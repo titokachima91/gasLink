@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "257420565332",
+    "project_id": "gaslink-app-4bfbb",
+    "storage_bucket": "gaslink-app-4bfbb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257420565332:android:06f74904de4e52bf1c06c1",
+        "android_client_info": {
+          "package_name": "com.example.gaslink_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAshVf9R2FGlfrPETR_oGC9BH73hEmQ2U8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
