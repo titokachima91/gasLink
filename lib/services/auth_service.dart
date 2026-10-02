@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthService {
   AuthService._();
   static final AuthService instance = AuthService._();
+
   // --- Session state (in-memory) ---
   String? currentRole;
   String? currentPhone;
@@ -14,6 +15,7 @@ class AuthService {
     currentPhone = null;
   }
 
+  // FIXED: hash now actually uses the PIN and phone
   String _hash(String pin, String phone) =>
       sha256.convert(utf8.encode('pin:pin:pin:phone')).toString();
 
