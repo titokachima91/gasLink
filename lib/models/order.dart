@@ -24,8 +24,7 @@ class Order {
   final double commissionRate;
   final double commissionDue;
   final bool billed;
-  final String
-      status; // 'placed'|'seen'|'confirmed'|'on_the_way'|'delivered_pending'|'delivered'|'cancelled'
+  final String status; // See AppConstants.orderStatuses for the canonical list
   final String deliveryAddress;
   final String contactPhone;
   final String receiverPhone;

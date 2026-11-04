@@ -20,6 +20,11 @@ class AuthService {
   static const String vapidKey =
       'BMmY8PbPwaWnj3mnP9pRrQ2FZWDYlO9hLbR3r9MQBUY87LQ3FDHwkczDXePgQRZG71XslxqI_o0vHK9S0O4IwrE';
 
+  // --- Roles ---
+  static const String roleConsumer = 'consumer';
+  static const String roleVendor = 'vendor';
+  static const String roleAdmin = 'admin';
+
   // --- Session state (in-memory) ---
   String? currentRole;
   String? currentPhone;
@@ -176,6 +181,24 @@ class AuthService {
     }
 
     return data;
+  }
+
+  /// Admin-only: promote an existing user to vendor role.
+  /// Call this after you (admin) have created the vendor's /vendors/{uid} profile.
+  Future<void> setVendorRole(String uid) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'role': roleVendor,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      // Sync in-memory session if this is the currently logged-in user
+      if (currentUserId == uid) {
+        currentRole = roleVendor;
+      }
+    } catch (e) {
+      debugPrint('Error setting vendor role for $uid: $e');
+      rethrow;
+    }
   }
 
   /// One-time: create/repair a user with a hashed PIN. Use in debug only.

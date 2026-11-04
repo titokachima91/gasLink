@@ -50,14 +50,17 @@ class AppConstants {
     'Kigamboni',
   ];
 
-  /// Order lifecycle: placed → confirmed → on_the_way → delivered.
-  /// refused/cancelled are terminal side-exits.
+  /// Order lifecycle (single source of truth):
+  /// placed → seen → confirmed → on_the_way → delivered_pending → delivered → cancelled
+  /// ETA is logged when the vendor starts the journey (on_the_way), not at confirmed.
   static const List<String> orderStatuses = [
     'placed',
+    'seen',
     'confirmed',
     'on_the_way',
+    'delivered_pending',
     'delivered',
-    'refused',
+    'cancelled',
   ];
 
   /// Bilingual status labels — ALL user-facing strings go through

@@ -51,11 +51,12 @@ class VendorRepository {
     });
   }
 
-  /// Stream brand inventory items from vendor's 'inventory' sub-collection
+  /// Stream brand inventory items from vendor's 'products' sub-collection
+  /// (matches InventoryScreen which reads /vendors/{uid}/products)
   Stream<List<InventoryDoc>> streamVendorInventory(String vendorId) {
     return _vendorsRef
         .doc(vendorId)
-        .collection('inventory')
+        .collection('products')
         .snapshots()
         .map((snapshot) {
       return snapshot.docs

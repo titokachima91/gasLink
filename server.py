@@ -74,18 +74,23 @@ def on_order_updated(col_snapshot, changes, read_time):
             if order_data.get(alert_key) is True:
                 continue
 
-            # Map appropriate user-friendly language to stepper shifts
+            # Map appropriate user-friendly language to stepper shifts.
+            # Statuses match Flutter's AppConstants.orderStatuses:
+            # placed, seen, confirmed, on_the_way, delivered_pending, delivered, cancelled
             title, body = None, None
-            if status == 'accepted' or status == 'confirmed':
+            if status == 'confirmed':
                 title = 'Oda Imethibitishwa! / Order Confirmed!'
                 body = f"Muuzaji amethibitisha oda yako. Muda wa kuwasili ni takriban dakika {order_data.get('eta_minutes', 20)}."
-            elif status == 'on_the_way' or status == 'dispatched':
+            elif status == 'on_the_way':
                 title = 'Ipo Njiani! / On The Way!'
                 body = f"Dereva yuko njiani kuleta oda yako ya {brand}."
-            elif status == 'delivered' or status == 'completed':
+            elif status == 'delivered_pending':
+                title = 'Mzigo Umewasilishwa / Delivered (Pending Confirm)'
+                body = f"Muuzaji amesema oda yako ya {brand} imewasilishwa. Tafadhali thibitisha kupokea."
+            elif status == 'delivered':
                 title = 'Imewasili! / Delivered!'
                 body = f"Oda yako ya {brand} imekamilika kikamilifu. Asante!"
-            elif status == 'cancelled' or status == 'rejected':
+            elif status == 'cancelled':
                 title = 'Oda Imesitishwa / Order Cancelled'
                 body = "Muuzaji amesitisha oda yako. Tafadhali jaribu muuzaji mwingine."
 

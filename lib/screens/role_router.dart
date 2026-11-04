@@ -24,17 +24,38 @@ class RoleRouter extends StatelessWidget {
     // 1. Determine active role: explicit parameter first, fallback to AuthService session
     final effectiveRole = userRole ?? AuthService.instance.currentRole;
 
-    // 2. Vendor Route
-    if (effectiveRole == 'vendor') {
+    // 2. Admin Route -> Admin dashboard (stub, build out later)
+    if (effectiveRole == AuthService.roleAdmin) {
+      return const AdminScreen();
+    }
+
+    // 3. Vendor Route
+    if (effectiveRole == AuthService.roleVendor) {
       return const VendorDashboardScreen();
     }
 
-    // 3. Consumer & Guest Route
-    if (effectiveRole == 'consumer' || effectiveRole == 'guest') {
+    // 4. Consumer & Guest Route
+    if (effectiveRole == AuthService.roleConsumer || effectiveRole == 'guest') {
       return const ConsumerHomeScreen();
     }
 
-    // 4. Unauthenticated Default -> Show LoginScreen
+    // 5. Unauthenticated Default -> Show LoginScreen
     return const LoginScreen();
+  }
+
+  }
+
+/// Stub admin screen — replace with real admin panel when ready.
+class AdminScreen extends StatelessWidget {
+  const AdminScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Admin Panel')),
+      body: const Center(
+        child: Text('Admin panel coming soon.\nUse Firestore Console to create vendors.'),
+      ),
+    );
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'core/theme.dart';
+import 'services/auth_service.dart';
 import 'screens/role_router.dart';
 
 // FIXED GLOBAL NAVIGATION KEY: Creates a permanent handle for background and foreground notifications
@@ -39,12 +40,13 @@ class GasLinkApp extends StatelessWidget {
             return const RoleRouter(userRole: null);
           }
 
-          // 3. Logged in -> fetch the user's role from Firestore
-          return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance
+          // 3. Logged in -> fetch the user's role from Firestore ONCE,
+          //    then sync to AuthService (single source of truth)
+          return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            future: FirebaseFirestore.instance
                 .collection('users')
                 .doc(user.uid)
-                .snapshots(),
+                .get(),
             builder: (context, userSnap) {
               if (userSnap.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
@@ -53,6 +55,11 @@ class GasLinkApp extends StatelessWidget {
               }
               final userData = userSnap.data?.data();
               final role = userData?['role'] as String? ?? 'consumer';
+              // Sync to AuthService — this is the single source of truth for role
+              AuthService.instance.currentRole = role;
+              AuthService.instance.currentUserId = user.uid;
+              AuthService.instance.currentPhone =
+                  userData?['phone'] as String?;
               return RoleRouter(userRole: role);
             },
           );

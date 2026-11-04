@@ -7,7 +7,7 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Vendor {
-  final String id; // = phone (doc ID)
+  final String id; // = Auth UID (doc ID), set by admin during onboarding
   final String ownerUid;
   final String businessName;
   final String phone;
