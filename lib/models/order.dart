@@ -1,3 +1,12 @@
+// ============================================================================
+// FILE PATH: lib/models/order.dart
+// ROLE OF THIS FILE:
+// This file defines the Order blueprint (data model) for GasLink. It is responsible for:
+// 1. Holding all order details in memory (e.g., customer ID, vendor ID, brand, size, quantity, total price, and status).
+// 2. Converting order details into a clean format to save in the Firebase database.
+// 3. Converting raw database documents into clean Dart objects so screens across the app can easily read them without crashing.
+// ============================================================================
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Order {
@@ -7,19 +16,25 @@ class Order {
   final String productId;
   final String brand;
   final String size;
-  final String type; // 'refill' | 'exchange'
+  final String type; // 'refill' | 'full_set' | 'accessories' | 'services'
+  final String orderIntent; // 'new_asset' | 'add_stock' | 'swap'
   final int quantity;
   final double unitPrice; // TZS at time of order
   final double total; // quantity * unitPrice
-  final double commissionRate; // copied from vendor at order time
-  final double commissionDue; // total * commissionRate
-  final bool billed; // true once included in a monthly invoice
-  final String status; // 'placed'|'confirmed'|'on_the_way'|'delivered'
+  final double commissionRate;
+  final double commissionDue;
+  final bool billed;
+  final String
+      status; // 'placed'|'seen'|'confirmed'|'on_the_way'|'delivered_pending'|'delivered'|'cancelled'
   final String deliveryAddress;
+  final String contactPhone;
+  final String receiverPhone;
+  final String specialRequests;
+  final String paymentMethod; // 'cash' | 'mobile_money'
   final double? latitude;
   final double? longitude;
   final DateTime createdAt;
-  final DateTime? deliveredAt; // set when status → delivered
+  final DateTime? deliveredAt;
 
   Order({
     required this.id,
@@ -29,6 +44,7 @@ class Order {
     required this.brand,
     required this.size,
     required this.type,
+    this.orderIntent = 'new_asset',
     required this.quantity,
     required this.unitPrice,
     required this.total,
@@ -37,6 +53,10 @@ class Order {
     this.billed = false,
     required this.status,
     required this.deliveryAddress,
+    this.contactPhone = '',
+    this.receiverPhone = '',
+    this.specialRequests = '',
+    this.paymentMethod = 'cash',
     this.latitude,
     this.longitude,
     required this.createdAt,
@@ -50,6 +70,7 @@ class Order {
         'brand': brand,
         'size': size,
         'type': type,
+        'order_intent': orderIntent,
         'quantity': quantity,
         'unit_price': unitPrice,
         'total': total,
@@ -58,6 +79,10 @@ class Order {
         'billed': billed,
         'status': status,
         'delivery_address': deliveryAddress,
+        'contact_phone': contactPhone,
+        'receiver_phone': receiverPhone,
+        'special_requests': specialRequests,
+        'payment_method': paymentMethod,
         'latitude': latitude,
         'longitude': longitude,
         'created_at': Timestamp.fromDate(createdAt),
@@ -66,26 +91,36 @@ class Order {
       };
 
   factory Order.fromDoc(DocumentSnapshot doc) {
-    final d = doc.data() as Map<String, dynamic>;
+    final d = doc.data() as Map<String, dynamic>? ?? {};
     return Order(
       id: doc.id,
-      consumerUid: d['consumer_uid'] ?? '',
-      vendorId: d['vendor_id'] ?? '',
-      productId: d['product_id'] ?? '',
-      brand: d['brand'] ?? '',
-      size: d['size'] ?? '',
-      type: d['type'] ?? 'refill',
-      quantity: d['quantity'] ?? 1,
-      unitPrice: (d['unit_price'] ?? 0).toDouble(),
-      total: (d['total'] ?? 0).toDouble(),
-      commissionRate: (d['commission_rate'] ?? 0).toDouble(),
-      commissionDue: (d['commission_due'] ?? 0).toDouble(),
+      consumerUid: d['consumer_uid'] ?? d['consumerUid'] ?? '',
+      vendorId: d['vendor_id'] ?? d['vendorId'] ?? '',
+      productId: d['product_id'] ?? d['productId'] ?? '',
+      brand: d['brand'] ?? d['brand_name'] ?? d['brandName'] ?? '',
+      size: d['size'] ?? d['weight'] ?? d['cylinder_weight'] ?? '15kg',
+      type: d['type'] ?? d['category'] ?? 'refill',
+      orderIntent: d['order_intent'] ?? d['orderIntent'] ?? 'new_asset',
+      quantity: (d['quantity'] as num?)?.toInt() ?? 1,
+      unitPrice: (d['unit_price'] ?? d['unitPrice'] ?? 0).toDouble(),
+      total:
+          (d['total'] ?? d['total_price'] ?? d['totalPrice'] ?? 0).toDouble(),
+      commissionRate:
+          (d['commission_rate'] ?? d['commissionRate'] ?? 0.03).toDouble(),
+      commissionDue:
+          (d['commission_due'] ?? d['commissionDue'] ?? 0).toDouble(),
       billed: d['billed'] ?? false,
       status: d['status'] ?? 'placed',
-      deliveryAddress: d['delivery_address'] ?? '',
+      deliveryAddress: d['delivery_address'] ?? d['deliveryAddress'] ?? '',
+      contactPhone: d['contact_phone'] ?? d['consumerPhone'] ?? '',
+      receiverPhone: d['receiver_phone'] ?? '',
+      specialRequests: d['special_requests'] ?? '',
+      paymentMethod: d['payment_method'] ?? 'cash',
       latitude: (d['latitude'])?.toDouble(),
       longitude: (d['longitude'])?.toDouble(),
-      createdAt: (d['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (d['created_at'] as Timestamp?)?.toDate() ??
+          (d['createdAt'] as Timestamp?)?.toDate() ??
+          DateTime.now(),
       deliveredAt: (d['delivered_at'] as Timestamp?)?.toDate(),
     );
   }

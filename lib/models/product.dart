@@ -1,13 +1,27 @@
+// lib/models/product.dart
+// ROLE: One inventory row per (vendor, brand, size) — the vendor's
+// price/stock offering. Lives in top-level `products` collection with
+// vendor_id (kept flat for easy admin queries). The vendor edit UI must
+// UPSERT (never create duplicates for the same brand+size combo).
+// Price is 100% vendor input, TZS, delivery included (pilot decision).
+// Size validity is enforced by the UI reading AppConstants.brandSizes,
+// NOT by this model.
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Model class representing a product
 class Product {
   final String id;
   final String vendorId;
-  final String brand; // must match AppConstants.gasBrands
-  final String size; // must match AppConstants.cylinderSizes
-  final double price; // TZS
+  final String
+      brand; // For accessories/services, this stores the item group (e.g., 'Vifaa')
+  final String
+      size; // For accessories/services, this stores the item name (e.g., 'Mrija')
+  final double
+      price; // 🟢 DYNAMIC PRICE: Always pulled directly from Firestore live rows
   final bool inStock; // vendor toggles; out-of-stock hidden/disabled
-  final String type; // 'refill' | 'exchange' (AppConstants)
+
+  // 🟢 DYNAMIC CATEGORY STRING: 'refill' | 'full_set' | 'accessories' | 'services'
+  final String category;
 
   Product({
     required this.id,
@@ -16,7 +30,8 @@ class Product {
     required this.size,
     required this.price,
     this.inStock = true,
-    this.type = 'refill',
+    this.category =
+        'refill', // Safely defaults to preserve existing database assets
   });
 
   Map<String, dynamic> toMap() => {
@@ -25,9 +40,9 @@ class Product {
         'size': size,
         'price': price,
         'in_stock': inStock,
-        'type': type,
+        'category': category,
       };
-
+  // FIXED FACTORY CONSTRUCTOR: Aligns perfectly with your true class name 'Product'
   factory Product.fromDoc(DocumentSnapshot doc) {
     final d = doc.data() as Map<String, dynamic>;
     return Product(
@@ -37,7 +52,7 @@ class Product {
       size: d['size'] ?? '',
       price: (d['price'] ?? 0).toDouble(),
       inStock: d['in_stock'] ?? true,
-      type: d['type'] ?? 'refill',
+      category: d['category'] ?? 'refill',
     );
   }
 }

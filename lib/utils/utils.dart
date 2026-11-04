@@ -1,3 +1,5 @@
+//lib/utils/utils.dart
+//This utility class provides helper methods for phone number normalization, validation, and formatting. It
 class Utils {
   static String normalizePhone(String raw) {
     final p = raw.replaceAll(RegExp(r'[\s\-()]'), '');

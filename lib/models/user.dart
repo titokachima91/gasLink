@@ -1,3 +1,5 @@
+//lib/models/user.dart
+//This is the model for a user. It is used to represent a user in the system. It is also used to convert between Firestore documents and Dart objects.
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {

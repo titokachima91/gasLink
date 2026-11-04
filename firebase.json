@@ -1,1 +1,36 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"gaslink-app-4bfbb","appId":"1:257420565332:android:06f74904de4e52bf1c06c1","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"gaslink-app-4bfbb","configurations":{"android":"1:257420565332:android:06f74904de4e52bf1c06c1","web":"1:257420565332:web:59b31390146c53661c06c1"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "gaslink-app-4bfbb",
+          "appId": "1:257420565332:android:06f74904de4e52bf1c06c1",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "gaslink-app-4bfbb",
+          "configurations": {
+            "android": "1:257420565332:android:06f74904de4e52bf1c06c1",
+            "web": "1:257420565332:web:59b31390146c53661c06c1"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
