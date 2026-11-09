@@ -8,49 +8,20 @@
 
 ## 📖 How to Use This Project
 
-This project documents GasLink — a Flutter + Firebase application for LPG gas distribution in Dar es Salaam, Tanzania.
+This is a **documentation-first project**. We do NOT write code here. We only:
+1. Read `PROGRESS.md` to understand current state
+2. Create `plan.md` for new phases
+3. Use `implementation.md` to record work after each phase
 
 ### Reference Hierarchy
 
-| File | Role | Update Frequency |
-|------|------|------------------|
+| File | Role | When to Update |
+|------|------|----------------|
 | **`PROGRESS.md`** | **Master reference** — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
-| `phases/plan.md` | Per-phase implementation plan — what the issue is and how to fix | When starting a new phase or when requirements change |
-| `phases/implementation.md` | Per-phase implementation record — what was done, each step, problems/pivots, what was accomplished | **After** each phase is implemented |
-| `PHASE_*.md` | **REMOVED** — redundant; all content moved to `progress.md` + `phases/` |
+| `phases/<phase-name>/plan.md` | Per-phase implementation plan — what the issue is, why it matters, how to fix | When starting a new phase |
+| `phases/<phase-name>/implementation.md` | Per-phase implementation record — what was done, steps taken, problems/pivots | **After** each phase is implemented |
 
----
-
-## 📋 Phase Structure
-
-Each phase in `phases/<phase-name>/` contains two files:
-
-### `plan.md` — The Plan
-
-What the issue is, why we need to fix it, and how we plan to do it.
-
-| Section | Purpose |
-|---------|---------|
-| Issue Description | What's broken or missing |
-| Why It Matters | Business/technical impact |
-| Proposed Solution | Approach |
-| Steps | Detailed implementation steps |
-| Risk | What could go wrong |
-| Estimated Effort | Time to complete |
-
-### `implementation.md` — The Record
-
-What was done after the build.
-
-| Section | Purpose |
-|---------|---------|
-| Status | ✅ Done / ❌ Not started / ⚠️ Partly done |
-| What Was Accomplished | Summary of work |
-| Step-by-Step | Each step with outcome |
-| Problems Encountered | Issues or bugs found |
-| Pivots Taken | When we changed direction |
-| Code Evidence | Files modified, key code snippets |
-| Next Step | What remains for this phase |
+**Rule:** `PROGRESS.md` is the master. If `implementation.md` says one thing but `PROGRESS.md` says another, `PROGRESS.md` wins.
 
 ---
 
@@ -113,4 +84,17 @@ git checkout e835912 -- lib/app.dart
 ---
 
 > **Reminder:** `PROGRESS.md` is the master. When in doubt, always read `PROGRESS.md` first.
-## Rollback Strategy
+
+
+## 🚀 Workflow Summary
+
+
+2. Pick the first incomplete phase
+   → Check Summary Status and Current Gaps in PROGRESS.md
+3. Read  phases/<phase-name>/plan.md → Understand the plan
+4. Implement (by yourself)  → Write code, no docs
+5. Write  phases/<phase-name>/implementation.md → Document what you did
+6. Update PROGRESS.md       → Move phase from ❌ to ✅ in Summary Status
+7. Commit                   → git add -A && git commit -m "docs: ..."
+```
+---
