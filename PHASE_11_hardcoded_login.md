@@ -1,15 +1,15 @@
-# PHASE 11 — Hardcoded Login Documentation
+# PHASE 11 — Hardcoded Login
 
 **Status:** ✅ Done (present on disk)  
 **Priority:** 🔵 Medium  
 **Branch:** `harden-source-of-truth`  
-**Commit:** `f301944`
+**Commit:** `e372c5b`
 
 ---
 
 ## 📝 Issue Description
 
-The original plan flagged hardcoded login `0767304776` / `0000` as "already present; make it a documented fallback." This phase documents it and verifies it works.
+The hardcoded login `0767304776` / `0000` was present in `auth_service.dart`. This phase documents it and verifies it works.
 
 ---
 
@@ -32,33 +32,18 @@ The original plan flagged hardcoded login `0767304776` / `0000` as "already pres
 
 ---
 
-## 🔍 Where It's Defined
+## 🔜 Implementation Steps
 
-In `lib/services/auth_service.dart`:
-
-- `adminLogin()` accepts `adminPhone: '+255767304776'` and `adminPin: '0000'`
-- On successful admin login, `user_role` is saved to session state
-- `AuthService.clearSession()` removes session on logout
-
----
-
-## 🔜 Verification Steps
-
-1. Run app in Android Studio / VS Code debug mode
-2. Open login screen
-3. Enter `0767304776` (or `+255767304776`) as phone
-4. Enter `0000` as PIN
-5. App should route to home screen
-6. Check session is saved (`AuthService.instance.roleAdmin` matches)
+1. **Run app** in debug mode
+2. **Open login screen**
+3. **Enter** `0767304776` (or `+255767304776`) as phone
+4. **Enter** `0000` as PIN
+5. **App routes** to home screen
+6. **Verify** session is saved
 
 ---
 
-## ⚠️ Security Note
+## 🔜 Next Steps
 
-This is a **development fallback**, not a production credential. Documented intentionally so the dev team can use it for testing. Do NOT deploy to production with hardcoded credentials.
-
----
-
-## 📅 Estimated Effort
-
-- 0.25 day (verification)
+- Verify in debug APK
+- Document security note (development fallback, not production)
