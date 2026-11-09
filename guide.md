@@ -6,89 +6,127 @@
 
 ---
 
-## 📖 How to Use This Project
+## 🎯 What This Project Is
 
-This project documents GasLink — a Flutter + Firebase application for LPG gas distribution in Dar es Salaam, Tanzania.
+GasLink is a **Flutter + Firebase** application for LPG gas distribution in Dar es Salaam, Tanzania.
+
+The codebase is already in a working state. This is a **documentation-first project** — we do NOT write code here. We only:
+1. Read `PROGRESS.md` to understand current state
+2. Create `plan.md` for new phases
+3. Use `implementation.md` to record work after each phase
+
+---
+
+## 📁 Project Structure
+
+```
+├── PROGRESS.md                              ← MASTER (read this first)
+├── guide.md                                 ← This file (process explanation)
+├── phases/
+│   └── <phase-name>/
+│       ├── plan.md                          ← Plan for this phase (read before starting)
+│       └── implementation.md                ← Record of this phase work (write after)
+├── lib/
+│   ├── services/                            ← Auth, PIN, orders, notifications
+│   ├── screens/                             ← All UI screens (consumer, vendor, admin)
+│   ├── models/                              ← Data models (Vendor, Product, Order)
+│   ├── utils/                               ← Utility functions (FIFO calculator)
+│   └── core/                                ← Constants, theme, session data
+└── ...                                    ← Other app files (android, ios, web, etc.)
+```
+
+---
+
+## 📖 The Documentation System
+
+This project follows a simple documentation workflow. Three files work together:
+
+| File | Role | When to Update |
+|------|------|----------------|
+| **`PROGRESS.md`** | Master reference — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
+| `phases/<name>/plan.md` | Per-phase implementation plan — what the issue is, why it matters, how to fix, risk, effort | When starting a new phase or when requirements change |
+| `phases/<name>/implementation.md` | Per-phase implementation record — what was done, steps taken, problems/pivots, code evidence | **After** each phase is implemented |
 
 ### Reference Hierarchy
 
-| File | Role | Update Frequency |
-|------|------|------------------|
-| **`PROGRESS.md`** | **Master reference** — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
-| `phases/plan.md` | Per-phase implementation plan — what the issue is and how to fix | When starting a new phase or when requirements change |
-| `phases/implementation.md` | Per-phase implementation record — what was done, each step, problems/pivots, what was accomplished | **After** each phase is implemented |
-| `PHASE_*.md` | **REMOVED** — redundant; all content moved to `progress.md` + `phases/` |
+| File | Role |
+|------|------|
+| `PROGRESS.md` | **Master**. Always read this first. Contains the full project state. |
+| `phases/<name>/plan.md` | Plan for a specific phase. Read before implementing that phase. |
+| `phases/<name>/implementation.md` | Record of work done for a specific phase. Write this after implementing. |
+
+**Rule:** `PROGRESS.md` is the master. If `implementation.md` says one thing but `PROGRESS.md` says another, `PROGRESS.md` wins.
 
 ---
 
-## 📋 Phase Structure
+## 🔑 Reference Points (Quick Links)
 
-Each phase in `phases/<phase-name>/` contains two files:
+### Authentication
+| What to Find | File/Path |
+|--------------|-----------|
+| Login / Register / Session Restore | `lib/services/auth_service.dart` |
+| PIN Persistence | `lib/services/admin_pin_service.dart` |
+| Hardcoded Login (Seed Credential) | `lib/services/auth_service.dart` — `adminLogin()` |
 
-### `plan.md` — The Plan
+### Gauges & FIFO
+| What to Find | File/Path |
+|--------------|-----------|
+| FIFO calculator (collective) | `lib/utils/cylinder_fifo.dart` |
+| Home screen gauge | `lib/screens/consumer/consumer_home_screen.dart` |
+| Smart hub gauge | `lib/screens/consumer/consumer_cylinder_screen.dart` |
 
-What the issue is, why we need to fix it, and how we plan to do it.
+### Navigation & Routing
+| What to Find | File/Path |
+|--------------|-----------|
+| Route router (admin / vendor / consumer) | `lib/screens/role_router.dart` |
 
-| Section | Purpose |
-|---------|---------|
-| Issue Description | What's broken or missing |
-| Why It Matters | Business/technical impact |
-| Proposed Solution | Approach |
-| Steps | Detailed implementation steps |
-| Risk | What could go wrong |
-| Estimated Effort | Time to complete |
+### Models & Data
+| What to Find | File/Path |
+|--------------|-----------|
+| Vendor model (no `verified` field yet) | `lib/models/vendor.dart` |
+| Product model | `lib/models/product.dart` |
+| Order model | `lib/models/order.dart` |
 
-### `implementation.md` — The Record
+### Screens
+| What to Find | File/Path |
+|--------------|-----------|
+| Admin vendor screen (STUB — 11 lines) | `lib/screens/admin/admin_vendor_screen.dart` |
+| Consumer home screen (gauge + vendor list) | `lib/screens/consumer/consumer_home_screen.dart` |
+| Consumer cylinder tracking | `lib/screens/consumer/consumer_cylinder_screen.dart` |
+| Inventory screen | `lib/screens/vendor/inventory_screen.dart` |
 
-What was done after the build.
-
-| Section | Purpose |
-|---------|---------|
-| Status | ✅ Done / ❌ Not started / ⚠️ Partly done |
-| What Was Accomplished | Summary of work |
-| Step-by-Step | Each step with outcome |
-| Problems Encountered | Issues or bugs found |
-| Pivots Taken | When we changed direction |
-| Code Evidence | Files modified, key code snippets |
-| Next Step | What remains for this phase |
-
----
-
-## 🔑 Key Reference Points
-
-### Verified Working (already done)
-
-| # | Feature | Reference |
-|---|---------|-----------|
-| 1 | Auth Persistence | `lib/services/auth_service.dart` |
-| 2 | Session Persistence | `lib/services/admin_pin_service.dart` |
-| 3 | Admin PIN Integration | `lib/services/auth_service.dart` + `lib/services/admin_pin_service.dart` |
-| 4 | Home Screen Gauge (collective) | `lib/screens/consumer/consumer_home_screen.dart` + `lib/utils/cylinder_fifo.dart` |
-| 5 | Cylinder Smart Hub (collective) | `lib/screens/consumer/consumer_cylinder_screen.dart` + `lib/utils/cylinder_fifo.dart` |
-| 6 | Order Statuses | `lib/core/constants.dart` |
-| 7 | Role Router | `lib/screens/role_router.dart` |
-| 8 | Circle FIFO | `lib/utils/cylinder_fifo.dart` |
-
-### Current Gaps (priority order)
-
-| Priority | Item | Reference |
-|----------|------|-----------|
-| 🔴 | Theme Overhaul | `lib/core/theme.dart` (still `Colors.orange`) |
-| 🔴 | Admin Panel | `lib/screens/role_router.dart` (11-line stub) |
-| 🔴 | Vendor verified Role | `lib/models/vendor.dart` (no `verified` field) |
-| 🟡 | Analytics Service | No file exists |
-| 🟡 | Vendor Settings | No file exists |
+### Theme & Constants
+| What to Find | File/Path |
+|--------------|-----------|
+| Theme (orange-based, needs overhaul) | `lib/core/theme.dart` |
+| App constants (order statuses, brands, districts) | `lib/core/constants.dart` |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Workflow Summary
 
-1. **Read `PROGRESS.md`** — understand current state
-2. **Pick a priority phase** — start with Theme Overhaul (Phase 1)
-3. **Read `phases/phase-01-theme/plan.md`** — understand the plan
-4. **Implement** the changes
-5. **Write `phases/phase-01-theme/implementation.md`** — document what you did
-6. **Update `PROGRESS.md`** — move phase from ❌ to ✅
+```text
+1. Read PROGRESS.md         → What's done? What's next?
+2. Pick the first incomplete phase
+   → Check Summary Status and Current Gaps in PROGRESS.md
+   → Priority order listed in PROGRESS.md Summary Status and Current Gaps
+3. Read  phases/<phase-name>/plan.md → Understand the plan
+4. Implement (by yourself)  → Write code, no docs
+5. Write  phases/<phase-name>/implementation.md → Document what you did
+6. Update PROGRESS.md       → Move phase from ❌ to ✅ in Summary Status
+7. Commit                   → git add -A && git commit -m "docs: ..."
+```
+
+---
+
+## 📊 Status Legend
+
+| Icon | Meaning |
+|------|---------|
+| ✅ | Done — verified working |
+| ❌ | Not done — needs implementation |
+| ⚠️ | Partly done — some work done, some remains |
+| ⏳ | Not started — plan created but not implemented |
 
 ---
 
