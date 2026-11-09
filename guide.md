@@ -81,15 +81,36 @@ What was done after the build.
 
 ---
 
-## 🚀 Getting Started
+## 🛡 Rollback Strategy
 
-1. **Read `PROGRESS.md`** — understand current state
-2. **Pick a priority phase** — start with Theme Overhaul (Phase 1)
-3. **Read `phases/phase-01-theme/plan.md`** — understand the plan
-4. **Implement** the changes
-5. **Write `phases/phase-01-theme/implementation.md`** — document what you did
-6. **Update `PROGRESS.md`** — move phase from ❌ to ✅
+### Best Rollback Option (Simple)
+
+**`git revert <commit-hash>`** — creates a new commit that undoes the changes. Safe, doesn't destroy history.
+
+### File-Level Rollback (if you only broke one file)
+
+**`git checkout <commit-hash> -- <file>`** — restores a specific file from a previous commit.
+
+### Full Rollback (if everything is broken)
+
+**`git reset --hard <commit-hash>`** — resets to a specific commit. **Destroys uncommitted changes.** Only use if you're sure.
+
+### Pick a Rollback Point
+
+```bash
+# See all commits
+git log --oneline
+
+# Undo the most recent commit
+git revert HEAD
+
+# Restore a file from a previous commit
+git checkout e835912 -- lib/app.dart
+```
+
+**Keep a few commits as checkpoints.** The git history is your backup. Push to remote before making risky changes.
 
 ---
 
 > **Reminder:** `PROGRESS.md` is the master. When in doubt, always read `PROGRESS.md` first.
+## Rollback Strategy
