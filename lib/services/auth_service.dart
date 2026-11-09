@@ -8,7 +8,9 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'admin_pin_service.dart';
 import 'notification_service.dart';
+import '../utils/utils.dart';
 
 class AuthService {
   AuthService._();
@@ -24,6 +26,14 @@ class AuthService {
   static const String roleConsumer = 'consumer';
   static const String roleVendor = 'vendor';
   static const String roleAdmin = 'admin';
+
+  /// Roles the app knows how to route. Anything else is treated as corrupt
+  /// session data and ignored.
+  static const Set<String> validRoles = {roleConsumer, roleVendor, roleAdmin};
+
+  // --- Hardcoded admin access (temporary until the admin panel is built) ---
+  static const String adminPhone = '+255767304776';
+  static const String adminPin = '0000';
 
   // --- Session state (in-memory) ---
   String? currentRole;
@@ -54,6 +64,55 @@ class AuthService {
     currentRole = null;
     currentPhone = null;
     currentUserId = null;
+
+    // Clear the persisted session so the app asks for login again.
+    try {
+      await AdminPinService.instance.clearSession();
+    } catch (e) {
+      debugPrint(
+          'Warning: Could not clear persisted session during logout: $e');
+    }
+  }
+
+  /// Restores the session saved by a previous login so the user does not have
+  /// to log in again after an app restart. Call this once during startup,
+  /// before `runApp`.
+  Future<void> restoreSession() async {
+    try {
+      final session = await AdminPinService.instance.loadSession();
+      if (session == null) return;
+
+      // Only restore sessions the router can actually use. Corrupt or
+      // outdated roles force a clean login instead of a blank screen.
+      if (!validRoles.contains(session.role)) {
+        debugPrint(
+            '⚠️ Ignoring persisted session with unknown role: ${session.role}');
+        await AdminPinService.instance.clearSession();
+        return;
+      }
+
+      currentRole = session.role;
+      currentPhone = session.phone;
+      currentUserId = session.userId;
+      debugPrint('♻️ Restored ${session.role} session from storage.');
+    } catch (e) {
+      debugPrint('Warning: Could not restore persisted session: $e');
+    }
+  }
+
+  /// Writes the current in-memory session to persistent storage.
+  Future<void> _persistSession() async {
+    final role = currentRole;
+    if (role == null || role.isEmpty) return;
+    try {
+      await AdminPinService.instance.saveSession(
+        role: role,
+        phone: currentPhone,
+        userId: currentUserId,
+      );
+    } catch (e) {
+      debugPrint('Warning: Could not persist session: $e');
+    }
   }
 
   Future<String?> getUserRole(String uid) async {
@@ -73,14 +132,16 @@ class AuthService {
     currentRole = 'guest';
     currentPhone = null;
     currentUserId = null;
+    await _persistSession();
   }
 
   Future<void> register(String phone, String pin) async {
-    final cleanPhone = phone.trim();
+    final cleanPhone = Utils.normalizePhone(phone);
     final cleanPin = pin.trim();
 
-    if (cleanPhone.length < 9) {
-      throw Exception('Namba ya simu si sahihi / Invalid phone number');
+    if (!Utils.isValidTzPhone(cleanPhone)) {
+      throw Exception(
+          'Namba ya simu si sahihi / Invalid phone number (e.g. 0767304776)');
     }
     if (cleanPin.length != 4 || int.tryParse(cleanPin) == null) {
       throw Exception('PIN lazima iwe namba 4 / PIN must be 4 digits');
@@ -89,7 +150,7 @@ class AuthService {
     final db = FirebaseFirestore.instance;
     final existing = await db
         .collection('users')
-        .where('phone', isEqualTo: cleanPhone)
+        .where('phone', whereIn: _phoneVariants(phone.trim(), cleanPhone))
         .limit(1)
         .get();
 
@@ -110,6 +171,7 @@ class AuthService {
     currentRole = 'consumer';
     currentPhone = cleanPhone;
     currentUserId = newDoc.id;
+    await _persistSession();
 
     // FIXED: Now passes both the explicit user ID and the VAPID key safely
     try {
@@ -126,15 +188,75 @@ class AuthService {
   String _hash(String pin, String phone) =>
       sha256.convert(utf8.encode('$pin:$phone')).toString();
 
-  Future<Map<String, dynamic>?> login(String phone, String pin) async {
-    final cleanPhone = phone.trim();
+  /// Every representation the same TZ number may have been stored under before
+  /// normalization was enforced.
+  List<String> _phoneVariants(String rawPhone, String cleanPhone) {
+    final variants = <String>{rawPhone.trim(), cleanPhone};
+    final digits = cleanPhone.replaceFirst('+', '');
+    if (digits.startsWith('255') && digits.length == 12) {
+      final local = digits.substring(3);
+      variants.add(digits);
+      variants.add('0$local');
+      variants.add(local);
+    }
+    variants.removeWhere((value) => value.isEmpty);
+    return variants.take(10).toList();
+  }
+
+  /// Hardcoded admin access. No Firestore account is needed while the admin
+  /// panel is still a stub.
+  Future<Map<String, dynamic>?> adminLogin(String phone, String pin) async {
+    final cleanPhone = Utils.normalizePhone(phone);
     final cleanPin = pin.trim();
 
-    final doc = await FirebaseFirestore.instance
+    if (cleanPhone != adminPhone) return null;
+    if (cleanPin != adminPin) {
+      throw Exception('PIN si sahihi / Incorrect PIN');
+    }
+
+    currentRole = roleAdmin;
+    currentPhone = cleanPhone;
+    currentUserId = 'admin_local';
+    await _persistSession();
+    debugPrint('👑 Admin login successful for $cleanPhone');
+    return {'role': roleAdmin, 'phone': cleanPhone, 'uid': 'admin_local'};
+  }
+
+  Future<Map<String, dynamic>?> login(String phone, String pin) async {
+    final rawPhone = phone.trim();
+    final cleanPin = pin.trim();
+    final cleanPhone = Utils.normalizePhone(rawPhone);
+
+    // A new login attempt must never inherit a stale in-memory session.
+    currentRole = null;
+    currentPhone = null;
+    currentUserId = null;
+
+    if (!Utils.isValidTzPhone(cleanPhone)) {
+      throw Exception(
+          'Namba ya simu si sahihi / Invalid phone number (e.g. 0767304776)');
+    }
+    if (cleanPin.length != 4 || int.tryParse(cleanPin) == null) {
+      throw Exception('PIN lazima iwe namba 4 / PIN must be 4 digits');
+    }
+
+    // 1. Hardcoded admin is checked before touching Firestore.
+    if (cleanPhone == adminPhone) {
+      return adminLogin(cleanPhone, cleanPin);
+    }
+
+    // 2. Registered users. Search every historical representation of the same
+    // number so accounts created before normalization still log in.
+    final db = FirebaseFirestore.instance;
+    final variants = _phoneVariants(rawPhone, cleanPhone);
+    final doc = await db
         .collection('users')
-        .where('phone', isEqualTo: cleanPhone)
+        .where('phone', whereIn: variants)
         .limit(1)
         .get();
+
+    debugPrint(
+        '🔐 Login query phone=$cleanPhone variants=$variants matches=${doc.docs.length}');
 
     if (doc.docs.isEmpty) {
       throw Exception('Account haijatambuliwa / Account not found');
@@ -142,6 +264,7 @@ class AuthService {
 
     final data = doc.docs.first.data();
     final ref = doc.docs.first.reference;
+    final storedPhone = (data['phone'] ?? cleanPhone).toString();
 
     final lockedUntil = data['lockedUntil'] as Timestamp?;
     if (lockedUntil != null && lockedUntil.toDate().isAfter(DateTime.now())) {
@@ -149,8 +272,8 @@ class AuthService {
           'Akaunti imefungwa kwa dakika 15 / Account locked for 15 minutes');
     }
 
-    if (data['passcodeHash'] != _hash(cleanPin, cleanPhone)) {
-      final attempts = ((data['pinAttempts'] ?? 0) as int) + 1;
+    if (data['passcodeHash'] != _hash(cleanPin, storedPhone)) {
+      final attempts = ((data['pinAttempts'] ?? 0) as num).toInt() + 1;
       if (attempts >= 5) {
         await ref.update({
           'pinAttempts': 0,
@@ -164,11 +287,25 @@ class AuthService {
       throw Exception('PIN si sahihi / Incorrect PIN');
     }
 
-    await ref.update({'pinAttempts': 0, 'lockedUntil': null});
+    final role = data['role'] as String?;
+    if (role == null || !validRoles.contains(role)) {
+      throw Exception(
+          'Akaunti haina wadhifa sahihi / Account role is not configured');
+    }
 
-    currentRole = data['role'] as String?;
+    final updates = <String, dynamic>{'pinAttempts': 0, 'lockedUntil': null};
+    if (storedPhone != cleanPhone) {
+      // Successful login is the safe moment to migrate the canonical phone
+      // and re-hash the PIN with it.
+      updates['phone'] = cleanPhone;
+      updates['passcodeHash'] = _hash(cleanPin, cleanPhone);
+    }
+    await ref.update(updates);
+
+    currentRole = role;
     currentPhone = cleanPhone;
     currentUserId = doc.docs.first.id;
+    await _persistSession();
 
     // FIXED: Now passes both the explicit logged-in user ID and the VAPID key safely
     try {
@@ -201,31 +338,37 @@ class AuthService {
     }
   }
 
-  /// One-time: create/repair a user with a hashed PIN. Use in debug only.
+  /// One-time: create a user with a hashed PIN. Use in debug only.
+  ///
+  /// Existing accounts are left untouched so a restart never resets a PIN
+  /// the user may have set.
   Future<void> seedUser(String phone, String pin, String role) async {
     try {
       final db = FirebaseFirestore.instance;
-      final cleanPhone = phone.trim();
+      final cleanPhone = Utils.normalizePhone(phone);
       final cleanPin = pin.trim();
+
+      if (!Utils.isValidTzPhone(cleanPhone) || !validRoles.contains(role)) {
+        debugPrint('Skipping seed for invalid phone/role: $phone / $role');
+        return;
+      }
 
       final existing = await db
           .collection('users')
           .where('phone', isEqualTo: cleanPhone)
           .limit(1)
           .get();
-      final payload = {
+      if (existing.docs.isNotEmpty) return;
+
+      await db.collection('users').add({
         'phone': cleanPhone,
         'passcodeHash': _hash(cleanPin, cleanPhone),
         'role': role,
         'pinAttempts': 0,
         'lockedUntil': null,
         'mustChangePin': false,
-      };
-      if (existing.docs.isEmpty) {
-        await db.collection('users').add(payload);
-      } else {
-        await existing.docs.first.reference.update(payload);
-      }
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
       debugPrint('Error seeding test user ($phone): $e');
     }

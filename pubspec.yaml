@@ -44,6 +44,7 @@ dependencies:
   firebase_messaging: ^15.2.4
   provider: ^6.1.5+1
   url_launcher: ^6.3.1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

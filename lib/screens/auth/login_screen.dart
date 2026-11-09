@@ -40,12 +40,18 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _error = 'Ingia imeshindikana / Login failed');
         return;
       }
+
+      final role = data['role'] as String?;
+      if (role == null || !AuthService.validRoles.contains(role)) {
+        setState(() => _error =
+            'Akaunti haina wadhifa sahihi / Account role is not configured');
+        return;
+      }
       if (!mounted) return;
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-            builder: (_) => RoleRouter(userRole: data['role'] as String?)),
+        MaterialPageRoute(builder: (_) => RoleRouter(userRole: role)),
         (_) => false,
       );
     } catch (e) {

@@ -49,14 +49,21 @@ void main() async {
     debugPrint('$fcmToken');
     debugPrint('==================================================\n');
 
-    // Seed default test users (debug only)
-    await AuthService.instance.seedUser('+255777000777', '1234', 'vendor');
-    await AuthService.instance.seedUser('+255777000778', '1234', 'consumer');
+    // Seed default test users (debug only). Existing accounts are left
+    // untouched, so this never resets a PIN on restart.
+    if (kDebugMode) {
+      await AuthService.instance.seedUser('+255777000777', '1234', 'vendor');
+      await AuthService.instance.seedUser('+255777000778', '1234', 'consumer');
+    }
   } catch (e, stackTrace) {
     debugPrint('Firebase init error: $e');
     debugPrint('Stack trace: $stackTrace');
   }
 
-  // 3. Mount app
+  // 3. Restore a previously saved login session so users stay signed in
+  //    across app restarts until they log out or another account logs in.
+  await AuthService.instance.restoreSession();
+
+  // 4. Mount app
   runApp(const GasLinkApp());
 }

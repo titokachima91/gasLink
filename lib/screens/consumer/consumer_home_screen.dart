@@ -8,7 +8,8 @@ import '../../core/constants.dart';
 import '../../core/session_data.dart';
 import '../../services/auth_service.dart';
 import '../../services/order_service.dart';
-import 'brand_shop_screen.dart';
+import '../../utils/cylinder_fifo.dart';
+import '../auth/login_screen.dart';
 import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
@@ -24,9 +25,9 @@ class ConsumerHomeScreen extends StatefulWidget {
 
 class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   String _selectedIntent = 'Refill';
-  bool _isIntentDrawerOpen = true;
   bool _isLoading = true;
   List<Map<String, dynamic>> _myCylinders = [];
+  List<Map<String, dynamic>> _deliveredOrders = [];
   Map<String, dynamic>? _lastCompletedOrder;
   Widget _buildCategoryCard({
     required String title,
@@ -175,6 +176,22 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           .collection('cylinders')
           .orderBy('createdAt', descending: true)
           .get();
+
+      // The Cylinder Smart Hub derives FIFO from delivered orders, so the
+      // home gauge reads the same source. Manual cylinders (no order history)
+      // fall back to the stored lastRefillDate.
+      var deliveredOrders = <Map<String, dynamic>>[];
+      try {
+        final ordersSnap = await FirebaseFirestore.instance
+            .collection('orders')
+            .where('consumer_uid', isEqualTo: uid)
+            .where('status', isEqualTo: 'delivered')
+            .get();
+        deliveredOrders = ordersSnap.docs.map((doc) => doc.data()).toList();
+      } catch (e) {
+        debugPrint('Error fetching delivered orders for gauge: $e');
+      }
+
       if (mounted) {
         setState(() {
           _myCylinders = snap.docs.map((doc) {
@@ -182,6 +199,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             data['id'] = doc.id;
             return data;
           }).toList();
+          _deliveredOrders = deliveredOrders;
         });
       }
     } catch (e) {
@@ -241,7 +259,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     if (confirm == true) {
       await AuthService.instance.signOut();
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
       }
     }
   }
@@ -565,6 +586,17 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
   Widget _buildGasEstimatorCard() {
     final hasCylinders = _myCylinders.isNotEmpty;
+
+    // Group cylinders by brand + weight so each row represents the
+    // consumer's collective stock for that cylinder (FIFO display).
+    final groups = <String, List<Map<String, dynamic>>>{};
+    for (final cylinder in _myCylinders) {
+      final key = '${_normalizeCylinderKey(cylinder['brand'] ?? 'Gesi')}-'
+          '${_normalizeCylinderKey(cylinder['weight'] ?? cylinder['size'] ?? '15kg')}';
+      (groups[key] ??= []).add(cylinder);
+    }
+    final groupList = groups.values.toList();
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -602,62 +634,29 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _myCylinders.length,
+              itemCount: groupList.length,
               separatorBuilder: (context, index) => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: Divider(height: 1),
               ),
               itemBuilder: (context, index) {
-                final cylinder = _myCylinders[index];
-                final brandName = (cylinder['brand'] ?? 'Gesi').toString();
-                final weight = (cylinder['weight'] ?? '15kg').toString();
-                final cycleStr = (cylinder['refillCycle'] ?? '30').toString();
-                final String? rawDate = cylinder['lastRefillDate'] as String?;
-                // Prefer stacked values from database when they exist
-                final int? storedDays =
-                    (cylinder['remainingDays'] as num?)?.toInt();
-                final double? storedPercentage =
-                    (cylinder['percentage'] as num?)?.toDouble();
+                final groupCylinders = groupList[index];
+                final brandName =
+                    (groupCylinders.first['brand'] ?? 'Gesi').toString();
+                final weight = (groupCylinders.first['weight'] ??
+                        groupCylinders.first['size'] ??
+                        '15kg')
+                    .toString();
 
-                double estimatedRemainingRatio;
-                int estimatedDaysLeft;
-                bool isTankEmptyState;
-                bool isCriticalLow;
+                final aggregate = _aggregateCylinderGroup(groupCylinders);
+                final estimatedDaysLeft = aggregate.totalRemainingDays;
+                final remainingPercentage =
+                    aggregate.totalPercentage.toStringAsFixed(1);
+                final estimatedRemainingRatio = aggregate.capacityFraction;
+                final isTankEmptyState = aggregate.isEmpty;
+                final isCriticalLow =
+                    estimatedRemainingRatio <= 0.15 || isTankEmptyState;
 
-                if (storedDays != null && storedPercentage != null) {
-                  // Use the stacked values written by finalizeAndRegisterCylinder
-                  estimatedDaysLeft = storedDays;
-                  estimatedRemainingRatio =
-                      (storedPercentage / 100.0).clamp(0.0, 4.0); // allow >100%
-                  isTankEmptyState = estimatedDaysLeft <= 0;
-                  isCriticalLow =
-                      estimatedRemainingRatio <= 0.15 || isTankEmptyState;
-                } else {
-                  // Fallback: calculate from lastRefillDate + cycle (old behaviour)
-                  final cycleStr = (cylinder['refillCycle'] ?? '30').toString();
-                  final String? rawDate = cylinder['lastRefillDate'] as String?;
-                  DateTime baseDate = DateTime.now();
-                  if (rawDate != null && rawDate.isNotEmpty) {
-                    baseDate = DateTime.tryParse(rawDate) ?? DateTime.now();
-                  }
-                  final daysElapsed =
-                      DateTime.now().difference(baseDate).inDays;
-                  int expectedTotalDays = 30;
-                  final Match? match = RegExp(r'\d+').firstMatch(cycleStr);
-                  if (match != null) {
-                    expectedTotalDays =
-                        int.tryParse(match.group(0) ?? '30') ?? 30;
-                  }
-                  estimatedDaysLeft = expectedTotalDays - daysElapsed;
-                  isTankEmptyState = estimatedDaysLeft <= 0;
-                  estimatedRemainingRatio =
-                      (estimatedDaysLeft / expectedTotalDays).clamp(0.0, 1.0);
-                  isCriticalLow =
-                      estimatedRemainingRatio <= 0.15 || isTankEmptyState;
-                }
-
-                final int remainingPercentage =
-                    (estimatedRemainingRatio * 100).toInt();
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -779,7 +778,6 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       } else {
                         setState(() {
                           _selectedIntent = 'Refill';
-                          _isIntentDrawerOpen = true;
                         });
                       }
                     },
@@ -795,6 +793,90 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         ],
       ),
     );
+  }
+
+  /// Aggregates a group of cylinders that share the same brand + weight into
+  /// one collective reading using the shared FIFO rules from
+  /// `utils/cylinder_fifo.dart`.
+  ///
+  /// - [FifoCollective.totalRemainingDays] is the SUM of the remaining days.
+  /// - [FifoCollective.totalPercentage] is the SUM of the per-cylinder
+  ///   percentages, so two full 30-day cylinders read 200%.
+  /// - [FifoCollective.capacityFraction] is what the progress bar shows
+  ///   (59 / 60 = 0.9833 for two cylinders after one day).
+  ///
+  /// Delivered orders are the source of truth (same as the Cylinder Smart
+  /// Hub). Manually registered cylinders fall back to their saved units or
+  /// lastRefillDate.
+  FifoCollective _aggregateCylinderGroup(List<Map<String, dynamic>> group) {
+    if (group.isEmpty) return calculateFifo(const []);
+
+    final cycleDays = _cycleDaysFor(group.first);
+    final targetBrand = _normalizeCylinderKey(group.first['brand'] ?? 'Gesi');
+    final targetWeight = _normalizeCylinderKey(
+        group.first['weight'] ?? group.first['size'] ?? '15kg');
+
+    // 1. Delivered orders, exactly like the Smart Hub.
+    final orderDates = <DateTime>[];
+    for (final order in _deliveredOrders) {
+      final orderBrand =
+          _normalizeCylinderKey(order['brand'] ?? order['brand_name'] ?? '');
+      final orderWeight =
+          _normalizeCylinderKey(order['size'] ?? order['weight'] ?? '');
+      if (orderBrand != targetBrand || orderWeight != targetWeight) continue;
+
+      final date = _dateFor(order['delivered_at'] ??
+          order['finalized_at'] ??
+          order['created_at']);
+      if (date != null) orderDates.add(date);
+    }
+    if (orderDates.isNotEmpty) {
+      return calculateFifo(orderDates, cycleDays: cycleDays);
+    }
+
+    // 2. Manual / offline fallback from the saved cylinder document.
+    final dates = <DateTime>[];
+    for (final cylinder in group) {
+      final units = cylinder['units'];
+      if (units is List && units.isNotEmpty) {
+        for (final unit in units) {
+          if (unit is Map) {
+            final date =
+                _dateFor(unit['lastRefillDate'] ?? unit['purchase_date']);
+            if (date != null) dates.add(date);
+          }
+        }
+      } else {
+        // A manually registered cylinder without a date is treated as full.
+        dates.add(_dateFor(
+                cylinder['lastRefillDate'] ?? cylinder['last_refill_date']) ??
+            DateTime.now());
+      }
+    }
+    return calculateFifo(dates, cycleDays: cycleDays);
+  }
+
+  String _normalizeCylinderKey(dynamic value) =>
+      value.toString().replaceAll(RegExp(r'\s+'), '').toLowerCase();
+
+  /// Reads a cylinder's refill cycle in days, accepting `30`, `'30'`,
+  /// `'Every 30 days'`, etc. Defaults to 30 days.
+  int _cycleDaysFor(Map<String, dynamic> cylinder) {
+    return parseCycleDays(cylinder['refillCycle'] ??
+        cylinder['refill_cycle'] ??
+        cylinder['cycle']);
+  }
+
+  /// Converts a Firestore/JSON date field into a [DateTime].
+  DateTime? _dateFor(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is Timestamp) return raw.toDate();
+    if (raw is DateTime) return raw;
+    if (raw is int) return DateTime.fromMillisecondsSinceEpoch(raw);
+    if (raw is String && raw.trim().isNotEmpty) {
+      return DateTime.tryParse(raw.trim());
+    }
+    return null;
   }
 
   void _showGasSetupSheet() {

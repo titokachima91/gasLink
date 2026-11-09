@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants.dart';
 import '../../services/auth_service.dart';
-import 'vendor_detail_screen.dart';
+import '../../utils/cylinder_fifo.dart';
 
 class ConsumerCylinderScreen extends StatefulWidget {
   final List<Map<String, dynamic>> initialCylinders;
@@ -26,6 +26,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
   List<Map<String, dynamic>> _allUserCylinders = [];
   bool _isLoading = false;
   int _expandedIndex = -1; // Tracks which card drawer is toggled open
+  // Cached per-cylinder unit queries so rebuilding a card does not refire
+  // Firestore reads or write to the database during build.
+  final Map<String, Future<List<Map<String, dynamic>>>> _unitsCache = {};
 
   @override
   void initState() {
@@ -38,33 +41,36 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
   Future<List<Map<String, dynamic>>> _fetchUnitsForCylinder(
     String brand,
     String weight, {
-    int cycleDays = 30, // fallback only
+    int cycleDays = 30,
+    Map<String, dynamic>? fallbackCylinder,
   }) async {
     final uid = AuthService.instance.currentUserId;
     if (uid == null || uid.isEmpty) return [];
 
     try {
-      final snap = await FirebaseFirestore.instance
-          .collection('orders')
-          .where('consumer_uid', isEqualTo: uid)
-          .where('status', isEqualTo: 'delivered')
-          .get();
+      final orderDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+      try {
+        final snap = await FirebaseFirestore.instance
+            .collection('orders')
+            .where('consumer_uid', isEqualTo: uid)
+            .where('status', isEqualTo: 'delivered')
+            .get();
+        orderDocs.addAll(snap.docs);
+      } catch (e) {
+        // Missing index / offline: the saved cylinder data below still works.
+        debugPrint('Error fetching order history: $e');
+      }
 
-      final targetBrand = brand.replaceAll(RegExp(r'\s+'), '').toLowerCase();
-      final targetWeight = weight.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+      final targetBrand = _normalizeKey(brand);
+      final targetWeight = _normalizeKey(weight);
 
       final rawUnits = <Map<String, dynamic>>[];
 
-      for (final doc in snap.docs) {
+      for (final doc in orderDocs) {
         final data = doc.data();
-        final orderBrand = (data['brand'] ?? data['brand_name'] ?? '')
-            .toString()
-            .replaceAll(RegExp(r'\s+'), '')
-            .toLowerCase();
-        final orderWeight = (data['size'] ?? data['weight'] ?? '')
-            .toString()
-            .replaceAll(RegExp(r'\s+'), '')
-            .toLowerCase();
+        final orderBrand =
+            _normalizeKey(data['brand'] ?? data['brand_name'] ?? '');
+        final orderWeight = _normalizeKey(data['size'] ?? data['weight'] ?? '');
 
         if (orderBrand != targetBrand || orderWeight != targetWeight) continue;
 
@@ -103,10 +109,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
             (data['total_price'] ?? data['totalPrice'] ?? data['total'] ?? 0)
                 .toDouble();
 
-        final date = (data['delivered_at'] as Timestamp?)?.toDate() ??
-            (data['finalized_at'] as Timestamp?)?.toDate() ??
-            (data['created_at'] as Timestamp?)?.toDate() ??
-            DateTime.now();
+        final date = _dateFor(data['delivered_at']) ??
+            _dateFor(data['finalized_at']) ??
+            _dateFor(data['created_at']);
+        if (date == null) continue;
 
         rawUnits.add({
           'id': doc.id,
@@ -118,52 +124,72 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
         });
       }
 
-      // Oldest first
+      // No delivered order for this brand/size: fall back to the cylinder
+      // document itself (manual entry or pre-order data).
+      if (rawUnits.isEmpty && fallbackCylinder != null) {
+        final savedUnits = fallbackCylinder['units'];
+        if (savedUnits is List && savedUnits.isNotEmpty) {
+          for (final unit in savedUnits) {
+            if (unit is! Map) continue;
+            final date =
+                _dateFor(unit['lastRefillDate'] ?? unit['purchase_date']);
+            if (date == null) continue;
+            rawUnits.add({
+              'id': unit['id'] ?? date.millisecondsSinceEpoch.toString(),
+              'supplier_name': unit['supplier_name'] ??
+                  fallbackCylinder['supplier_name'] ??
+                  'Muuzaji Rasmi',
+              'price': unit['price'] ?? fallbackCylinder['price'] ?? 0.0,
+              'lastRefillDate':
+                  unit['lastRefillDate'] ?? date.toIso8601String(),
+              'purchase_date': unit['purchase_date'] ?? date.toIso8601String(),
+              'deliveryDate': date,
+            });
+          }
+        }
+
+        if (rawUnits.isEmpty) {
+          final date = _dateFor(fallbackCylinder['lastRefillDate'] ??
+                  fallbackCylinder['purchase_date']) ??
+              DateTime.now();
+          rawUnits.add({
+            'id': fallbackCylinder['id'] ??
+                date.millisecondsSinceEpoch.toString(),
+            'supplier_name':
+                fallbackCylinder['supplier_name'] ?? 'Muuzaji Rasmi',
+            'price': fallbackCylinder['price'] ?? 0.0,
+            'lastRefillDate': date.toIso8601String(),
+            'purchase_date': date.toIso8601String(),
+            'deliveryDate': date,
+          });
+        }
+      }
+
+      // Oldest first, then let the shared FIFO model deplete them.
       rawUnits.sort((a, b) {
         final da = a['deliveryDate'] as DateTime;
         final db = b['deliveryDate'] as DateTime;
         return da.compareTo(db);
       });
 
-      // ===== TRUE FIFO DEPLETION =====
-      // Each unit starts with 30 days capacity.
-      // Consumption starts from the oldest unit and only moves to the next
-      // when the current one is fully empty.
-      const int cycleDays = 30;
-      final now = DateTime.now();
-
-      // Total days that have passed since the oldest unit arrived
-      int daysToConsume = 0;
-      if (rawUnits.isNotEmpty) {
-        final oldest = rawUnits.first['deliveryDate'] as DateTime;
-        daysToConsume = now.difference(oldest).inDays;
-        if (daysToConsume < 0) daysToConsume = 0;
-      }
+      final fifo = calculateFifo(
+        rawUnits.map((unit) => unit['deliveryDate'] as DateTime).toList(),
+        cycleDays: cycleDays,
+      );
 
       final units = <Map<String, dynamic>>[];
-
-      for (final raw in rawUnits) {
-        int remaining;
-        if (daysToConsume >= cycleDays) {
-          // This unit is fully used up
-          remaining = 0;
-          daysToConsume -= cycleDays;
-        } else {
-          // Partially used (or still full)
-          remaining = cycleDays - daysToConsume;
-          daysToConsume = 0;
-        }
-
-        final percentage = (remaining / cycleDays * 100).clamp(0.0, 100.0);
-
+      for (var i = 0; i < rawUnits.length; i++) {
+        final raw = rawUnits[i];
+        final computed = fifo.units[i];
         units.add({
           'id': raw['id'],
           'supplier_name': raw['supplier_name'],
           'price': raw['price'],
           'lastRefillDate': raw['lastRefillDate'],
           'purchase_date': raw['purchase_date'],
-          'remainingDays': remaining,
-          'percentage': percentage,
+          'remainingDays': computed.remainingDays,
+          'percentage': computed.percentage,
+          'cycleDays': cycleDays,
         });
       }
 
@@ -174,6 +200,62 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
     }
   }
 
+  String _normalizeKey(dynamic value) =>
+      value.toString().replaceAll(RegExp(r'\s+'), '').toLowerCase();
+
+  DateTime? _dateFor(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is Timestamp) return raw.toDate();
+    if (raw is DateTime) return raw;
+    if (raw is int) return DateTime.fromMillisecondsSinceEpoch(raw);
+    if (raw is String && raw.trim().isNotEmpty) {
+      return DateTime.tryParse(raw.trim());
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> _unitsForCylinder(
+    Map<String, dynamic> cylinder,
+    String brand,
+    String weight,
+    int cycleDays,
+  ) {
+    final key = (cylinder['id'] ?? '$brand|$weight').toString();
+    return _unitsCache.putIfAbsent(
+      key,
+      () => _fetchUnitsForCylinder(
+        brand,
+        weight,
+        cycleDays: cycleDays,
+        fallbackCylinder: cylinder,
+      ),
+    );
+  }
+
+  /// Sums FIFO units into the collective reading.
+  ///
+  /// - days: sum of remaining days.
+  /// - percentage: sum of per-unit percentages (2 full = 200%).
+  /// - fraction: remaining capacity ÷ total capacity (2 full = 1.0).
+  ({int days, double percentage, double fraction}) _collectiveFromUnits(
+      List<Map<String, dynamic>> units, int cycleDays) {
+    int days = 0;
+    double percentage = 0.0;
+    int capacityDays = 0;
+
+    for (final unit in units) {
+      days += (unit['remainingDays'] as num?)?.toInt() ?? 0;
+      percentage += (unit['percentage'] as num?)?.toDouble() ?? 0.0;
+      capacityDays += (unit['cycleDays'] as num?)?.toInt() ?? cycleDays;
+    }
+
+    final fraction = capacityDays > 0
+        ? (days / capacityDays).clamp(0.0, 1.0).toDouble()
+        : 0.0;
+
+    return (days: days, percentage: percentage, fraction: fraction);
+  }
+
   /// 🔄 Pulls all saved tank entries flat from subcollection
   Future<void> _fetchCompleteCylinderStack() async {
     final uid = AuthService.instance.currentUserId;
@@ -181,6 +263,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
     if (!mounted) return;
     setState(() => _isLoading = true);
     try {
+      _unitsCache.clear();
       final snap = await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
@@ -567,26 +650,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
   Widget _buildDynamicAssetCard(
       int idx, Map<String, dynamic> cyl, bool isExpanded) {
-    // Collective values (from the cylinder document)
-    final int collectiveDays = (cyl['remainingDays'] as num?)?.toInt() ?? 30;
-    final double collectivePercentage =
-        (cyl['percentage'] as num?)?.toDouble() ?? 100.0;
-    final double collectiveRatio =
-        (collectivePercentage / 100.0).clamp(0.0, 5.0);
-    final bool isCollectiveEmpty = collectiveDays <= 0;
-    final bool isCollectiveCritical =
-        collectiveRatio <= 0.15 || isCollectiveEmpty;
-
     final String brand = (cyl['brand'] ?? 'Gesi').toString();
     final String weight = (cyl['weight'] ?? cyl['size'] ?? '').toString();
-
-    // Read user-set cycle (fallback 30)
-    int cycleDays = 30;
-    final cycleStr = (cyl['refillCycle'] ?? '30').toString();
-    final match = RegExp(r'\d+').firstMatch(cycleStr);
-    if (match != null) {
-      cycleDays = int.tryParse(match.group(0) ?? '30') ?? 30;
-    }
+    final int cycleDays = parseCycleDays(cyl['refillCycle']);
 
     return Card(
       elevation: 0,
@@ -606,18 +672,45 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
               '$brand ($weight)',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-            subtitle: Text(
-              isExpanded
-                  ? 'Bofya kufunga maelezo'
-                  : (isCollectiveEmpty
-                      ? 'Imeisha / Empty (0%)'
-                      : 'Zimebaki ~$collectiveDays Siku (${collectivePercentage.toInt()}%)'),
-              style: TextStyle(
-                fontSize: 11,
-                color: isCollectiveCritical ? Colors.red : Colors.grey,
-                fontWeight:
-                    isCollectiveCritical ? FontWeight.bold : FontWeight.normal,
-              ),
+            subtitle: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _unitsForCylinder(cyl, brand, weight, cycleDays),
+              builder: (context, snapshot) {
+                final waiting =
+                    snapshot.connectionState == ConnectionState.waiting;
+                final units = snapshot.data ?? const <Map<String, dynamic>>[];
+
+                // Fall back to the stored document values only while the
+                // FIFO query is still running.
+                final collective = waiting || units.isEmpty
+                    ? (
+                        days: (cyl['remainingDays'] as num?)?.toInt() ?? 0,
+                        percentage:
+                            (cyl['percentage'] as num?)?.toDouble() ?? 0.0,
+                        fraction:
+                            (((cyl['percentage'] as num?)?.toDouble() ?? 0.0) /
+                                    100.0)
+                                .clamp(0.0, 1.0)
+                                .toDouble(),
+                      )
+                    : _collectiveFromUnits(units, cycleDays);
+
+                final isEmpty = collective.days <= 0;
+                final isCritical = collective.fraction <= 0.15 || isEmpty;
+
+                return Text(
+                  isExpanded
+                      ? 'Bofya kufunga maelezo'
+                      : (isEmpty
+                          ? 'Imeisha / Empty (0%)'
+                          : 'Zimebaki ~${collective.days} Siku (${collective.percentage.toStringAsFixed(1)}%)'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isCritical ? Colors.red : Colors.grey,
+                    fontWeight:
+                        isCritical ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              },
             ),
             trailing: Icon(
               isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
@@ -635,8 +728,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                   // ===== REAL UNITS FROM ORDER HISTORY (FIFO) =====
 // ===== REAL UNITS + COLLECTIVE (no mocks) =====
                   FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _fetchUnitsForCylinder(brand, weight,
-                        cycleDays: cycleDays),
+                    future: _unitsForCylinder(cyl, brand, weight, cycleDays),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Padding(
@@ -656,41 +748,15 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
                       final units = snapshot.data ?? [];
 
-                      // Collective = sum of real remaining days (true FIFO result)
-                      final int collectiveDays = units.fold<int>(
-                          0,
-                          (sum, u) =>
-                              sum +
-                              ((u['remainingDays'] as num?)?.toInt() ?? 0));
-                      final double collectivePercentage = units.isEmpty
-                          ? 0.0
-                          : units.fold<double>(
-                              0,
-                              (sum, u) =>
-                                  sum +
-                                  ((u['percentage'] as num?)?.toDouble() ?? 0));
-                      // Sync correct collective to cylinder document (so Home screen is correct)
-                      final String? cylId = cyl['id']?.toString();
-                      final String? uid = AuthService.instance.currentUserId;
-                      if (cylId != null &&
-                          cylId.isNotEmpty &&
-                          uid != null &&
-                          uid.isNotEmpty) {
-                        FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(uid)
-                            .collection('cylinders')
-                            .doc(cylId)
-                            .update({
-                          'remainingDays': collectiveDays,
-                          'percentage': collectivePercentage,
-                          'updatedAt': FieldValue.serverTimestamp(),
-                        }).catchError((e) {
-                          debugPrint('Sync collective error: $e');
-                        });
-                      }
-                      final double collectiveRatio =
-                          (collectivePercentage / 100.0).clamp(0.0, 10.0);
+                      // Same FIFO sums as the home gauge.
+                      final collective = _collectiveFromUnits(units, cycleDays);
+                      final int collectiveDays = collective.days;
+                      final double collectivePercentage = collective.percentage;
+
+                      // The bar shows remaining capacity, not the summed
+                      // percentage: two full cylinders = 1.0, and after one
+                      // day 59/60 = 0.9833 even though the text says 196.7%.
+                      final double collectiveRatio = collective.fraction;
                       final bool isCollectiveEmpty = collectiveDays <= 0;
                       final bool isCollectiveCritical =
                           collectiveRatio <= 0.15 || isCollectiveEmpty;
@@ -720,7 +786,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                               Text(
                                 isCollectiveEmpty
                                     ? 'Imeisha (0%)'
-                                    : '~$collectiveDays Siku (${collectivePercentage.toInt()}%)',
+                                    : '~$collectiveDays Siku (${collectivePercentage.toStringAsFixed(1)}%)',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -735,8 +801,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
-                              value:
-                                  collectiveRatio > 1.0 ? 1.0 : collectiveRatio,
+                              value: collectiveRatio,
                               backgroundColor: Colors.grey.shade100,
                               color: isCollectiveCritical
                                   ? Colors.red
@@ -801,7 +866,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                       Text(
                                         unitEmpty
                                             ? 'Imeisha (0%)'
-                                            : '~$unitDays Siku (${unitPct.toInt()}%)',
+                                            : '~$unitDays Siku (${unitPct.toStringAsFixed(1)}%)',
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
