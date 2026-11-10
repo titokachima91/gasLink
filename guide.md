@@ -112,5 +112,5 @@ Record phase rollback points here after each push.
 |---|---|---|---|
 | Phase 1 + docs baseline | `4c89d66` | `origin/harden-source-of-truth` | Pre-Phase 2 rollback point |
 | Phase 2 code | `5bed4fb` | `origin/harden-source-of-truth` | Admin & Operations Console + analytics |
-| Phase 2 docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
+| Phase 2 docs | `0ca4080` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 ---
