@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/vendor.dart';
 import 'consumer/vendor_detail_screen.dart';
 
+import '../core/theme_ext.dart';
+
 class VendorListScreen extends StatefulWidget {
   const VendorListScreen({super.key});
 
@@ -89,7 +91,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (v.areaText.isNotEmpty)
-                    Text(v.areaText, style: TextStyle(color: Colors.grey[600])),
+                    Text(v.areaText, style: TextStyle(color: context.colors.onSurfaceVariant)),
                   if (v.stockedBrandNames.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),

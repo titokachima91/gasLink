@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/theme_mode_button.dart';
+
 class AdminVendorScreen extends StatelessWidget {
   const AdminVendorScreen({super.key});
 
@@ -8,8 +10,7 @@ class AdminVendorScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Panel'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
+        actions: const [ThemeModeButton()],
       ),
       body: const Center(
         child: Text('Admin panel coming soon.\nUse Firestore Console to create vendors.'),

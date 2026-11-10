@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import '../../core/session_data.dart';
 import 'vendor_detail_screen.dart';
 
+import '../../core/theme_ext.dart';
+
 class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
   final int sortIndex;
 
@@ -31,9 +33,9 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
   ThemeData appBarTheme(BuildContext context) {
     final theme = Theme.of(context);
     return theme.copyWith(
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.orange,
-        iconTheme: IconThemeData(color: Colors.white),
+      appBarTheme: AppBarTheme(
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       inputDecorationTheme: const InputDecorationTheme(
         border: InputBorder.none,
@@ -102,11 +104,11 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 48, color: Colors.grey.shade400),
+            Icon(Icons.search_off, size: 48, color: context.colors.outline),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Hakuna maduka yaliyopatikana / No shops found',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: context.colors.onSurfaceVariant),
             ),
           ],
         ),
@@ -126,7 +128,7 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
           margin: const EdgeInsets.only(bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: context.colors.outlineVariant),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
@@ -147,8 +149,8 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.orange.shade50,
-                    child: const Icon(Icons.store, color: Colors.orange),
+                    backgroundColor: context.colors.primaryContainer,
+                    child: Icon(Icons.store, color: context.colors.primary),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -169,7 +171,7 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
                             vendor.area,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey.shade600,
+                              color: context.colors.onSurfaceVariant,
                             ),
                           ),
                         const SizedBox(height: 2),
@@ -177,7 +179,7 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
                           '${summary.inStockBrands} chapa zipo • Kuanzia TZS ${summary.minPrice}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade800,
+                            color: context.colors.onSurface,
                           ),
                         ),
                         if (offer.distanceKm != null)
@@ -185,21 +187,21 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
                             'Umbali: ${offer.distanceKm!.toStringAsFixed(1)} km',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.orange.shade800,
+                              color: context.colors.primary,
                             ),
                           ),
                       ],
                     ),
                   ),
-                  const Column(
+                  Column(
                     children: [
-                      Icon(Icons.chevron_right, color: Colors.orange),
+                      Icon(Icons.chevron_right, color: context.colors.primary),
                       SizedBox(height: 4),
                       Text(
                         'Tazama',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey,
+                          color: context.colors.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

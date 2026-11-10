@@ -14,6 +14,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import 'vendor_profile_screen.dart';
 
+import '../../core/theme_ext.dart';
+
 class VendorBadgeScreen extends StatefulWidget {
   const VendorBadgeScreen({super.key});
 
@@ -36,9 +38,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Tuzo na Uthibitisho / Badges',
@@ -56,8 +57,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
+            return Center(
+              child: CircularProgressIndicator(color: context.colors.primary),
             );
           }
 
@@ -94,14 +95,17 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orange.shade700, Colors.orange.shade400],
+                      colors: [
+                        Theme.of(context).appBarTheme.backgroundColor!,
+                        Theme.of(context).appBarTheme.backgroundColor!,
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.orange.shade200,
+                        color: context.colors.primaryContainer,
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -111,13 +115,13 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                     children: [
                       Row(
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 28,
                             backgroundColor: Colors.white,
                             child: Icon(
                               Icons.workspace_premium,
                               size: 36,
-                              color: Colors.orange,
+                              color: context.colors.primary,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -199,7 +203,7 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                   title: 'Tier 1: Muuza Gesi',
                   subtitle: 'Kiwango cha Msingi cha Biashara',
                   badgeIcon: Icons.store,
-                  badgeColor: Colors.blue,
+                  badgeColor: context.gasColors.info,
                   isCompleted: currentTier > 1,
                   isCurrent: currentTier == 1,
                   benefits: const [
@@ -224,7 +228,7 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                   title: 'Tier 2: Muuzaji Aliyethibitishwa',
                   subtitle: 'Badge ya Uthibitisho na Uaminifu',
                   badgeIcon: Icons.verified,
-                  badgeColor: Colors.green,
+                  badgeColor: context.gasColors.success,
                   isCompleted: currentTier > 2,
                   isCurrent: currentTier == 2,
                   benefits: const [
@@ -259,7 +263,7 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                   title: 'Tier 3: Muuzaji Aliyeaminika',
                   subtitle: 'Kiwango cha Juu Cha Ubora',
                   badgeIcon: Icons.workspace_premium,
-                  badgeColor: Colors.amber,
+                  badgeColor: context.gasColors.warning,
                   isCompleted: currentTier == 3,
                   isCurrent: currentTier == 3,
                   benefits: const [
@@ -317,10 +321,10 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: isCurrent
-              ? Colors.orange
+              ? context.colors.primary
               : isCompleted
-                  ? Colors.green.shade300
-                  : Colors.grey.shade300,
+                  ? context.gasColors.success
+                  : context.colors.outlineVariant,
           width: isCurrent ? 2 : 1,
         ),
       ),
@@ -347,27 +351,29 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                       Text(
                         subtitle,
                         style:
-                            const TextStyle(fontSize: 11, color: Colors.grey),
+                            TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
                       ),
                     ],
                   ),
                 ),
                 if (isCompleted)
-                  const Chip(
+                  Chip(
                     label: Text(
                       'Kamilifu',
-                      style: TextStyle(color: Colors.white, fontSize: 10),
+                      style: TextStyle(
+                          color: context.gasColors.onSuccess, fontSize: 10),
                     ),
-                    backgroundColor: Colors.green,
+                    backgroundColor: context.gasColors.success,
                     visualDensity: VisualDensity.compact,
                   )
                 else if (isCurrent)
-                  const Chip(
+                  Chip(
                     label: Text(
                       'Inafanya Kazi',
-                      style: TextStyle(color: Colors.white, fontSize: 10),
+                      style: TextStyle(
+                          color: context.colors.onPrimary, fontSize: 10),
                     ),
-                    backgroundColor: Colors.orange,
+                    backgroundColor: context.colors.primary,
                     visualDensity: VisualDensity.compact,
                   ),
               ],
@@ -383,7 +389,7 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Row(
                   children: [
-                    const Icon(Icons.star, size: 14, color: Colors.amber),
+                    Icon(Icons.star, size: 14, color: context.gasColors.warning),
                     const SizedBox(width: 6),
                     Text(b, style: const TextStyle(fontSize: 12)),
                   ],
@@ -406,7 +412,7 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                           ? Icons.check_circle
                           : Icons.cancel_outlined,
                       size: 16,
-                      color: r['done'] == true ? Colors.green : Colors.grey,
+                      color: r['done'] == true ? context.gasColors.success : context.colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -415,8 +421,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           color: r['done'] == true
-                              ? Colors.black
-                              : Colors.grey.shade700,
+                              ? context.colors.onSurface
+                              : context.colors.onSurfaceVariant,
                           decoration: r['done'] == true
                               ? TextDecoration.lineThrough
                               : null,
@@ -434,8 +440,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: onTapAction != null
-                        ? Colors.orange
-                        : Colors.grey.shade300,
+                        ? context.colors.primary
+                        : context.colors.outlineVariant,
                     elevation: 0,
                   ),
                   onPressed: onTapAction,
@@ -443,8 +449,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                     actionLabel,
                     style: TextStyle(
                       color: onTapAction != null
-                          ? Colors.white
-                          : Colors.grey.shade600,
+                          ? context.colors.onPrimary
+                          : context.colors.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

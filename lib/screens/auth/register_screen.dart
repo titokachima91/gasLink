@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../role_router.dart';
 
+import '../../core/theme_ext.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -84,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: Colors.red)),
+              Text(_error!, style: TextStyle(color: context.colors.error)),
             ],
             const SizedBox(height: 16),
             FilledButton(

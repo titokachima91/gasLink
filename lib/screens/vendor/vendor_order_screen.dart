@@ -7,7 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth_service.dart';
-import '../../services/order_service.dart';
+
+import '../../core/theme_ext.dart';
 
 class VendorOrderScreen extends StatefulWidget {
   const VendorOrderScreen({super.key});
@@ -55,9 +56,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           body: Center(child: Text('Tafadhali ingia kama muuzaji')));
     }
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text('Usimamizi wa Oda / Order Manager',
             style: TextStyle(
@@ -88,8 +88,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(color: Colors.orange));
+            return Center(
+                child: CircularProgressIndicator(color: context.colors.primary));
           }
           final allDocs = snapshot.data?.docs ??
               <QueryDocumentSnapshot<Map<String, dynamic>>>[];
@@ -160,10 +160,10 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade400),
+            Icon(Icons.inbox_outlined, size: 48, color: context.colors.outline),
             const SizedBox(height: 12),
             Text('Hakuna oda katika orodha hii',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13)),
           ],
         ),
       );
@@ -217,7 +217,7 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200)),
+              side: BorderSide(color: context.colors.outlineVariant)),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -232,13 +232,13 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                         children: [
                           Text(
                               'ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
-                                  color: Colors.black87)),
+                                  color: context.colors.onSurface)),
                           Text('Mteja: $customerName',
-                              style: const TextStyle(
-                                  fontSize: 11, color: Colors.grey)),
+                              style: TextStyle(
+                                  fontSize: 11, color: context.colors.onSurfaceVariant)),
                         ],
                       ),
                     ),
@@ -252,8 +252,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                               style: TextStyle(
                                   fontSize: 10, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
+                              backgroundColor: context.gasColors.success,
+                              foregroundColor: context.gasColors.onSuccess,
                               elevation: 0),
                         ),
                       ),
@@ -282,20 +282,20 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                   ),
                 ),
                 Text('Jumla: TZS ${totalPrice.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                        color: Colors.orange,
+                    style: TextStyle(
+                        color: context.colors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 12)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 14, color: Colors.grey),
+                    Icon(Icons.location_on_outlined,
+                        size: 14, color: context.colors.onSurfaceVariant),
                     const SizedBox(width: 4),
                     Expanded(
                         child: Text(address,
-                            style: const TextStyle(
-                                fontSize: 11, color: Colors.black87),
+                            style: TextStyle(
+                                fontSize: 11, color: context.colors.onSurface),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis)),
                   ],
@@ -306,21 +306,21 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: context.gasColors.infoContainer,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade100)),
+                        border: Border.all(color: context.gasColors.infoContainer)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(children: [
+                        Row(children: [
                           Icon(Icons.info_outline,
-                              size: 14, color: Colors.blue),
+                              size: 14, color: context.gasColors.info),
                           SizedBox(width: 4),
                           Text('ℹ️ Maelezo ya Ziada:',
                               style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue))
+                                  color: context.gasColors.info))
                         ]),
                         if (specialRequests.isNotEmpty)
                           Text('📝 Ombi: $specialRequests',
@@ -336,11 +336,11 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                               TextButton(
                                   onPressed: () =>
                                       _makePhoneCall(receiverPhone),
-                                  child: const Text('Piga Simu',
+                                  child: Text('Piga Simu',
                                       style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.green))),
+                                          color: context.gasColors.success))),
                             ],
                           ),
                       ],
@@ -369,8 +369,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                 'updated_at': FieldValue.serverTimestamp()
               }),
               style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red)),
+                  foregroundColor: context.colors.error,
+                  side: BorderSide(color: context.colors.error)),
               child: const Text('Kataa Oda', style: TextStyle(fontSize: 12)),
             ),
           ),
@@ -382,8 +382,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                 'updated_at': FieldValue.serverTimestamp()
               }),
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
                   elevation: 0),
               child: const Text('Pokea Oda', style: TextStyle(fontSize: 12)),
             ),
@@ -395,11 +395,11 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Maelezo ya Usafirishaji / Logistics Dispatch:',
+          Text('Maelezo ya Usafirishaji / Logistics Dispatch:',
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange)),
+                  color: context.colors.primary)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -462,8 +462,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                 });
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.colors.tertiary,
+                  foregroundColor: context.colors.onTertiary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8))),
@@ -481,9 +481,9 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Njiani 🚚',
+          Text('Njiani 🚚',
               style: TextStyle(
-                  color: Colors.purple,
+                  color: context.colors.tertiary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13)),
           ElevatedButton.icon(
@@ -493,8 +493,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
               'updated_at': FieldValue.serverTimestamp(),
             }),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                backgroundColor: context.gasColors.success,
+                foregroundColor: context.gasColors.onSuccess,
                 elevation: 0),
             icon: const Icon(Icons.check_circle_outline, size: 16),
             label: const Text('Imefika / Delivered',
@@ -509,25 +509,25 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: context.gasColors.infoContainer,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue.shade200)),
-        child: const Column(
+            border: Border.all(color: context.gasColors.infoContainer)),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(children: [
-              Icon(Icons.hourglass_top, size: 16, color: Colors.blue),
+              Icon(Icons.hourglass_top, size: 16, color: context.gasColors.info),
               SizedBox(width: 6),
               Text('Inasubiri Ithibitishwe na Mteja',
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87))
+                      color: context.colors.onSurface))
             ]),
             SizedBox(height: 4),
             Text(
                 'Mzigo umewasilishwa. Inasubiri mteja athibitishe kupokea au muda wa dakika 10 uishe kiotomatiki.',
-                style: TextStyle(fontSize: 11, color: Colors.black54)),
+                style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant)),
           ],
         ),
       );
@@ -536,24 +536,24 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
   }
 
   Widget _buildStatusChip(String status) {
-    Color color = Colors.orange;
+    Color color = context.colors.primary;
     String text = 'Mpya';
     if (status == 'accepted') {
-      color = Colors.blue;
+      color = context.gasColors.info;
       text = 'Imepokelewa';
     } else if (status == 'on_the_way' ||
         status == 'in_transit' ||
         status == 'delivering') {
-      color = Colors.purple;
+      color = context.colors.tertiary;
       text = 'Njiani';
     } else if (status == 'delivered_pending') {
-      color = Colors.amber;
+      color = context.gasColors.warning;
       text = 'Awaiting';
     } else if (status == 'delivered' || status == 'completed') {
-      color = Colors.green;
+      color = context.gasColors.success;
       text = 'Kamilifu';
     } else if (status == 'cancelled' || status == 'rejected') {
-      color = Colors.red;
+      color = context.colors.error;
       text = 'Imeghairiwa';
     }
     return Container(

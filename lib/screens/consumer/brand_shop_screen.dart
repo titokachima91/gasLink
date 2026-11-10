@@ -23,6 +23,8 @@ import '../../core/constants.dart';
 import '../../core/session_data.dart';
 import 'consumer_order_dialog.dart';
 
+import '../../core/theme_ext.dart';
+
 class BrandShopScreen extends StatefulWidget {
   final String brandName;
   final String selectedDistrict;
@@ -121,10 +123,9 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
     final matchedOffers = _matchingVendorOffers;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.orange,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -147,16 +148,16 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
         children: [
           // 1. Net Gas Weight Chips & Sorting Options
           Container(
-            color: Colors.white,
+            color: context.colors.surface,
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Kiwango cha Uzito / Net Weight Capacity:',
                   style: TextStyle(
                       fontSize: 11,
-                      color: Colors.grey,
+                      color: context.colors.onSurfaceVariant,
                       fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
@@ -170,11 +171,11 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                         child: ChoiceChip(
                           label: Text(weight),
                           selected: isSelected,
-                          selectedColor: Colors.orange.shade100,
+                          selectedColor: context.colors.primaryContainer,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? Colors.orange.shade900
-                                : Colors.black87,
+                                ? context.colors.primary
+                                : context.colors.onSurface,
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -197,7 +198,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                         'Wauza Gesi (${widget.brandName} $_selectedWeight)',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade800,
+                          color: context.colors.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -207,10 +208,10 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                     DropdownButton<String>(
                       value: _sortBy,
                       underline: const SizedBox(),
-                      icon: const Icon(Icons.sort,
-                          size: 18, color: Colors.orange),
+                      icon: Icon(Icons.sort,
+                          size: 18, color: context.colors.primary),
                       style:
-                          const TextStyle(fontSize: 12, color: Colors.black87),
+                          TextStyle(fontSize: 12, color: context.colors.onSurface),
                       onChanged: (val) {
                         if (val != null) setState(() => _sortBy = val);
                       },
@@ -235,8 +236,8 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
           // 2. Dynamic Live Vendor List
           Expanded(
             child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange),
+                ? Center(
+                    child: CircularProgressIndicator(color: context.colors.primary),
                   )
                 : matchedOffers.isEmpty
                     ? _buildEmptyOffersState()
@@ -270,7 +271,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -283,10 +284,10 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: context.colors.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.storefront, color: Colors.orange),
+                  child: Icon(Icons.storefront, color: context.colors.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -305,21 +306,21 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                       Text(
                         '📍 ${vendor.area.isNotEmpty ? vendor.area : widget.selectedDistrict}',
                         style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
+                            TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.verified,
-                              size: 14, color: Colors.blue),
+                          Icon(Icons.verified,
+                              size: 14, color: context.gasColors.info),
                           const SizedBox(width: 4),
-                          const Text(
+                          Text(
                             'Verified Vendor',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.blue,
+                              color: context.gasColors.info,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -328,7 +329,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                             Text(
                               '• ${vendor.phone}',
                               style: TextStyle(
-                                  fontSize: 11, color: Colors.grey.shade600),
+                                  fontSize: 11, color: context.colors.onSurfaceVariant),
                             ),
                           ],
                         ],
@@ -347,10 +348,10 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                   children: [
                     Text(
                       'TZS ${price.toStringAsFixed(0)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                        color: context.colors.primary,
                       ),
                     ),
                     Text(
@@ -358,7 +359,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green.shade700,
+                        color: context.gasColors.success,
                       ),
                     ),
                   ],
@@ -383,8 +384,8 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -413,7 +414,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.remove_shopping_cart_outlined,
-                size: 48, color: Colors.grey.shade400),
+                size: 48, color: context.colors.outline),
             const SizedBox(height: 12),
             Text(
               'Hakuna Muuzaji wa ${widget.brandName} ($_selectedWeight)',
@@ -424,7 +425,7 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
             Text(
               'Hakuna muuzaji aliyetangaza bidhaa ya ${widget.brandName} $_selectedWeight katika eneo la${widget.selectedDistrict}. Jaribu kuchagua uzito mwingine.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
             ),
           ],
         ),

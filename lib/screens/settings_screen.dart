@@ -1,5 +1,8 @@
 // lib/screens/settings_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/theme_controller.dart';
 import '../services/auth_service.dart';
 import 'auth/login_screen.dart';
 
@@ -16,10 +19,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Mipangilio / Settings',
@@ -29,23 +32,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // ── SECTION 1: PREFERENCES ───────────────────────────────────────
-          const Text(
-            'Mipangilio ya App / App Preferences',
+          // ── SECTION 1: APPEARANCE ─────────────────────────────────────────
+          Text(
+            'Muonekano / Appearance',
             style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey),
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 8),
           Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
+              side: BorderSide(color: colors.outlineVariant),
+            ),
+            child: Consumer(
+              builder: (context, ref, _) {
+                final themeMode = ref.watch(themeControllerProvider);
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          Icons.brightness_6_outlined,
+                          color: colors.primary,
+                        ),
+                        title: const Text('Mandhari / Theme'),
+                        subtitle: Text(_themeModeLabel(themeMode)),
+                      ),
+                      SegmentedButton<ThemeMode>(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(
+                            value: ThemeMode.system,
+                            icon: Icon(Icons.settings_suggest_outlined),
+                            label: Text('System'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.light,
+                            icon: Icon(Icons.light_mode_outlined),
+                            label: Text('Light'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.dark,
+                            icon: Icon(Icons.dark_mode_outlined),
+                            label: Text('Dark'),
+                          ),
+                        ],
+                        selected: {themeMode},
+                        onSelectionChanged: (selection) {
+                          ref
+                              .read(themeControllerProvider.notifier)
+                              .setMode(selection.first);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── SECTION 2: PREFERENCES ────────────────────────────────────────
+          Text(
+            'Mipangilio ya App / App Preferences',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: colors.outlineVariant),
             ),
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.language, color: Colors.orange),
+                  leading: Icon(Icons.language, color: colors.primary),
                   title: const Text('Lugha / Language'),
                   subtitle: Text(_selectedLanguage),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -53,12 +127,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
-                  secondary: const Icon(Icons.notifications_outlined,
-                      color: Colors.orange),
+                  secondary: Icon(
+                    Icons.notifications_outlined,
+                    color: colors.primary,
+                  ),
                   title: const Text('Taarifa (Notifications)'),
                   subtitle: const Text('Pokea taarifa za oda na mabadiliko'),
                   value: _notificationsEnabled,
-                  activeColor: Colors.orange,
+                  activeColor: colors.primary,
                   onChanged: (val) {
                     setState(() => _notificationsEnabled = val);
                   },
@@ -68,49 +144,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ── SECTION 2: ABOUT & LEGAL ─────────────────────────────────────
-          const Text(
+          // ── SECTION 3: ABOUT & LEGAL ──────────────────────────────────────
+          Text(
             'Kuhusu App / About & Legal',
             style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey),
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 8),
           Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
+              side: BorderSide(color: colors.outlineVariant),
             ),
             child: Column(
               children: [
-                const ListTile(
-                  leading: Icon(Icons.info_outline, color: Colors.orange),
-                  title: Text('Kuhusu GasLink / About GasLink'),
-                  subtitle: Text('Toleo 1.0.0 (Version 1.0.0)'),
+                ListTile(
+                  leading: Icon(Icons.info_outline, color: colors.primary),
+                  title: const Text('Kuhusu GasLink / About GasLink'),
+                  subtitle: const Text('Toleo 1.0.0 (Version 1.0.0)'),
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined,
-                      color: Colors.orange),
+                  leading: Icon(
+                    Icons.privacy_tip_outlined,
+                    color: colors.primary,
+                  ),
                   title: const Text('Sera ya Faragha / Privacy Policy'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('GasLink Privacy Policy v1.0')),
+                        content: Text('GasLink Privacy Policy v1.0'),
+                      ),
                     );
                   },
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.description_outlined,
-                      color: Colors.orange),
+                  leading: Icon(
+                    Icons.description_outlined,
+                    color: colors.primary,
+                  ),
                   title: const Text('Vigezo na Masharti / Terms of Service'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('GasLink Terms of Service v1.0')),
+                        content: Text('GasLink Terms of Service v1.0'),
+                      ),
                     );
                   },
                 ),
@@ -119,17 +204,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // ── SECTION 3: LOGOUT ───────────────────────────────────────────
+          // ── SECTION 4: LOGOUT ─────────────────────────────────────────────
           ElevatedButton.icon(
             onPressed: _handleLogout,
-            icon: const Icon(Icons.logout, color: Colors.white),
-            label: const Text(
+            icon: Icon(Icons.logout, color: colors.onError),
+            label: Text(
               'Ondoka / Logout',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: colors.onError,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -139,6 +227,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  String _themeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'Inafuata mfumo / Follow system';
+      case ThemeMode.light:
+        return 'Nuru / Light';
+      case ThemeMode.dark:
+        return 'Giza / Dark';
+    }
   }
 
   void _showLanguageDialog() {
@@ -154,8 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0),
-              child:
-                  Text('Kiswahili (Swahili)', style: TextStyle(fontSize: 16)),
+              child: Text('Kiswahili (Swahili)', style: TextStyle(fontSize: 16)),
             ),
           ),
           SimpleDialogOption(
@@ -186,7 +284,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ondoka', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Ondoka',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),

@@ -8,6 +8,8 @@ import '../../core/constants.dart';
 import '../../services/auth_service.dart';
 import '../../utils/cylinder_fifo.dart';
 
+import '../../core/theme_ext.dart';
+
 class ConsumerCylinderScreen extends StatefulWidget {
   final List<Map<String, dynamic>> initialCylinders;
   final Map<String, dynamic>? lastCompletedOrder;
@@ -303,9 +305,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
               child: const Text('Ghairi')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ondoa / Delete',
+            child: Text('Ondoa / Delete',
                 style:
-                    TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    TextStyle(color: context.colors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -518,7 +520,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+        style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
         onPressed: isSavingNode
             ? null
             : () async {
@@ -555,14 +557,14 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 }
               },
         child: isSavingNode
-            ? const SizedBox(
+            ? SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2))
+                    color: context.colors.onPrimary, strokeWidth: 2))
             : Text(isEditing ? 'Hifadhi Mabadiliko' : 'Hifadhi Mtungi',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: context.colors.onPrimary, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -572,10 +574,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
     // We no longer rely on lastCompletedOrder for display.
 // Each cylinder now carries its own supplier_name and price.
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.orange,
         title: const Text('Cylinder Smart Hub',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -591,17 +592,17 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('MITUNGI YANGU / MY TANK ASSETS',
+                Text('MITUNGI YANGU / MY TANK ASSETS',
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black54)),
+                        color: context.colors.onSurfaceVariant)),
                 TextButton.icon(
                   onPressed: () => _showCylinderFormModal(),
-                  icon: const Icon(Icons.add, size: 16, color: Colors.orange),
-                  label: const Text('Ongeza Mpya',
+                  icon: Icon(Icons.add, size: 16, color: context.colors.primary),
+                  label: Text('Ongeza Mpya',
                       style: TextStyle(
-                          color: Colors.orange,
+                          color: context.colors.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold)),
                 ),
@@ -609,10 +610,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
             ),
             const SizedBox(height: 6),
             if (_isLoading)
-              const Center(
+              Center(
                   child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(color: Colors.orange)))
+                      child: CircularProgressIndicator(color: context.colors.primary)))
             else
               ..._allUserCylinders.asMap().entries.map((entry) {
                 final idx = entry.key;
@@ -621,11 +622,11 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 return _buildDynamicAssetCard(idx, cylinder, isExpanded);
               }),
             const SizedBox(height: 24),
-            const Text('MIFUMO YA NDANI / SMART FEATURES',
+            Text('MIFUMO YA NDANI / SMART FEATURES',
                 style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+                    color: context.colors.onSurfaceVariant,
                     letterSpacing: 0.5)),
             const SizedBox(height: 10),
             _buildMenuCard(
@@ -659,7 +660,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: Column(
         children: [
@@ -667,7 +668,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
           ListTile(
             onTap: () => setState(() => _expandedIndex = isExpanded ? -1 : idx),
             leading:
-                const Icon(Icons.propane_tank, color: Colors.orange, size: 28),
+                Icon(Icons.propane_tank, color: context.colors.primary, size: 28),
             title: Text(
               '$brand ($weight)',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -705,7 +706,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           : 'Zimebaki ~${collective.days} Siku (${collective.percentage.toStringAsFixed(1)}%)'),
                   style: TextStyle(
                     fontSize: 11,
-                    color: isCritical ? Colors.red : Colors.grey,
+                    color: isCritical ? context.colors.error : context.colors.onSurfaceVariant,
                     fontWeight:
                         isCritical ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -714,7 +715,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
             ),
             trailing: Icon(
               isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-              color: Colors.grey,
+              color: context.colors.onSurfaceVariant,
             ),
           ),
 
@@ -731,7 +732,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     future: _unitsForCylinder(cyl, brand, weight, cycleDays),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Padding(
+                        return Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: SizedBox(
@@ -739,7 +740,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.orange,
+                                color: context.colors.primary,
                               ),
                             ),
                           ),
@@ -762,11 +763,11 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           collectiveRatio <= 0.15 || isCollectiveEmpty;
 
                       if (units.isEmpty) {
-                        return const Padding(
+                        return Padding(
                           padding: EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             'Hakuna historia ya oda kwa mtungi huu bado.',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                           ),
                         );
                       }
@@ -778,10 +779,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Jumla / Collective Level:',
                                 style: TextStyle(
-                                    fontSize: 12, color: Colors.black54),
+                                    fontSize: 12, color: context.colors.onSurfaceVariant),
                               ),
                               Text(
                                 isCollectiveEmpty
@@ -791,8 +792,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: isCollectiveCritical
-                                      ? Colors.red
-                                      : Colors.orange.shade800,
+                                      ? context.colors.error
+                                      : context.colors.primary,
                                 ),
                               ),
                             ],
@@ -802,10 +803,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: collectiveRatio,
-                              backgroundColor: Colors.grey.shade100,
+                              backgroundColor: context.colors.surfaceContainerLow,
                               color: isCollectiveCritical
-                                  ? Colors.red
-                                  : Colors.orange,
+                                  ? context.colors.error
+                                  : context.colors.primary,
                               minHeight: 8,
                             ),
                           ),
@@ -837,9 +838,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
+                                color: context.colors.surfaceContainerLowest,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade200),
+                                border: Border.all(color: context.colors.outlineVariant),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -848,10 +849,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     unitIndex == 0
                                         ? 'Unit ${unitIndex + 1} (Oldest – inatumika kwanza)'
                                         : 'Unit ${unitIndex + 1}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: context.colors.onSurface,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
@@ -859,10 +860,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text('Kiwango:',
+                                      Text('Kiwango:',
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: Colors.black54)),
+                                              color: context.colors.onSurfaceVariant)),
                                       Text(
                                         unitEmpty
                                             ? 'Imeisha (0%)'
@@ -871,8 +872,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                           color: unitEmpty
-                                              ? Colors.red
-                                              : Colors.orange.shade800,
+                                              ? context.colors.error
+                                              : context.colors.primary,
                                         ),
                                       ),
                                     ],
@@ -882,10 +883,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: unitRatio,
-                                      backgroundColor: Colors.grey.shade200,
+                                      backgroundColor: context.colors.outlineVariant,
                                       color: unitEmpty
-                                          ? Colors.red
-                                          : Colors.orange,
+                                          ? context.colors.error
+                                          : context.colors.primary,
                                       minHeight: 6,
                                     ),
                                   ),
@@ -912,12 +913,12 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                                     'Edit unit – coming next')),
                                           );
                                         },
-                                        icon: const Icon(Icons.edit_outlined,
-                                            size: 16, color: Colors.blue),
-                                        label: const Text('Edit',
+                                        icon: Icon(Icons.edit_outlined,
+                                            size: 16, color: context.gasColors.info),
+                                        label: Text('Edit',
                                             style: TextStyle(
                                                 fontSize: 11,
-                                                color: Colors.blue)),
+                                                color: context.gasColors.info)),
                                       ),
                                       const SizedBox(width: 8),
                                       TextButton.icon(
@@ -929,14 +930,14 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                                     'Mark Empty – coming next')),
                                           );
                                         },
-                                        icon: const Icon(
+                                        icon: Icon(
                                             Icons.inventory_2_outlined,
                                             size: 16,
-                                            color: Colors.red),
-                                        label: const Text('Mark Empty',
+                                            color: context.colors.error),
+                                        label: Text('Mark Empty',
                                             style: TextStyle(
                                                 fontSize: 11,
-                                                color: Colors.red)),
+                                                color: context.colors.error)),
                                       ),
                                     ],
                                   ),
@@ -955,8 +956,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
+                        foregroundColor: context.colors.error,
+                        side: BorderSide(color: context.colors.error),
                       ),
                       onPressed: () => _deleteCylinderNode(cyl['id'] ?? ''),
                       icon: const Icon(Icons.delete_outline, size: 16),
@@ -976,10 +977,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
   Widget _buildFactLine(String label, String value) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+      Text(label, style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
       Text(value,
-          style: const TextStyle(
-              fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87))
+          style: TextStyle(
+              fontSize: 12, fontWeight: FontWeight.bold, color: context.colors.onSurface))
     ]);
   }
 
@@ -989,11 +990,11 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: Colors.grey.shade200)),
+          side: BorderSide(color: context.colors.outlineVariant)),
       child: ListTile(
         title: Text(title,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+        trailing: Icon(Icons.chevron_right, size: 18, color: context.colors.onSurfaceVariant),
         onTap: () => _navigateToEmptyScreen(screenKey),
       ),
     );
@@ -1010,7 +1011,6 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     fontSize: 15,
                     color: Colors.white,
                     fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.orange,
             iconTheme: const IconThemeData(color: Colors.white),
             elevation: 0,
           ),
@@ -1020,13 +1020,13 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.construction_outlined,
-                      size: 48, color: Colors.grey.shade400),
+                      size: 48, color: context.colors.outline),
                   const SizedBox(height: 12),
                   Text(
                     '$featureTitle Is Empty For Now',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: context.colors.onSurfaceVariant,
                         fontWeight: FontWeight.w500),
                   ),
                 ],

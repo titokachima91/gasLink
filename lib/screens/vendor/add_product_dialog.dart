@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants.dart';
 import '../../services/auth_service.dart';
 
+import '../../core/theme_ext.dart';
+
 class AddProductDialog extends StatefulWidget {
   const AddProductDialog({super.key});
 
@@ -92,9 +94,9 @@ class _AddProductDialogState extends State<AddProductDialog> {
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Bidhaa imehifadhiwa / Product saved'),
-            backgroundColor: Colors.green,
+            backgroundColor: context.gasColors.success,
           ),
         );
       }
@@ -150,7 +152,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                       style: const TextStyle(fontSize: 12),
                     ),
                     selected: _selectedCategory == cat,
-                    selectedColor: Colors.orange.shade100,
+                    selectedColor: context.colors.primaryContainer,
                     onSelected: (_) {
                       setState(() => _selectedCategory = cat);
                     },
@@ -249,25 +251,25 @@ class _AddProductDialogState extends State<AddProductDialog> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitProduct,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: context.colors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: context.colors.onPrimary,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Hifadhi / Save Product',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.colors.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

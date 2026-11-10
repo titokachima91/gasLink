@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import 'add_product_dialog.dart';
 
+import '../../core/theme_ext.dart';
+
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
@@ -60,8 +62,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Futa / Delete',
-                style: TextStyle(color: Colors.red)),
+            child: Text('Futa / Delete',
+                style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),
@@ -110,9 +112,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   if (context.mounted) Navigator.pop(context);
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
               child:
-                  const Text('Hifadhi', style: TextStyle(color: Colors.white)),
+                  Text('Hifadhi',
+                      style: TextStyle(color: context.colors.onPrimary)),
             ),
           ],
         );
@@ -130,9 +133,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Stoki & Bidhaa / Inventory',
@@ -148,8 +150,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
+            return Center(
+              child: CircularProgressIndicator(color: context.colors.primary),
             );
           }
 
@@ -161,20 +163,20 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.inventory_2_outlined,
-                      size: 64, color: Colors.grey.shade400),
+                      size: 64, color: context.colors.outline),
                   const SizedBox(height: 12),
                   Text(
                     'Bado huna bidhaa zozote / No products added',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 14),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: _showAddProductModal,
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text('Ongeza Bidhaa',
-                        style: TextStyle(color: Colors.white)),
+                    icon: Icon(Icons.add, color: context.colors.onPrimary),
+                    label: Text('Ongeza Bidhaa',
+                        style: TextStyle(color: context.colors.onPrimary)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: context.colors.primary,
                     ),
                   ),
                 ],
@@ -200,14 +202,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 margin: const EdgeInsets.only(bottom: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: context.colors.outlineVariant),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.local_fire_department,
-                          color: Colors.orange, size: 32),
+                      Icon(Icons.local_fire_department,
+                          color: context.colors.primary, size: 32),
                       const SizedBox(width: 12),
                       Expanded(
                         child: InkWell(
@@ -224,7 +226,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               Text(
                                 'TZS $price',
                                 style: TextStyle(
-                                    color: Colors.grey.shade700, fontSize: 12),
+                                    color: context.colors.onSurfaceVariant, fontSize: 12),
                               ),
                             ],
                           ),
@@ -237,18 +239,18 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             inStock ? 'Ipo' : 'Hakuna',
                             style: TextStyle(
                               fontSize: 12,
-                              color: inStock ? Colors.green : Colors.red,
+                              color: inStock ? context.gasColors.success : context.colors.error,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Switch(
                             value: inStock,
-                            activeColor: Colors.orange,
+                            activeColor: context.colors.primary,
                             onChanged: (_) => _toggleStock(docId, inStock),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline,
-                                color: Colors.grey, size: 20),
+                            icon: Icon(Icons.delete_outline,
+                                color: context.colors.onSurfaceVariant, size: 20),
                             onPressed: () =>
                                 _deleteProduct(docId, '$brand $size'),
                           ),
@@ -264,10 +266,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddProductModal,
-        backgroundColor: Colors.orange,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Add Product',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: context.colors.primary,
+        icon: Icon(Icons.add, color: context.colors.onPrimary),
+        label: Text('Add Product',
+            style: TextStyle(
+                color: context.colors.onPrimary, fontWeight: FontWeight.bold)),
       ),
     );
   }

@@ -13,11 +13,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/theme_mode_button.dart';
 import '../auth/login_screen.dart';
 import 'inventory_screen.dart';
 import 'vendor_order_screen.dart';
 import 'vendor_profile_screen.dart';
 import 'widgets/vendor_drawer.dart';
+
+import '../../core/theme_ext.dart';
 
 class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
@@ -114,13 +117,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Hali ya oda imebadilishwa: $newStatus'),
-          backgroundColor: newStatus == 'cancelled' ? Colors.red : Colors.green,
+          backgroundColor: newStatus == 'cancelled' ? context.colors.error : context.gasColors.success,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hitilafu: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Hitilafu: $e'), backgroundColor: context.colors.error),
       );
     }
   }
@@ -195,9 +198,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'Mteja ataona muda huu kwenye app yake mara tu utakapothibitisha.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -207,9 +210,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       return ChoiceChip(
                         label: Text('Dakika $mins'),
                         selected: isSelected,
-                        selectedColor: Colors.orange,
+                        selectedColor: context.colors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
+                          color: isSelected ? context.colors.onPrimary : context.colors.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (_) {
@@ -223,8 +226,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.colors.primary,
+                        foregroundColor: context.colors.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -284,7 +287,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             SnackBar(
                               content: Text(
                                   'Oda imethibitishwa: Dakika $selectedEta'),
-                              backgroundColor: Colors.green,
+                              backgroundColor: context.gasColors.success,
                             ),
                           );
                         } catch (e) {
@@ -292,7 +295,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                           scaffoldMessenger.showSnackBar(
                             SnackBar(
                                 content: Text('Hitilafu: $e'),
-                                backgroundColor: Colors.red),
+                                backgroundColor: context.colors.error),
                           );
                         }
                       },
@@ -350,7 +353,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             vendorData['isOnline'] as bool? ??
             true;
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FA),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           // ── Left Drawer Menu (☰) ────────────────────────────────────
           drawer: VendorDrawer(
             storeName: storeName,
@@ -372,7 +375,6 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
           ),
           // ── Top App Bar ─────────────────────────────────────────────
           appBar: AppBar(
-            backgroundColor: Colors.orange,
             elevation: 0,
             title: Text(
               storeName,
@@ -383,6 +385,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
               ),
             ),
             actions: [
+              const ThemeModeButton(),
               // Store Status Switch (OPEN 🟢 / CLOSED 🔴)
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
@@ -398,8 +401,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: isOpen
-                            ? Colors.green.shade700
-                            : Colors.red.shade700,
+                            ? context.gasColors.success
+                            : context.colors.error,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -408,13 +411,17 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                           Icon(
                             isOpen ? Icons.circle : Icons.circle_outlined,
                             size: 8,
-                            color: Colors.white,
+                            color: isOpen
+                                ? context.gasColors.onSuccess
+                                : context.colors.onError,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             isOpen ? 'OPEN 🟢' : 'CLOSED 🔴',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: isOpen
+                                  ? context.gasColors.onSuccess
+                                  : context.colors.onError,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -489,7 +496,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             title: 'Oda Leo',
                             value: '$todayOrdersCount',
                             icon: Icons.shopping_bag_outlined,
-                            color: Colors.blue,
+                            color: context.gasColors.info,
                           ),
                           const SizedBox(width: 8),
                           _buildMetricCard(
@@ -497,7 +504,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             value: todayRevenue.toStringAsFixed(0),
                             subtitle: 'TZS',
                             icon: Icons.payments_outlined,
-                            color: Colors.green,
+                            color: context.gasColors.success,
                           ),
                           const SizedBox(width: 8),
                           _buildMetricCard(
@@ -505,7 +512,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             value: '$lowStockCount',
                             subtitle: 'Bidhaa',
                             icon: Icons.warning_amber_rounded,
-                            color: lowStockCount > 0 ? Colors.red : Colors.grey,
+                            color: lowStockCount > 0 ? context.colors.error : context.colors.onSurfaceVariant,
                           ),
                         ],
                       );
@@ -518,7 +525,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       Expanded(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
+                            backgroundColor: context.colors.primary,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -532,12 +539,12 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               ),
                             );
                           },
-                          icon:
-                              const Icon(Icons.inventory, color: Colors.white),
-                          label: const Text(
+                          icon: Icon(Icons.inventory,
+                              color: context.colors.onPrimary),
+                          label: Text(
                             'Stoki / Inventory',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.colors.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -548,7 +555,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: const BorderSide(color: Colors.orange),
+                            side: BorderSide(color: context.colors.primary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -562,11 +569,11 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             );
                           },
                           icon:
-                              const Icon(Icons.list_alt, color: Colors.orange),
-                          label: const Text(
+                              Icon(Icons.list_alt, color: context.colors.primary),
+                          label: Text(
                             'Oda Zote / Orders',
                             style: TextStyle(
-                              color: Colors.orange,
+                              color: context.colors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -593,13 +600,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       Chip(
                         label: Text('${pendingOrders.length} Mpya'),
                         backgroundColor: pendingOrders.isNotEmpty
-                            ? Colors.orange.shade100
-                            : Colors.grey.shade200,
+                            ? context.colors.primaryContainer
+                            : context.colors.outlineVariant,
                         labelStyle: TextStyle(
                           fontSize: 11,
                           color: pendingOrders.isNotEmpty
-                              ? Colors.orange.shade900
-                              : Colors.grey.shade700,
+                              ? context.colors.primary
+                              : context.colors.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -609,11 +616,11 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   if (pendingOrders.isEmpty)
                     Card(
                       elevation: 0,
-                      color: Colors.grey.shade100,
+                      color: context.colors.surfaceContainerLow,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.all(24.0),
                         child: Center(
                           child: Row(
@@ -621,12 +628,12 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             children: [
                               Icon(
                                 Icons.check_circle_outline,
-                                color: Colors.grey,
+                                color: context.colors.onSurfaceVariant,
                               ),
                               SizedBox(width: 8),
                               Text(
                                 'Hakuna oda mpya kwa sasa.',
-                                style: TextStyle(color: Colors.grey),
+                                style: TextStyle(color: context.colors.onSurfaceVariant),
                               ),
                             ],
                           ),
@@ -668,8 +675,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
                             color: currentStatus == 'delivered_pending'
-                                ? Colors.grey
-                                : Colors.orange.shade300,
+                                ? context.colors.onSurfaceVariant
+                                : context.colors.primary,
                             width: 1.5,
                           ),
                         ),
@@ -686,13 +693,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.orange.shade100,
+                                      color: context.colors.primaryContainer,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
                                       '⚡ ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
                                       style: TextStyle(
-                                        color: Colors.orange.shade900,
+                                        color: context.colors.primary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 11,
                                       ),
@@ -700,10 +707,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   ),
                                   Text(
                                     phone,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.grey),
+                                        color: context.colors.onSurfaceVariant),
                                   ),
                                 ],
                               ),
@@ -716,22 +723,22 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
+                                    color: context.gasColors.infoContainer,
                                     borderRadius: BorderRadius.circular(4),
                                     border:
-                                        Border.all(color: Colors.blue.shade200),
+                                        Border.all(color: context.gasColors.infoContainer),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(Icons.info_outline,
                                           size: 14,
-                                          color: Colors.blue.shade800),
+                                          color: context.gasColors.info),
                                       const SizedBox(width: 6),
                                       Text(
                                         'ℹ️ Ina maelezo ya ziada',
                                         style: TextStyle(
-                                            color: Colors.blue.shade900,
+                                            color: context.gasColors.info,
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -748,10 +755,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 'Jumla: TZS ${total.toStringAsFixed(0)} • Cash on Delivery',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green),
+                                    color: context.gasColors.success),
                               ),
                               const Divider(height: 20),
                               // DYNAMIC EXPLICIT UI MORPHING TIMELINE HOOKS
@@ -770,15 +777,15 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                                     const VendorOrderScreen()));
                                       },
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            color: Colors.orange),
+                                        side: BorderSide(
+                                            color: context.colors.primary),
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(8)),
                                       ),
-                                      child: const Text('View',
+                                      child: Text('View',
                                           style:
-                                              TextStyle(color: Colors.orange)),
+                                              TextStyle(color: context.colors.primary)),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
@@ -786,9 +793,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         onPressed: () => _updateOrderStatus(
                                             doc.id, 'cancelled'),
                                         style: OutlinedButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                          side: const BorderSide(
-                                              color: Colors.red),
+                                          foregroundColor: context.colors.error,
+                                          side: BorderSide(
+                                              color: context.colors.error),
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(8)),
@@ -802,8 +809,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         onPressed: () =>
                                             _showAcceptOrderDialog(doc.id),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.orange,
-                                          foregroundColor: Colors.white,
+                                          backgroundColor: context.colors.primary,
+                                          foregroundColor: context.colors.onPrimary,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(8)),
@@ -870,8 +877,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                             });
                                           },
                                           style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.purple,
-                                              foregroundColor: Colors.white),
+                                              backgroundColor: context.colors.tertiary,
+                                              foregroundColor: context.colors.onTertiary),
                                           child: const Text('Hifadhi'),
                                         ),
                                       ],
@@ -884,9 +891,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text('Njiani 🚚',
+                                    Text('Njiani 🚚',
                                         style: TextStyle(
-                                            color: Colors.purple,
+                                            color: context.colors.tertiary,
                                             fontWeight: FontWeight.bold)),
                                     ElevatedButton(
                                       onPressed: () async {
@@ -898,8 +905,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         });
                                       },
                                       style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.green,
-                                          foregroundColor: Colors.white),
+                                          backgroundColor: context.gasColors.success,
+                                          foregroundColor: context.gasColors.onSuccess),
                                       child: const Text('Imefika / Delivered'),
                                     ),
                                   ],
@@ -911,9 +918,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text('Inasubiri Mteja...',
+                                    Text('Inasubiri Mteja...',
                                         style: TextStyle(
-                                            color: Colors.grey,
+                                            color: context.colors.onSurfaceVariant,
                                             fontStyle: FontStyle.italic)),
                                     TextButton(
                                       onPressed: () async {
@@ -921,10 +928,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         await doc.reference
                                             .update({'status': 'on_the_way'});
                                       },
-                                      child: const Text(
+                                      child: Text(
                                         'Batilisha / Undo',
                                         style: TextStyle(
-                                            color: Colors.red,
+                                            color: context.colors.error,
                                             fontWeight: FontWeight.bold,
                                             decoration:
                                                 TextDecoration.underline),
@@ -958,9 +965,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: context.colors.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -981,11 +988,11 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             if (subtitle != null)
               Text(
                 subtitle,
-                style: const TextStyle(fontSize: 9, color: Colors.grey),
+                style: TextStyle(fontSize: 9, color: context.colors.onSurfaceVariant),
               ),
             Text(
               title,
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
+              style: TextStyle(fontSize: 10, color: context.colors.onSurfaceVariant),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

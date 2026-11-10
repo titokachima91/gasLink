@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'gas_cylinder_icon.dart';
 
+import '../core/theme_ext.dart';
+
 class ProductListTile extends StatelessWidget {
   final String brand;
   final String size;
@@ -32,7 +34,7 @@ class ProductListTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -67,7 +69,7 @@ class ProductListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context).primaryColor,
+                        color: context.colors.primary,
                       ),
                       maxLines: 1,
                     ),
@@ -76,7 +78,7 @@ class ProductListTile extends StatelessWidget {
                       deliveryText,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade700,
+                        color: context.colors.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -97,12 +99,12 @@ class ProductListTile extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color:
-                          inStock ? Colors.green.shade50 : Colors.grey.shade100,
+                          inStock ? context.gasColors.successContainer : context.colors.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: inStock
-                            ? Colors.green.shade300
-                            : Colors.grey.shade400,
+                            ? context.gasColors.success
+                            : context.colors.outline,
                       ),
                     ),
                     child: Row(
@@ -114,8 +116,8 @@ class ProductListTile extends StatelessWidget {
                               : Icons.pause_circle_outline,
                           size: 14,
                           color: inStock
-                              ? Colors.green.shade700
-                              : Colors.grey.shade700,
+                              ? context.gasColors.success
+                              : context.colors.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -124,8 +126,8 @@ class ProductListTile extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: inStock
-                                ? Colors.green.shade800
-                                : Colors.grey.shade700,
+                                ? context.gasColors.success
+                                : context.colors.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -139,7 +141,7 @@ class ProductListTile extends StatelessWidget {
                         if (onEdit != null)
                           IconButton(
                             icon: const Icon(Icons.edit, size: 18),
-                            color: Colors.blue.shade700,
+                            color: context.gasColors.info,
                             constraints: const BoxConstraints(),
                             padding: const EdgeInsets.all(4),
                             onPressed: onEdit,
@@ -147,7 +149,7 @@ class ProductListTile extends StatelessWidget {
                         if (onDelete != null)
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 18),
-                            color: Colors.red.shade700,
+                            color: context.colors.error,
                             constraints: const BoxConstraints(),
                             padding: const EdgeInsets.all(4),
                             onPressed: onDelete,

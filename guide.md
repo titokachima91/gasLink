@@ -1,6 +1,6 @@
 # GasLink — Project Guide
 
-> **Last updated:** 11/09/2026  
+> **Last updated:** 2026-11-10
 > **Branch:** `harden-source-of-truth`  
 > **Primary reference:** `PROGRESS.md` is the authoritative master file for this project.
 
@@ -8,16 +8,19 @@
 
 ## 📖 How to Use This Project
 
-This is a **documentation-first project**. We do NOT write code here. We only:
-1. Read `PROGRESS.md` to understand current state
-2. Create `plan.md` for new phases
-3. Use `implementation.md` to record work after each phase
+This is a **documentation-first project**: plan before code, record after code.
+
+1. Read `PROGRESS.md` to understand the current state.
+2. Create or update `plan.md` before starting a phase.
+3. Build the phase.
+4. Write `implementation.md` after the phase.
 
 ### Reference Hierarchy
 
 | File | Role | When to Update |
 |------|------|----------------|
 | **`PROGRESS.md`** | **Master reference** — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
+| **`ROADMAP.md`** | Project-wide roadmap and Phase 1 completion checklist | When priorities or phase status change |
 | `phases/<phase-name>/plan.md` | Per-phase implementation plan — what the issue is, why it matters, how to fix | When starting a new phase |
 | `phases/<phase-name>/implementation.md` | Per-phase implementation record — what was done, steps taken, problems/pivots | **After** each phase is implemented |
 
@@ -39,15 +42,14 @@ This is a **documentation-first project**. We do NOT write code here. We only:
 | 6 | Order Statuses | `lib/core/constants.dart` |
 | 7 | Role Router | `lib/screens/role_router.dart` |
 | 8 | Circle FIFO | `lib/utils/cylinder_fifo.dart` |
+| 9 | Theme System | `lib/core/theme.dart`, `lib/core/theme_controller.dart`, `lib/core/theme_ext.dart` |
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🔴 | Theme Overhaul | `lib/core/theme.dart` (still `Colors.orange`) |
-| 🔴 | Admin Panel | `lib/screens/role_router.dart` (11-line stub) |
+| 🚧 | Admin & Operations Console (includes analytics) | `lib/screens/admin/`, `lib/services/admin_service.dart` |
 | 🔴 | Vendor verified Role | `lib/models/vendor.dart` (no `verified` field) |
-| 🟡 | Analytics Service | No file exists |
 | 🟡 | Vendor Settings | No file exists |
 
 ---
@@ -88,13 +90,23 @@ git checkout e835912 -- lib/app.dart
 
 ## 🚀 Workflow Summary
 
+1. Read `PROGRESS.md`
+   → Check Summary Status and Current Gaps.
+2. Pick the first incomplete phase.
+3. Read `phases/<phase-name>/plan.md` → Understand the plan.
+4. Implement → Write code, no docs.
+5. Write `phases/<phase-name>/implementation.md` → Document what you did.
+6. Update `PROGRESS.md` → Move the phase from 🚧 to ✅ in Summary Status.
+7. Commit and push → `git add -A && git commit -m "..." && git push`.
 
-2. Pick the first incomplete phase
-   → Check Summary Status and Current Gaps in PROGRESS.md
-3. Read  phases/<phase-name>/plan.md → Understand the plan
-4. Implement (by yourself)  → Write code, no docs
-5. Write  phases/<phase-name>/implementation.md → Document what you did
-6. Update PROGRESS.md       → Move phase from ❌ to ✅ in Summary Status
-7. Commit                   → git add -A && git commit -m "docs: ..."
-```
+---
+
+## 🏷 Checkpoints
+
+Record phase rollback points here after each push.
+
+| Checkpoint | Commit | Remote | Notes |
+|---|---|---|---|
+| Phase 1 + docs baseline | _pending_ | `origin/harden-source-of-truth` | Pre-Phase 2 rollback point |
+| Phase 2 complete | _pending_ | `origin/harden-source-of-truth` | Admin & Operations Console |
 ---

@@ -16,6 +16,8 @@ import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
 import '../../core/constants.dart';
 
+import '../../core/theme_ext.dart';
+
 class VendorProfileScreen extends StatefulWidget {
   const VendorProfileScreen({super.key});
 
@@ -172,20 +174,20 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_hasOperationalScale) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
               'Tafadhali thibitisha umiliki wa mizani halisi (Operational Scale Check).'),
-          backgroundColor: Colors.orange,
+          backgroundColor: context.colors.primary,
         ),
       );
       return;
     }
     if (_offeredServices.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
               'Chagua angalau huduma 2 za nyongeza kwa mteja katika Section E.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: context.colors.primary,
         ),
       );
       return;
@@ -254,7 +256,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             content: Text(
               'Taarifa zimehifadhiwa kikamilifu! (${updatedVendor.completionPercentage}% Complete)',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: context.gasColors.success,
           ),
         );
       }
@@ -263,7 +265,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Hitilafu ya kuhifadhi: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: context.colors.error,
           ),
         );
       }
@@ -275,15 +277,14 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Colors.orange)),
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator(color: context.colors.primary)),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Taarifa za Duka / Store Profile',
@@ -303,7 +304,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: context.colors.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -363,7 +364,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: context.colors.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -385,8 +386,8 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                       decoration: InputDecoration(
                         labelText: 'Wilaya / District *',
                         hintText: 'Chagua Wilaya',
-                        prefixIcon: const Icon(Icons.location_city_outlined,
-                            color: Colors.orange),
+                        prefixIcon: Icon(Icons.location_city_outlined,
+                            color: context.colors.primary),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(
@@ -448,7 +449,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: context.colors.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -473,14 +474,14 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                     CheckboxListTile(
                       title: const Text('Cash on Delivery (Lipia Ukipokea)'),
                       value: _acceptsCash,
-                      activeColor: Colors.orange,
+                      activeColor: context.colors.primary,
                       onChanged: (v) =>
                           setState(() => _acceptsCash = v ?? true),
                     ),
                     CheckboxListTile(
                       title: const Text('Mobile Money (M-Pesa / Tigo Pesa)'),
                       value: _acceptsMobileMoney,
-                      activeColor: Colors.orange,
+                      activeColor: context.colors.primary,
                       onChanged: (v) =>
                           setState(() => _acceptsMobileMoney = v ?? false),
                     ),
@@ -510,7 +511,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: context.colors.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -527,7 +528,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                       title: const Text(
                           'Thibitisha unamiliki mizani halisi inayofanya kazi (Operational Scale Check) *'),
                       value: _hasOperationalScale,
-                      activeColor: Colors.orange,
+                      activeColor: context.colors.primary,
                       onChanged: (v) =>
                           setState(() => _hasOperationalScale = v ?? false),
                     ),
@@ -572,7 +573,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                       title: const Text(
                           'Nakubali kupima uzito wa gesi kabla ya kupokea malipo mteja akiomba'),
                       value: _agreedToConsumerProtection,
-                      activeColor: Colors.orange,
+                      activeColor: context.colors.primary,
                       onChanged: (v) => setState(
                           () => _agreedToConsumerProtection = v ?? false),
                     ),
@@ -591,7 +592,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: context.colors.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -608,15 +609,15 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                         ),
                         Text(
                           '${_offeredServices.length} zimechaguliwa',
-                          style: const TextStyle(
-                              color: Colors.green, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: context.gasColors.success, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Chagua angalau huduma 2 ili kukamilisha sehemu hii / Choose at least 2 services *:',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                     ),
                     const Divider(),
                     const SizedBox(height: 8),
@@ -642,7 +643,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                               fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         value: isChecked,
-                        activeColor: Colors.orange,
+                        activeColor: context.colors.primary,
                         controlAffinity: ListTileControlAffinity.trailing,
                         onChanged: (bool? selected) {
                           setState(() {
@@ -677,22 +678,22 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             ElevatedButton(
               onPressed: _isSaving ? null : _saveProfile,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: context.colors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
               child: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
+                          strokeWidth: 2, color: context.colors.onPrimary),
                     )
-                  : const Text(
+                  : Text(
                       'Hifadhi Taarifa / Save Profile',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: context.colors.onPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
@@ -707,15 +708,15 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: Colors.orange, size: 20),
+        Icon(icon, color: context.colors.primary, size: 20),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87),
+                color: context.colors.onSurface),
           ),
         ),
       ],

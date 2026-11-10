@@ -2,6 +2,8 @@
 //This widget displays a gas cylinder icon with dynamic sizing based on the cylinder's weight. It visually indicates whether the cylinder is in stock or out of stock by changing its color. The widget is used in product listings to represent different gas cylinder sizes and their availability status.
 import 'package:flutter/material.dart';
 
+import '../core/theme_ext.dart';
+
 class GasCylinderIcon extends StatelessWidget {
   final String weight;
   final bool inStock;
@@ -34,7 +36,7 @@ class GasCylinderIcon extends StatelessWidget {
       width = 30.0;
     }
 
-    final baseColor = inStock ? Colors.orange.shade700 : Colors.grey.shade500;
+    final baseColor = inStock ? context.colors.primary : context.colors.onSurfaceVariant;
 
     return Container(
       width: 52,
@@ -48,7 +50,7 @@ class GasCylinderIcon extends StatelessWidget {
             width: width + 4,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.black12,
+              color: context.colors.shadow.withOpacity(0.12),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -59,7 +61,7 @@ class GasCylinderIcon extends StatelessWidget {
             decoration: BoxDecoration(
               color: baseColor,
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.black26, width: 1),
+              border: Border.all(color: context.colors.outlineVariant, width: 1),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,7 +72,7 @@ class GasCylinderIcon extends StatelessWidget {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white30,
+                    color: context.colors.onPrimary.withOpacity(0.30),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -79,8 +81,8 @@ class GasCylinderIcon extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 2),
                   child: Text(
                     weight.replaceAll('kg', '').replaceAll('KG', ''),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: context.colors.onPrimary,
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                     ),

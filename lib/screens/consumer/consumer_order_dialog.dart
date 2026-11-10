@@ -15,6 +15,8 @@ import 'consumer_order_screen.dart';
 import '../../services/order_service.dart';
 import '../../services/auth_service.dart';
 
+import '../../core/theme_ext.dart';
+
 class ConsumerOrderDialog extends StatefulWidget {
   final String vendorId;
   final String vendorName;
@@ -41,7 +43,6 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
   int _quantity = 1;
   String _paymentMethod = 'cash';
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
   // Text editing controllers for delivery and contact information form fields
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -101,8 +102,6 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
     try {
       // 1. Fetch kitchen cylinders for threshold validation
       // 1. Fetch kitchen cylinders for threshold validation
@@ -158,8 +157,6 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         }
       }
 
-      setState(() => _isLoading = false);
-
       // 3. Prompt user if gas is still remaining
       if (hasRemainingGas) {
         final String? chosenIntent = await showDialog<String>(
@@ -193,7 +190,6 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
 // 4. Proceed to Order Creation Pipeline (Step 2)
       await _executeRoutingPipeline(uid, address, phone);
     } catch (e) {
-      setState(() => _isLoading = false);
       debugPrint('Error validating kitchen cylinder prior to order: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Hitilafu wakati wa kuhakiki mtungi: $e')),
@@ -213,9 +209,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+              Icon(Icons.warning_amber_rounded, color: context.colors.primary, size: 24),
               SizedBox(width: 8),
               Text('Gas Yako Haijaisha!',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
@@ -223,7 +219,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
           ),
           content: Text(
             'Bado una gesi ya kutosha kwenye mtungi huu nyumbani (Inakadiriwa kubaki siku ~$daysLeft). Je, ungependa kufanya nini?',
-            style: const TextStyle(fontSize: 13, color: Colors.black87),
+            style: TextStyle(fontSize: 13, color: context.colors.onSurface),
           ),
           actions: [
             Column(
@@ -233,7 +229,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange, elevation: 0),
+                        backgroundColor: context.colors.primary, elevation: 0),
                     onPressed: () {
                       setState(() => _orderIntent = 'add_stock');
                       Navigator.pop(context);
@@ -243,9 +239,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                         _phoneController.text.trim(),
                       );
                     },
-                    child: const Text('Ongeza Akiba / Add Stock',
+                    child: Text('Ongeza Akiba / Add Stock',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: context.colors.onPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.bold)),
                   ),
@@ -256,7 +252,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   width: double.infinity,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade300)),
+                        side: BorderSide(color: context.colors.outlineVariant)),
                     onPressed: () {
                       setState(() => _orderIntent = 'new_asset');
                       Navigator.pop(context);
@@ -266,17 +262,17 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                         _phoneController.text.trim(),
                       );
                     },
-                    child: const Text('Badili Mtungi / Change Cylinder',
-                        style: TextStyle(color: Colors.black87, fontSize: 12)),
+                    child: Text('Badili Mtungi / Change Cylinder',
+                        style: TextStyle(color: context.colors.onSurface, fontSize: 12)),
                   ),
                 ),
                 const SizedBox(height: 4),
-                const SizedBox(
+                SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: null,
                     child: Text('Agizia Mwenzako (Soon)',
-                        style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
                   ),
                 ),
                 const Divider(),
@@ -286,9 +282,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                     Navigator.pop(context);
                     Navigator.pop(this.context);
                   },
-                  child: const Text('Ghairi Oda / Cancel',
+                  child: Text('Ghairi Oda / Cancel',
                       style: TextStyle(
-                          color: Colors.red,
+                          color: context.colors.error,
                           fontSize: 12,
                           fontWeight: FontWeight.bold)),
                 ),
@@ -376,7 +372,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('Imeshindikana kuweka oda: $e'),
-              backgroundColor: Colors.red),
+              backgroundColor: context.colors.error),
         );
       }
     }
@@ -416,16 +412,16 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               // Selected Product Summary Card with Quantity Counter
               Card(
                 elevation: 0,
-                color: Colors.orange.shade50,
+                color: context.colors.primaryContainer,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.orange.shade200)),
+                    side: BorderSide(color: context.colors.primaryContainer)),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.local_fire_department,
-                          color: Colors.orange, size: 32),
+                      Icon(Icons.local_fire_department,
+                          color: context.colors.primary, size: 32),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -436,12 +432,12 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                                 style: const TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                             Text('Muuzaji: ${widget.vendorName}',
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.black87)),
+                                style: TextStyle(
+                                    fontSize: 12, color: context.colors.onSurface)),
                             Text(
                                 'TZS ${widget.price.toStringAsFixed(0)} kwa moja',
                                 style: TextStyle(
-                                    fontSize: 11, color: Colors.grey.shade700)),
+                                    fontSize: 11, color: context.colors.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -458,8 +454,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 15)),
                           IconButton(
-                              icon: const Icon(Icons.add_circle_outline,
-                                  size: 20, color: Colors.orange),
+                              icon: Icon(Icons.add_circle_outline,
+                                  size: 20, color: context.colors.primary),
                               onPressed: () => setState(() => _quantity++)),
                         ],
                       ),
@@ -484,8 +480,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 decoration: InputDecoration(
                   labelText: 'Anwani au Eneo Lako *',
                   hintText: 'Mfano: Nyumba No. 12, Karibu na Msikiti',
-                  prefixIcon: const Icon(Icons.location_on_outlined,
-                      color: Colors.orange, size: 18),
+                  prefixIcon: Icon(Icons.location_on_outlined,
+                      color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   contentPadding:
@@ -505,8 +501,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 decoration: InputDecoration(
                   labelText: 'Namba ya Simu ya Mawasiliano *',
                   hintText: 'Mfano: 07XXXXXXXX',
-                  prefixIcon: const Icon(Icons.phone_outlined,
-                      color: Colors.orange, size: 18),
+                  prefixIcon: Icon(Icons.phone_outlined,
+                      color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   contentPadding:
@@ -522,8 +518,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 decoration: InputDecoration(
                   labelText: 'Maelezo ya Ziada (Ombi Maalumu)',
                   hintText: 'Mfano: Dada yuko nyumbani kabisa',
-                  prefixIcon: const Icon(Icons.assignment_outlined,
-                      color: Colors.orange, size: 18),
+                  prefixIcon: Icon(Icons.assignment_outlined,
+                      color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   contentPadding:
@@ -540,8 +536,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 decoration: InputDecoration(
                   labelText: 'Namba ya Mpokeaji wa Nyumbani',
                   hintText: 'Mfano: 07XXXXXXXX',
-                  prefixIcon: const Icon(Icons.phone_android_outlined,
-                      color: Colors.orange, size: 18),
+                  prefixIcon: Icon(Icons.phone_android_outlined,
+                      color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   contentPadding:
@@ -563,7 +559,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                           label: const Text('💵 Cash on Delivery',
                               style: TextStyle(fontSize: 11)),
                           selected: _paymentMethod == 'cash',
-                          selectedColor: Colors.orange.shade100,
+                          selectedColor: context.colors.primaryContainer,
                           onSelected: (val) {
                             if (val) setState(() => _paymentMethod = 'cash');
                           })),
@@ -573,7 +569,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                           label: const Text('📱 Mobile Money',
                               style: TextStyle(fontSize: 11)),
                           selected: _paymentMethod == 'mobile_money',
-                          selectedColor: Colors.orange.shade100,
+                          selectedColor: context.colors.primaryContainer,
                           onSelected: (val) {
                             if (val)
                               setState(() => _paymentMethod = 'mobile_money');
@@ -589,13 +585,13 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Jumla Kuu / Total Price',
-                          style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      Text('Jumla Kuu / Total Price',
+                          style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant)),
                       Text('TZS ${totalPrice.toStringAsFixed(0)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.orange)),
+                              color: context.colors.primary)),
                     ],
                   ),
                   Expanded(
@@ -606,17 +602,17 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                             ? null
                             : _validateAndSubmitOrder,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
+                            backgroundColor: context.colors.primary,
+                            foregroundColor: context.colors.onPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12))),
                         child: _isCheckingThreshold
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 18,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
+                                    color: context.colors.onPrimary, strokeWidth: 2))
                             : const Text('Thibitisha Oda ➔',
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),

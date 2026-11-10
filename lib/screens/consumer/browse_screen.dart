@@ -20,6 +20,8 @@ import '../../core/session_data.dart';
 import 'search_delegate.dart';
 import 'vendor_detail_screen.dart';
 
+import '../../core/theme_ext.dart';
+
 enum SortOption { distance, price, stock, none }
 
 class BrowseScreen extends StatefulWidget {
@@ -108,9 +110,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(color: Colors.orange),
+          child: CircularProgressIndicator(color: context.colors.primary),
         ),
       );
     }
@@ -118,9 +120,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
     final results = _apply();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Maduka ya Gesi / Gas Shops',
@@ -128,9 +129,10 @@ class _BrowseScreenState extends State<BrowseScreen> {
         ),
         actions: [
           if (_error != null)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(right: 8.0),
-              child: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+              child: Icon(Icons.warning_amber_rounded,
+                  color: context.colors.onPrimary),
             ),
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
@@ -171,12 +173,12 @@ class _BrowseScreenState extends State<BrowseScreen> {
       body: Column(
         children: [
           Container(
-            color: Colors.amber.shade100,
+            color: context.gasColors.warningContainer,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: const Text(
+            child: Text(
               'Orodha ya maduka yote ya gesi karibu nawe',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
+              style: TextStyle(fontSize: 12, color: context.colors.onSurface),
             ),
           ),
 
@@ -190,7 +192,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 ChoiceChip(
                   label: const Text('Zote / All'),
                   selected: _brandFilter == null,
-                  selectedColor: Colors.orange.shade100,
+                  selectedColor: context.colors.primaryContainer,
                   onSelected: (_) {
                     setState(() {
                       _brandFilter = null;
@@ -203,7 +205,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     child: ChoiceChip(
                       label: Text(b),
                       selected: _brandFilter == b,
-                      selectedColor: Colors.orange.shade100,
+                      selectedColor: context.colors.primaryContainer,
                       onSelected: (_) {
                         setState(() {
                           _brandFilter = b;
@@ -224,17 +226,17 @@ class _BrowseScreenState extends State<BrowseScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.storefront,
-                            size: 48, color: Colors.grey.shade400),
+                            size: 48, color: context.colors.outline),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'No shops found / Hakuna matokeo',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: context.colors.onSurfaceVariant),
                         ),
                       ],
                     ),
                   )
                 : RefreshIndicator(
-                    color: Colors.orange,
+                    color: context.colors.primary,
                     onRefresh: () async {
                       SessionData.instance.loaded = false;
                       await SessionData.instance.ensureLoaded();
@@ -261,14 +263,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
                           margin: const EdgeInsets.only(bottom: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.grey.shade200),
+                            side: BorderSide(color: context.colors.outlineVariant),
                           ),
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
-                              backgroundColor: Colors.orange.shade50,
+                              backgroundColor: context.colors.primaryContainer,
                               child:
-                                  const Icon(Icons.store, color: Colors.orange),
+                                  Icon(Icons.store, color: context.colors.primary),
                             ),
                             title: Text(
                               vendor.businessName.isEmpty
@@ -287,19 +289,19 @@ class _BrowseScreenState extends State<BrowseScreen> {
                                       vendor.area,
                                       style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey.shade600),
+                                          color: context.colors.onSurfaceVariant),
                                     ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '$brandCountText • $priceText$distanceText',
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.black87),
+                                    style: TextStyle(
+                                        fontSize: 12, color: context.colors.onSurface),
                                   ),
                                 ],
                               ),
                             ),
-                            trailing: const Icon(Icons.chevron_right,
-                                color: Colors.orange),
+                            trailing: Icon(Icons.chevron_right,
+                                color: context.colors.primary),
                             onTap: () {
                               Navigator.push(
                                 context,

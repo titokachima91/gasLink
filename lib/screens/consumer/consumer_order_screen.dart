@@ -11,6 +11,8 @@ import '../../services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/order_service.dart';
 
+import '../../core/theme_ext.dart';
+
 class ConsumerOrderScreen extends StatefulWidget {
   final String? orderId;
   final String vendorId;
@@ -89,10 +91,10 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
 
     return Card(
       elevation: 0,
-      color: Colors.amber.shade50,
+      color: context.gasColors.warningContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.amber.shade400, width: 1.5),
+        side: BorderSide(color: context.gasColors.warning, width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -102,7 +104,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
             Row(
               children: [
                 Icon(Icons.star_rate_rounded,
-                    color: Colors.amber.shade800, size: 26),
+                    color: context.gasColors.warning, size: 26),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
@@ -113,17 +115,17 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Oda yako imewasili! Hujaweka tathmini ya huduma hii. Bonyeza hapa chini kukamilisha.',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
+              style: TextStyle(fontSize: 12, color: context.colors.onSurface),
             ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber.shade800,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.gasColors.warning,
+                  foregroundColor: context.gasColors.onWarning,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -274,9 +276,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
         : '...';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: Text('Fuatilia Oda $displayId',
             style: const TextStyle(
@@ -286,14 +287,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: _isCreatingOrder
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Colors.orange),
+                  CircularProgressIndicator(color: context.colors.primary),
                   SizedBox(height: 12),
                   Text('Inatengeneza Oda Yako...',
-                      style: TextStyle(color: Colors.grey)),
+                      style: TextStyle(color: context.colors.onSurfaceVariant)),
                 ],
               ),
             )
@@ -306,8 +307,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                   : null,
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data?.data() == null) {
-                  return const Center(
-                      child: CircularProgressIndicator(color: Colors.orange));
+                  return Center(
+                      child: CircularProgressIndicator(color: context.colors.primary));
                 }
 
                 final data = snapshot.data!.data()!;
@@ -344,35 +345,35 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                     if (isCancelled) ...[
                       Card(
                         elevation: 0,
-                        color: Colors.red.shade50,
+                        color: context.colors.errorContainer,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.red.shade200)),
+                            side: BorderSide(color: context.colors.errorContainer)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
-                              const Icon(Icons.cancel_outlined,
-                                  color: Colors.red, size: 40),
+                              Icon(Icons.cancel_outlined,
+                                  color: context.colors.error, size: 40),
                               const SizedBox(height: 8),
-                              const Text('Oda Imesitishwa / Order Cancelled',
+                              Text('Oda Imesitishwa / Order Cancelled',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Colors.red)),
+                                      color: context.colors.error)),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                   'Oda hii imeghairiwa. Tafadhali chagua muuzaji mwingine.',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 12, color: Colors.black87)),
+                                      fontSize: 12, color: context.colors.onSurface)),
                               const SizedBox(height: 12),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      foregroundColor: Colors.white,
+                                      backgroundColor: context.colors.error,
+                                      foregroundColor: context.colors.onError,
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8))),
@@ -391,24 +392,24 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
 
                     Card(
                       elevation: 0,
-                      color: Colors.orange.shade50,
+                      color: context.colors.primaryContainer,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.orange.shade200)),
+                          side: BorderSide(color: context.colors.primaryContainer)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            const Icon(Icons.delivery_dining,
-                                size: 40, color: Colors.orange),
+                            Icon(Icons.delivery_dining,
+                                size: 40, color: context.colors.primary),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Muda wa Kuwasili (ETA)',
+                                  Text('Muda wa Kuwasili (ETA)',
                                       style: TextStyle(
-                                          fontSize: 11, color: Colors.grey)),
+                                          fontSize: 11, color: context.colors.onSurfaceVariant)),
                                   const SizedBox(height: 2),
                                   Text(
                                     isCancelled
@@ -418,10 +419,10 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                             : (currentStep == 0
                                                 ? 'Inasubiri Muuzaji...'
                                                 : 'Dakika $etaMinutes')),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.orange),
+                                        color: context.colors.primary),
                                   ),
                                 ],
                               ),
@@ -436,30 +437,30 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                     if (currentStatus == 'delivered_pending') ...[
                       Card(
                         elevation: 0,
-                        color: Colors.blue.shade50,
+                        color: context.gasColors.infoContainer,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                                color: Colors.blue.shade300, width: 1.5)),
+                                color: context.gasColors.info, width: 1.5)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
                               Icon(Icons.verified_user_outlined,
-                                  color: Colors.blue.shade800, size: 36),
+                                  color: context.gasColors.info, size: 36),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                   'Je, umepokea gesi yako? / Confirm Delivery',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Colors.black87)),
+                                      color: context.colors.onSurface)),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                   'Muuzaji ameweka alama kuwa oda imefika. Tafadhali thibitisha ikiwa umepokea mtungi na umelipa.',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 11, color: Colors.black54)),
+                                      fontSize: 11, color: context.colors.onSurfaceVariant)),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
@@ -475,9 +476,9 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                         });
                                       },
                                       style: OutlinedButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                          side: const BorderSide(
-                                              color: Colors.red)),
+                                          foregroundColor: context.colors.error,
+                                          side: BorderSide(
+                                              color: context.colors.error)),
                                       child: const Text('Sijapokea',
                                           style: TextStyle(
                                               fontSize: 12,
@@ -512,8 +513,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        foregroundColor: Colors.white,
+                                        backgroundColor: context.gasColors.success,
+                                        foregroundColor: context.gasColors.onSuccess,
                                       ),
                                       child: const Text(
                                         'Nimepokea',
@@ -542,8 +543,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                         height: 44,
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
+                              backgroundColor: context.gasColors.success,
+                              foregroundColor: context.gasColors.onSuccess,
                               elevation: 0),
                           onPressed: () async {
                             if (_activeOrderId == null ||
@@ -575,7 +576,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey.shade200)),
+                          side: BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -598,20 +599,22 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                       CircleAvatar(
                                         radius: 12,
                                         backgroundColor: isDone
-                                            ? Colors.orange
-                                            : Colors.grey.shade300,
+                                            ? context.colors.primary
+                                            : context.colors.outlineVariant,
                                         child: Icon(
                                             isDone ? Icons.check : Icons.circle,
                                             size: 14,
-                                            color: Colors.white),
+                                            color: isDone
+                                                ? context.colors.onPrimary
+                                                : context.colors.onSurface),
                                       ),
                                       if (index < _orderSteps.length - 1)
                                         Container(
                                             width: 2,
                                             height: 36,
                                             color: isDone && index < currentStep
-                                                ? Colors.orange
-                                                : Colors.grey.shade300),
+                                                ? context.colors.primary
+                                                : context.colors.outlineVariant),
                                     ],
                                   ),
                                   const SizedBox(width: 12),
@@ -627,14 +630,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                     ? FontWeight.bold
                                                     : FontWeight.normal,
                                                 color: isDone
-                                                    ? Colors.black87
-                                                    : Colors.grey)),
+                                                    ? context.colors.onSurface
+                                                    : context.colors.onSurfaceVariant)),
                                         Text(
                                             _getStepSubtitle(
                                                 index, currentStatus),
                                             style: TextStyle(
                                                 fontSize: 11,
-                                                color: Colors.grey.shade600)),
+                                                color: context.colors.onSurfaceVariant)),
                                         const SizedBox(height: 16),
                                       ],
                                     ),
@@ -652,7 +655,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey.shade200)),
+                          side: BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
@@ -660,10 +663,10 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                           children: [
                             Row(
                               children: [
-                                const CircleAvatar(
-                                    backgroundColor: Colors.orange,
+                                CircleAvatar(
+                                    backgroundColor: context.colors.primary,
                                     child: Icon(Icons.person,
-                                        color: Colors.white)),
+                                        color: context.colors.onPrimary)),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -674,10 +677,10 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13)),
-                                      const Text('Muuzaji / Office Depot',
+                                      Text('Muuzaji / Office Depot',
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: Colors.grey)),
+                                              color: context.colors.onSurfaceVariant)),
                                     ],
                                   ),
                                 ),
@@ -688,8 +691,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                   label: const Text('Ofisini',
                                       style: TextStyle(fontSize: 10)),
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      foregroundColor: Colors.white,
+                                      backgroundColor: context.colors.primary,
+                                      foregroundColor: context.colors.onPrimary,
                                       elevation: 0),
                                 ),
                               ],
@@ -710,13 +713,13 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                         children: [
                                           CircleAvatar(
                                               backgroundColor:
-                                                  Colors.purple.shade100,
-                                              child: const Icon(
+                                                  context.colors.tertiaryContainer,
+                                              child: Icon(
                                                   Icons.delivery_dining,
-                                                  color: Colors.purple,
+                                                  color: context.colors.tertiary,
                                                   size: 18)),
                                           const SizedBox(width: 12),
-                                          const Expanded(
+                                          Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -729,7 +732,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                 Text('Anakuja na mzigo wako',
                                                     style: TextStyle(
                                                         fontSize: 11,
-                                                        color: Colors.grey)),
+                                                        color: context.colors.onSurfaceVariant)),
                                               ],
                                             ),
                                           ),
@@ -741,8 +744,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                             label: const Text('Piga Simu',
                                                 style: TextStyle(fontSize: 10)),
                                             style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.green,
-                                                foregroundColor: Colors.white,
+                                                backgroundColor: context.gasColors.success,
+                                                foregroundColor: context.gasColors.onSuccess,
                                                 elevation: 0),
                                           ),
                                         ],
@@ -765,12 +768,12 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                           .update({'status': 'cancelled'});
                                     }
                                   },
-                                  icon: const Icon(Icons.cancel_outlined,
-                                      color: Colors.red, size: 16),
-                                  label: const Text(
+                                  icon: Icon(Icons.cancel_outlined,
+                                      color: context.colors.error, size: 16),
+                                  label: Text(
                                       'Ghairi Oda Hii / Cancel Order',
                                       style: TextStyle(
-                                          color: Colors.red,
+                                          color: context.colors.error,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold)),
                                 ),
@@ -786,7 +789,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey.shade200)),
+                          side: BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -845,7 +848,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(label, style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
           Flexible(
               child: Text(value,
                   textAlign: TextAlign.end,
@@ -935,9 +938,9 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Asante! Tathmini imerekodiwa.'),
-          backgroundColor: Colors.green,
+          backgroundColor: context.gasColors.success,
         ),
       );
     }
@@ -971,7 +974,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                 children: [
                   Text(
                     'Unaipeaje huduma ya ${widget.vendorName}?',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    style: TextStyle(fontSize: 13, color: context.colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -981,7 +984,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                       return IconButton(
                         icon: Icon(
                           starIndex <= _rating ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
+                          color: context.gasColors.warning,
                           size: 36,
                         ),
                         onPressed: () => setState(() => _rating = starIndex),
@@ -1008,8 +1011,8 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                   label:
                       Text(tag['label']!, style: const TextStyle(fontSize: 11)),
                   selected: isSelected,
-                  selectedColor: Colors.orange.shade100,
-                  checkmarkColor: Colors.orange,
+                  selectedColor: context.colors.primaryContainer,
+                  checkmarkColor: context.colors.primary,
                   onSelected: (selected) {
                     setState(() {
                       if (selected) {
@@ -1025,12 +1028,12 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
             const SizedBox(height: 16),
 
             // Comment
-            const Text(
+            Text(
               'Maelezo ya Ziada / Custom Comments (Sio Lazima)',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: context.colors.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -1038,21 +1041,21 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               controller: _commentController,
               maxLines: 3,
               keyboardType: TextInputType.multiline,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              style: TextStyle(fontSize: 13, color: context.colors.onSurface),
               decoration: InputDecoration(
                 hintText: 'Andika maelezo au pongezi hapa...',
-                hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                hintStyle: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                 contentPadding: const EdgeInsets.all(12),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.colors.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  borderSide: BorderSide(color: context.colors.outlineVariant, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide:
-                      const BorderSide(color: Colors.orange, width: 1.5),
+                      BorderSide(color: context.colors.primary, width: 1.5),
                 ),
               ),
             ),
@@ -1062,9 +1065,9 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.colors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: context.colors.outlineVariant),
               ),
               child: Column(
                 children: [
@@ -1075,12 +1078,12 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                       style:
                           TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
-                    subtitle: const Text(
+                    subtitle: Text(
                       'Pata taarifa gesi inapokaribia kuisha',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                      style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
                     value: _enableReminder,
-                    activeColor: Colors.orange,
+                    activeColor: context.colors.primary,
                     onChanged: (val) => setState(() => _enableReminder = val),
                   ),
                   if (_enableReminder) ...[
@@ -1095,9 +1098,9 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                         DropdownButton<String>(
                           value: _reminderInterval,
                           underline: const SizedBox(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Colors.orange,
+                            color: context.colors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                           items: const [
@@ -1134,8 +1137,8 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               child: ElevatedButton(
                 onPressed: _submitReview,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -1153,10 +1156,10 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
+                child: Text(
                   'Funga / Close (unaweza kufungua tena baadaye)',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: context.colors.onSurfaceVariant,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),

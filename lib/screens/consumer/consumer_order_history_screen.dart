@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import '../../services/order_service.dart';
 import 'consumer_order_screen.dart';
 
+import '../../core/theme_ext.dart';
+
 class ConsumerOrdersHistoryScreen extends StatelessWidget {
   final String consumerUid;
 
@@ -16,9 +18,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         title: const Text(
           'Historia ya Oda Zangu / Orders History',
           style: TextStyle(
@@ -29,8 +30,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
         stream: OrderService.instance.consumerOrders(consumerUid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(color: Colors.orange));
+            return Center(
+                child: CircularProgressIndicator(color: context.colors.primary));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -39,19 +40,19 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long_outlined,
-                      size: 64, color: Colors.grey.shade400),
+                      size: 64, color: context.colors.outline),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Huna historia ya oda bado',
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87),
+                        color: context.colors.onSurface),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Oda zote utakazofanya zitaonekana hapa.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -85,25 +86,25 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
               }
 
               // Determine status badge color and label
-              Color badgeColor = Colors.orange;
+              Color badgeColor = context.colors.primary;
               String statusLabel = 'Inasubiri';
 
               if (status == 'delivered' || status == 'completed') {
-                badgeColor = Colors.green;
+                badgeColor = context.gasColors.success;
                 statusLabel = 'Imekamilika';
               } else if (status == 'on_the_way' || status == 'in_transit') {
-                badgeColor = Colors.purple;
+                badgeColor = context.colors.tertiary;
                 statusLabel = 'Ipo Njiani';
               } else if (status == 'confirmed' ||
                   status == 'accepted' ||
                   status == 'preparing' ||
                   status == 'seen') {
-                badgeColor = Colors.teal;
+                badgeColor = context.colors.secondary;
                 statusLabel = 'Inaendelea / Inaandaliwa';
               } else if (status == 'cancelled' ||
                   status == 'rejected' ||
                   status == 'refused') {
-                badgeColor = Colors.red;
+                badgeColor = context.colors.error;
                 statusLabel = 'Imeghairiwa';
               }
 
@@ -112,7 +113,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: context.colors.outlineVariant),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
@@ -163,11 +164,11 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
+                            color: context.colors.primaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.propane_tank,
-                              color: Colors.orange, size: 22),
+                          child: Icon(Icons.propane_tank,
+                              color: context.colors.primary, size: 22),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -180,10 +181,10 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     '$brand ($size)',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
-                                        color: Colors.black87),
+                                        color: context.colors.onSurface),
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -206,20 +207,20 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                               Text(
                                 'TZS ${total.toStringAsFixed(0)} • ${intent == 'add_stock' ? '🔄 Ongeza Akiba' : '📦 Mtungi Mpya'}',
                                 style: TextStyle(
-                                    fontSize: 11, color: Colors.grey.shade700),
+                                    fontSize: 11, color: context.colors.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Tarehe: ${createdAt.toLocal().toString().split('.').first}',
                                 style: TextStyle(
-                                    fontSize: 10, color: Colors.grey.shade500),
+                                    fontSize: 10, color: context.colors.onSurfaceVariant),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right,
-                            color: Colors.grey, size: 18),
+                        Icon(Icons.chevron_right,
+                            color: context.colors.onSurfaceVariant, size: 18),
                       ],
                     ),
                   ),

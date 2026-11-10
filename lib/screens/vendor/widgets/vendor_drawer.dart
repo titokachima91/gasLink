@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import '../vendor_badge_screen.dart';
 import '../../settings_screen.dart';
 
+import '../../../core/theme_ext.dart';
+
 class VendorDrawer extends StatelessWidget {
   final String storeName;
   final String? imageUrl;
@@ -43,12 +45,13 @@ class VendorDrawer extends StatelessWidget {
       case 3:
         badgeLabel = 'Muuzaji Anayeaminika (Tier 3)';
         badgeIcon = Icons.workspace_premium;
-        badgeColor = Colors.amber;
+        // Lighten status colors so they stay visible on the dark header.
+        badgeColor = Color.lerp(context.gasColors.warning, Colors.white, 0.55)!;
         break;
       case 2:
         badgeLabel = 'Muuzaji Aliyethibitishwa (Tier 2)';
         badgeIcon = Icons.verified;
-        badgeColor = Colors.lightGreenAccent;
+        badgeColor = Color.lerp(context.gasColors.success, Colors.white, 0.55)!;
         break;
       case 1:
       default:
@@ -63,7 +66,9 @@ class VendorDrawer extends StatelessWidget {
         children: [
           // ── Header Card ──────────────────────────────────────────────
           UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: Colors.orange),
+            decoration: BoxDecoration(
+              color: Theme.of(context).appBarTheme.backgroundColor,
+            ),
             accountName: Text(
               storeName.isEmpty ? 'Duka Langu' : storeName,
               style: const TextStyle(
@@ -95,7 +100,7 @@ class VendorDrawer extends StatelessWidget {
                   ? NetworkImage(imageUrl!)
                   : null,
               child: imageUrl == null || imageUrl!.isEmpty
-                  ? const Icon(Icons.storefront, color: Colors.orange, size: 36)
+                  ? Icon(Icons.storefront, color: context.colors.primary, size: 36)
                   : null,
             ),
           ),
@@ -110,16 +115,16 @@ class VendorDrawer extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Ukamilifu wa Akaunti',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                     ),
                     Text(
                       '$completionPercentage%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: Colors.orange,
+                        color: context.colors.primary,
                       ),
                     ),
                   ],
@@ -130,8 +135,8 @@ class VendorDrawer extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: completionPercentage / 100,
                     minHeight: 6,
-                    color: Colors.orange,
-                    backgroundColor: Colors.grey.shade200,
+                    color: context.colors.primary,
+                    backgroundColor: context.colors.outlineVariant,
                   ),
                 ),
               ],
@@ -153,8 +158,8 @@ class VendorDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 11),
                   ),
                   selected: selectedIndex == 0,
-                  selectedTileColor: Colors.orange.shade50,
-                  selectedColor: Colors.orange,
+                  selectedTileColor: context.colors.primaryContainer,
+                  selectedColor: context.colors.primary,
                   onTap: () {
                     Navigator.pop(context);
                     onSelectTab(0);
@@ -165,7 +170,7 @@ class VendorDrawer extends StatelessWidget {
                 // NEW CODE:
                 ListTile(
                   leading:
-                      const Icon(Icons.workspace_premium, color: Colors.orange),
+                      Icon(Icons.workspace_premium, color: context.colors.primary),
                   title: const Text('Tuzo na Uthibitisho'),
                   subtitle: const Text('Hatua za Badge & Badges Hub'),
                   onTap: () {
@@ -188,8 +193,8 @@ class VendorDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 11),
                   ),
                   selected: selectedIndex == 2,
-                  selectedTileColor: Colors.orange.shade50,
-                  selectedColor: Colors.orange,
+                  selectedTileColor: context.colors.primaryContainer,
+                  selectedColor: context.colors.primary,
                   onTap: () {
                     Navigator.pop(context);
                     onSelectTab(2);
@@ -205,8 +210,8 @@ class VendorDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 11),
                   ),
                   selected: selectedIndex == 3,
-                  selectedTileColor: Colors.orange.shade50,
-                  selectedColor: Colors.orange,
+                  selectedTileColor: context.colors.primaryContainer,
+                  selectedColor: context.colors.primary,
                   onTap: () {
                     Navigator.pop(context);
                     onSelectTab(3);
@@ -222,8 +227,8 @@ class VendorDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 11),
                   ),
                   selected: selectedIndex == 4,
-                  selectedTileColor: Colors.orange.shade50,
-                  selectedColor: Colors.orange,
+                  selectedTileColor: context.colors.primaryContainer,
+                  selectedColor: context.colors.primary,
                   onTap: () {
                     Navigator.pop(context);
                     onSelectTab(4);
@@ -237,7 +242,7 @@ class VendorDrawer extends StatelessWidget {
 
           // ── Footer Actions ───────────────────────────────────────────
           ListTile(
-            leading: const Icon(Icons.settings_outlined, color: Colors.orange),
+            leading: Icon(Icons.settings_outlined, color: context.colors.primary),
             title: const Text('Mipangilio / Settings'),
             onTap: () {
               Navigator.pop(context); // Close drawer
@@ -251,7 +256,7 @@ class VendorDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text('Logout', style: TextStyle(color: context.colors.error)),
             onTap: () {
               Navigator.pop(context);
               onLogout();
@@ -283,24 +288,24 @@ class VendorDrawer extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.language, color: Colors.orange),
+              leading: Icon(Icons.language, color: context.colors.primary),
               title: const Text('Lugha / Language'),
               subtitle: const Text('Kiswahili (Chaguo kuu)'),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.notifications_active_outlined,
-                  color: Colors.orange),
+              leading: Icon(Icons.notifications_active_outlined,
+                  color: context.colors.primary),
               title: const Text('Sauti ya Oda Mpya / Audio Alerts'),
               trailing: Switch(
                 value: true,
-                activeColor: Colors.orange,
+                activeColor: context.colors.primary,
                 onChanged: (_) {},
               ),
             ),
             ListTile(
               leading:
-                  const Icon(Icons.support_agent_rounded, color: Colors.orange),
+                  Icon(Icons.support_agent_rounded, color: context.colors.primary),
               title: const Text('Msaada / Support'),
               subtitle: const Text('Piga au Tuma ujumbe WhatsApp'),
               onTap: () => Navigator.pop(context),

@@ -8,8 +8,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/theme_controller.dart';
+import 'core/theme_preferences.dart';
 import 'firebase_options.dart'; // <--- Added generated options import
 import 'services/auth_service.dart';
 import 'services/notification_service.dart';
@@ -64,6 +67,16 @@ void main() async {
   //    across app restarts until they log out or another account logs in.
   await AuthService.instance.restoreSession();
 
-  // 4. Mount app
-  runApp(const GasLinkApp());
+  // 4. Restore the saved theme preference (light, dark or system).
+  final ThemeMode initialThemeMode = await ThemePreferences.readThemeMode();
+
+  // 5. Mount app. ProviderScope must sit above every ConsumerWidget.
+  runApp(
+    ProviderScope(
+      overrides: [
+        initialThemeModeProvider.overrideWithValue(initialThemeMode),
+      ],
+      child: const GasLinkApp(),
+    ),
+  );
 }

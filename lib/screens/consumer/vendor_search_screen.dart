@@ -21,6 +21,8 @@ import '../../core/constants.dart';
 import '../../core/session_data.dart';
 import 'vendor_detail_screen.dart';
 
+import '../../core/theme_ext.dart';
+
 class VendorSearchScreen extends StatefulWidget {
   const VendorSearchScreen({super.key});
 
@@ -68,9 +70,8 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         elevation: 0,
         title: const Text(
           'Tafuta Muuzaji / Find Vendor',
@@ -85,7 +86,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
         children: [
           // Header Search Box & Filter Chips
           Container(
-            color: Colors.white,
+            color: context.colors.surface,
             padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
@@ -97,7 +98,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                     hintText:
                         'Tafuta kwa jina la duka au eneo (Mwenge, Kinondoni)...',
                     hintStyle: const TextStyle(fontSize: 13),
-                    prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                    prefixIcon: Icon(Icons.search, color: context.colors.primary),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear, size: 20),
@@ -108,7 +109,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                           )
                         : null,
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: context.colors.surfaceContainerLow,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -126,16 +127,16 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                       // Verified Vendor Filter Chip
                       FilterChip(
                         selected: _verifiedOnly,
-                        label: const Row(
+                        label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.verified, size: 14, color: Colors.green),
+                            Icon(Icons.verified, size: 14, color: context.gasColors.success),
                             SizedBox(width: 4),
                             Text('Duka Lililothibitishwa'),
                           ],
                         ),
-                        selectedColor: Colors.orange.shade100,
-                        checkmarkColor: Colors.orange,
+                        selectedColor: context.colors.primaryContainer,
+                        checkmarkColor: context.colors.primary,
                         onSelected: (val) {
                           setState(() => _verifiedOnly = val);
                         },
@@ -158,8 +159,8 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                         ],
                         child: Chip(
                           backgroundColor: _selectedBrand != null
-                              ? Colors.orange.shade100
-                              : Colors.grey.shade200,
+                              ? context.colors.primaryContainer
+                              : context.colors.outlineVariant,
                           label: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -191,8 +192,8 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                         ],
                         child: Chip(
                           backgroundColor: _selectedWeight != null
-                              ? Colors.orange.shade100
-                              : Colors.grey.shade200,
+                              ? context.colors.primaryContainer
+                              : context.colors.outlineVariant,
                           label: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -215,9 +216,9 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                               _verifiedOnly = false;
                             });
                           },
-                          child: const Text(
+                          child: Text(
                             'Futa Filters',
-                            style: TextStyle(color: Colors.red, fontSize: 12),
+                            style: TextStyle(color: context.colors.error, fontSize: 12),
                           ),
                         ),
                     ],
@@ -235,11 +236,11 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.storefront,
-                            size: 48, color: Colors.grey.shade400),
+                            size: 48, color: context.colors.outline),
                         const SizedBox(height: 8),
                         Text(
                           'Hakuna muuzaji aliyepatikana.',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: context.colors.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -256,7 +257,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey.shade200),
+                          side: BorderSide(color: context.colors.outlineVariant),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(14.0),
@@ -266,9 +267,9 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundColor: Colors.orange.shade50,
-                                    child: const Icon(Icons.store,
-                                        color: Colors.orange),
+                                    backgroundColor: context.colors.primaryContainer,
+                                    child: Icon(Icons.store,
+                                        color: context.colors.primary),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -291,10 +292,10 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                               ),
                                             ),
                                             const SizedBox(width: 4),
-                                            const Icon(
+                                            Icon(
                                               Icons.verified,
                                               size: 16,
-                                              color: Colors.blue,
+                                              color: context.gasColors.info,
                                             ),
                                           ],
                                         ),
@@ -304,7 +305,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                               : 'Eneo halijatajwa',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: Colors.grey.shade600,
+                                            color: context.colors.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -326,7 +327,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                             style: TextStyle(fontSize: 10),
                                           ),
                                           visualDensity: VisualDensity.compact,
-                                          backgroundColor: Colors.grey.shade100,
+                                          backgroundColor: context.colors.surfaceContainerLow,
                                         )
                                       ]
                                     : offer.vendorBrands
@@ -340,7 +341,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                             visualDensity:
                                                 VisualDensity.compact,
                                             backgroundColor:
-                                                Colors.grey.shade100,
+                                                context.colors.surfaceContainerLow,
                                             padding: EdgeInsets.zero,
                                           ),
                                         )
@@ -353,7 +354,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
+                                    backgroundColor: context.colors.primary,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
@@ -371,10 +372,10 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                       ),
                                     );
                                   },
-                                  child: const Text(
+                                  child: Text(
                                     'Angalia Stoki & Oda / View Shop',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: context.colors.onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

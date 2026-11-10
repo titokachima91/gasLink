@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../core/session_data.dart';
 import 'consumer_order_dialog.dart';
 
+import '../../core/theme_ext.dart';
+
 class ItemVendorsScreen extends StatefulWidget {
   final String category; // refill | full_set | accessories | services
   final String itemName; // brand name or accessory/service name
@@ -76,9 +78,8 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
     final offers = _matchingOffers;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         title: Text(
           widget.itemName,
           style: const TextStyle(
@@ -92,7 +93,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
         children: [
           // Sort bar
           Container(
-            color: Colors.white,
+            color: context.colors.surface,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,14 +103,14 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
+                    color: context.colors.onSurface,
                   ),
                 ),
                 DropdownButton<String>(
                   value: _sortBy,
                   underline: const SizedBox(),
-                  icon: const Icon(Icons.sort, size: 18, color: Colors.orange),
-                  style: const TextStyle(fontSize: 12, color: Colors.black87),
+                  icon: Icon(Icons.sort, size: 18, color: context.colors.primary),
+                  style: TextStyle(fontSize: 12, color: context.colors.onSurface),
                   onChanged: (val) {
                     if (val != null) setState(() => _sortBy = val);
                   },
@@ -131,8 +132,8 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
 
           Expanded(
             child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Colors.orange))
+                ? Center(
+                    child: CircularProgressIndicator(color: context.colors.primary))
                 : offers.isEmpty
                     ? _buildEmptyState()
                     : ListView.builder(
@@ -148,7 +149,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                             margin: const EdgeInsets.only(bottom: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: Colors.grey.shade200),
+                              side: BorderSide(color: context.colors.outlineVariant),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
@@ -158,11 +159,11 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: Colors.orange.shade50,
+                                      color: context.colors.primaryContainer,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(Icons.storefront,
-                                        color: Colors.orange),
+                                    child: Icon(Icons.storefront,
+                                        color: context.colors.primary),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -180,16 +181,16 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                         ),
                                         Text(
                                           '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
-                                          style: const TextStyle(
-                                              fontSize: 11, color: Colors.grey),
+                                          style: TextStyle(
+                                              fontSize: 11, color: context.colors.onSurfaceVariant),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           'TZS ${price.toStringAsFixed(0)}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.orange,
+                                            color: context.colors.primary,
                                           ),
                                         ),
                                       ],
@@ -215,8 +216,8 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      foregroundColor: Colors.white,
+                                      backgroundColor: context.colors.primary,
+                                      foregroundColor: context.colors.onPrimary,
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 12, vertical: 8),
                                     ),
@@ -243,7 +244,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.remove_shopping_cart_outlined,
-                size: 48, color: Colors.grey.shade400),
+                size: 48, color: context.colors.outline),
             const SizedBox(height: 12),
             Text(
               'Hakuna Muuzaji wa ${widget.itemName}',
@@ -254,7 +255,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
             Text(
               'Hakuna muuzaji aliyetangaza bidhaa hii kwa sasa. Jaribu baadaye.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
             ),
           ],
         ),

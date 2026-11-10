@@ -14,7 +14,10 @@ import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
+import '../../widgets/theme_mode_button.dart';
 import 'item_vendors_screen.dart';
+
+import '../../core/theme_ext.dart';
 
 class ConsumerHomeScreen extends StatefulWidget {
   const ConsumerHomeScreen({super.key});
@@ -41,10 +44,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Colors.orange.shade50 : Colors.white,
+          color: isSelected ? context.colors.primaryContainer : context.colors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.orange : Colors.grey.shade200,
+            color: isSelected ? context.colors.primary : context.colors.outlineVariant,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -52,7 +55,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: isSelected ? Colors.orange : Colors.grey.shade600,
+                color: isSelected ? context.colors.primary : context.colors.onSurfaceVariant,
                 size: 26),
             const SizedBox(height: 6),
             Text(
@@ -60,14 +63,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: isSelected ? Colors.orange.shade900 : Colors.black87,
+                color: isSelected ? context.colors.primary : context.colors.onSurface,
               ),
             ),
             Text(
               subtitle,
               style: TextStyle(
                 fontSize: 11,
-                color: isSelected ? Colors.orange.shade700 : Colors.grey,
+                color: isSelected ? context.colors.primary : context.colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -106,20 +109,20 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: ListTile(
         leading: Icon(
           _selectedIntent == 'Accessories' || _selectedIntent == 'Services'
               ? Icons.handyman_outlined
               : Icons.propane_tank,
-          color: Colors.orange,
+          color: context.colors.primary,
         ),
         title: Text(
           itemName,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        trailing: Icon(Icons.chevron_right, color: context.colors.onSurfaceVariant),
         onTap: () {
           String category;
           switch (_selectedIntent) {
@@ -251,7 +254,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               child: const Text('Ghairi')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ondoka', style: TextStyle(color: Colors.red)),
+            child: Text('Ondoka', style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),
@@ -314,32 +317,32 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         final intent = primaryOrder.orderIntent;
 
         String displayStatus = 'Oda Imetumwa • Inasubiri Muuzaji';
-        Color statusTextColor = Colors.orange.shade800;
+        Color statusTextColor = context.colors.primary;
         IconData statusIcon = Icons.access_time_rounded;
         int currentStepIndex = 0;
 
         if (rawStatus == 'seen') {
           displayStatus = 'Muuzaji Anakagua Oda Yako...';
-          statusTextColor = Colors.blue.shade800;
+          statusTextColor = context.gasColors.info;
           statusIcon = Icons.visibility_outlined;
           currentStepIndex = 0;
         } else if (rawStatus == 'accepted' ||
             rawStatus == 'confirmed' ||
             rawStatus == 'preparing') {
           displayStatus = 'Oda Imepokelewa • Inaandaliwa 📦';
-          statusTextColor = Colors.teal.shade800;
+          statusTextColor = context.colors.secondary;
           statusIcon = Icons.inventory_2_outlined;
           currentStepIndex = 1;
         } else if (rawStatus == 'on_the_way' ||
             rawStatus == 'dispatched' ||
             rawStatus == 'in_transit') {
           displayStatus = 'Gesi Yako Ipo Njiani! 🛵';
-          statusTextColor = Colors.purple.shade800;
+          statusTextColor = context.colors.tertiary;
           statusIcon = Icons.two_wheeler;
           currentStepIndex = 2;
         } else if (rawStatus == 'delivered_pending') {
           displayStatus = 'Imefika • Tafadhali Thibitisha';
-          statusTextColor = Colors.green.shade800;
+          statusTextColor = context.gasColors.success;
           statusIcon = Icons.handshake_outlined;
           currentStepIndex = 2;
         }
@@ -353,9 +356,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.orange.shade300, width: 1.5),
+            side: BorderSide(color: context.colors.primary, width: 1.5),
           ),
-          color: Colors.orange.shade50,
+          color: context.colors.primaryContainer,
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () => _navigateToExtendedTrackingScreen(
@@ -373,14 +376,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(statusIcon, color: Colors.orange, size: 20),
+                          Icon(statusIcon, color: context.colors.primary, size: 20),
                           const SizedBox(width: 6),
-                          const Text(
+                          Text(
                             'ODA ZANGU / ACTIVE TRACKER',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black54,
+                              color: context.colors.onSurfaceVariant,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -388,10 +391,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       ),
                       Text(
                         '#${orderId.substring(0, orderId.length > 6 ? 6 : orderId.length).toUpperCase()}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          color: context.colors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -408,9 +411,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   const SizedBox(height: 4),
                   Text(
                     '$brand $weight',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Colors.black87,
+                      color: context.colors.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -425,7 +428,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
                             color:
-                                isDone ? Colors.orange : Colors.grey.shade300,
+                                isDone ? context.colors.primary : context.colors.outlineVariant,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -443,14 +446,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade600,
+                          color: context.colors.onSurfaceVariant,
                         ),
                       ),
-                      const Text(
+                      Text(
                         'Gusa Kufungua Maelezo Zaidi ➔',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.orange,
+                          color: context.colors.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -473,9 +476,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        side: BorderSide(color: context.colors.outlineVariant, width: 1),
       ),
-      color: Colors.white,
+      color: context.colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(14.0),
         child: Column(
@@ -487,13 +490,13 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: context.colors.primaryContainer,
                       borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.history_toggle_off_rounded,
-                      color: Colors.orange, size: 20),
+                  child: Icon(Icons.history_toggle_off_rounded,
+                      color: context.colors.primary, size: 20),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -502,12 +505,12 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87),
+                            color: context.colors.onSurface),
                       ),
                       SizedBox(height: 2),
                       Text(
                         'Huna oda inayotembea kwa sasa.',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                        style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -519,8 +522,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.orange,
-                  side: BorderSide(color: Colors.orange.shade300),
+                  foregroundColor: context.colors.primary,
+                  side: BorderSide(color: context.colors.primary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -601,34 +604,34 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colors.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'My Gas Cylinder',
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: context.colors.onSurface,
                 letterSpacing: 0.3),
           ),
           const SizedBox(height: 16),
           if (!hasCylinders) ...[
-            const Text(
+            Text(
               'Hujasajili Mtungi Bado / No Cylinder Registered',
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87),
+                  color: context.colors.onSurface),
             ),
             const SizedBox(height: 4),
             Text(
               'Weka taarifa kuanza kukadiria matumizi yako.',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
             ),
           ] else ...[
             ListView.separated(
@@ -665,10 +668,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       children: [
                         Text(
                           '$brandName $weight',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Colors.black87),
+                              color: context.colors.onSurface),
                         ),
                         Text(
                           isTankEmptyState
@@ -678,8 +681,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: isCriticalLow
-                                ? Colors.red
-                                : Colors.orange.shade800,
+                                ? context.colors.error
+                                : context.colors.primary,
                           ),
                         ),
                       ],
@@ -692,8 +695,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: estimatedRemainingRatio,
-                              backgroundColor: Colors.grey.shade100,
-                              color: isCriticalLow ? Colors.red : Colors.orange,
+                              backgroundColor: context.colors.surfaceContainerLow,
+                              color: isCriticalLow ? context.colors.error : context.colors.primary,
                               minHeight: 8,
                             ),
                           ),
@@ -714,7 +717,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    side: BorderSide(color: Colors.orange.shade300),
+                    side: BorderSide(color: context.colors.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
@@ -738,13 +741,13 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           ? Icons.analytics_outlined
                           : Icons.add_circle_outline,
                       size: 16,
-                      color: Colors.orange),
+                      color: context.colors.primary),
                   label: Text(
                     hasCylinders ? 'Taarifa Zaidi' : 'Weka Sasa',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange),
+                        color: context.colors.primary),
                   ),
                 ),
               ),
@@ -753,8 +756,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.primary,
+                      foregroundColor: context.colors.onPrimary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -1046,7 +1049,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
             onPressed: isSaving
                 ? null
                 : () async {
@@ -1079,14 +1082,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     }
                   },
             child: isSaving
-                ? const SizedBox(
+                ? SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
-                : const Text('Hifadhi Mtungi',
+                        color: context.colors.onPrimary, strokeWidth: 2))
+                : Text('Hifadhi Mtungi',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: context.colors.onPrimary, fontWeight: FontWeight.bold)),
           ),
         );
       },
@@ -1132,16 +1135,16 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Colors.orange,
           title: const Text(
             AppConstants.appName,
             style: TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
           ),
           actions: [
+            const ThemeModeButton(),
             IconButton(
               icon: const Icon(Icons.logout, color: Colors.white),
               tooltip: 'Ondoka / Logout',
@@ -1151,7 +1154,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         ),
         body: RefreshIndicator(
           onRefresh: _onRefresh,
-          color: Colors.orange,
+          color: Theme.of(context).colorScheme.primary,
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
@@ -1160,12 +1163,12 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               _buildGasEstimatorCard(),
               const SizedBox(height: 12),
 
-              const Text(
+              Text(
                 'Unataka kufanya nini? / Choose Service',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1216,10 +1219,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               // ===== VERTICAL LIST TITLE =====
               Text(
                 _getListTitle(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 10),
@@ -1233,26 +1236,31 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Wauza Gesi Walio Karibu Nawe',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     '${liveOffers.length} Wauza Gesi',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               if (_isLoading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Center(
-                    child: CircularProgressIndicator(color: Colors.orange),
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 )
               else if (liveOffers.isEmpty)
@@ -1274,7 +1282,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -1297,10 +1305,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: context.colors.primaryContainer,
                     borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.storefront,
-                    color: Colors.orange, size: 24),
+                child: Icon(Icons.storefront,
+                    color: context.colors.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1319,27 +1327,27 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.verified,
-                            size: 12, color: Colors.blue),
+                        Icon(Icons.verified,
+                            size: 12, color: context.gasColors.info),
                         const SizedBox(width: 4),
-                        const Text('Verified Shop',
+                        Text('Verified Shop',
                             style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.blue,
+                                color: context.gasColors.info,
                                 fontWeight: FontWeight.w600)),
                         if (minPrice > 0) ...[
                           const SizedBox(width: 8),
                           Text(
                             '• Kuanzia TZS ${minPrice.toStringAsFixed(0)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange),
+                                color: context.colors.primary),
                           ),
                         ],
                       ],
@@ -1347,7 +1355,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+              Icon(Icons.chevron_right, color: context.colors.onSurfaceVariant, size: 20),
             ],
           ),
         ),
@@ -1359,14 +1367,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colors.outlineVariant),
       ),
       child: Column(
         children: [
           Icon(Icons.store_mall_directory_outlined,
-              size: 40, color: Colors.grey.shade400),
+              size: 40, color: context.colors.outline),
           const SizedBox(height: 8),
           const Text('Hakuna Muuzaji Karibu Nawe',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -1374,7 +1382,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           Text(
             'Hakuna muuzaji aliyesajiliwa katika eneo lako kwa sasa. Huduma inazidi kusambaa.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
           ),
         ],
       ),
@@ -1390,9 +1398,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
         title: const Text('Historia ya Oda Zangu / Orders History',
             style: TextStyle(
                 fontSize: 15,
@@ -1403,8 +1410,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
         stream: OrderService.instance.consumerOrders(consumerUid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(color: Colors.orange));
+            return Center(
+                child: CircularProgressIndicator(color: context.colors.primary));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -1413,16 +1420,16 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long_outlined,
-                      size: 64, color: Colors.grey.shade400),
+                      size: 64, color: context.colors.outline),
                   const SizedBox(height: 12),
-                  const Text('Huna historia ya oda bado',
+                  Text('Huna historia ya oda bado',
                       style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87)),
+                          color: context.colors.onSurface)),
                   const SizedBox(height: 4),
-                  const Text('Oda zote utakazofanya zitaonekana hapa.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('Oda zote utakazofanya zitaonekana hapa.',
+                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
                 ],
               ),
             );
@@ -1447,21 +1454,21 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
               final createdAt = (data['created_at'] as Timestamp?)?.toDate() ??
                   DateTime.now();
 
-              Color badgeColor = Colors.orange;
+              Color badgeColor = context.colors.primary;
               String statusLabel = 'Inasubiri';
               if (status == 'delivered' || status == 'completed') {
-                badgeColor = Colors.green;
+                badgeColor = context.gasColors.success;
                 statusLabel = 'Imekamilika';
               } else if (status == 'on_the_way' || status == 'in_transit') {
-                badgeColor = Colors.purple;
+                badgeColor = context.colors.tertiary;
                 statusLabel = 'Ipo Njiani';
               } else if (status == 'confirmed' ||
                   status == 'accepted' ||
                   status == 'preparing') {
-                badgeColor = Colors.teal;
+                badgeColor = context.colors.secondary;
                 statusLabel = 'Inaandaliwa';
               } else if (status == 'cancelled' || status == 'rejected') {
-                badgeColor = Colors.red;
+                badgeColor = context.colors.error;
                 statusLabel = 'Imekataliwa/Imeghairiwa';
               }
 
@@ -1470,7 +1477,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: context.colors.outlineVariant),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
@@ -1505,11 +1512,11 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
+                            color: context.colors.primaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.propane_tank,
-                              color: Colors.orange, size: 22),
+                          child: Icon(Icons.propane_tank,
+                              color: context.colors.primary, size: 22),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -1521,10 +1528,10 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('$brand ($size)',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: Colors.black87)),
+                                          color: context.colors.onSurface)),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8, vertical: 2),
@@ -1545,7 +1552,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                   'TZS ${total.toStringAsFixed(0)} • ${intent == 'add_stock' ? 'Ongeza Akiba' : 'Mtungi Mpya'}',
                                   style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey.shade700)),
+                                      color: context.colors.onSurfaceVariant)),
                               const SizedBox(height: 2),
                               Text(
                                   'Tarehe: ${createdAt.toLocal()}'
@@ -1553,13 +1560,13 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                       .first,
                                   style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.grey.shade500)),
+                                      color: context.colors.onSurfaceVariant)),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right,
-                            color: Colors.grey, size: 18),
+                        Icon(Icons.chevron_right,
+                            color: context.colors.onSurfaceVariant, size: 18),
                       ],
                     ),
                   ),

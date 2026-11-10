@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
 import '../role_router.dart';
+import '../../widgets/theme_mode_button.dart';
 import 'register_screen.dart';
+
+import '../../core/theme_ext.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -102,7 +105,10 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Karibu / Welcome')),
+        appBar: AppBar(
+          title: const Text('Karibu / Welcome'),
+          actions: const [ThemeModeButton()],
+        ),
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -131,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                  Text(_error!, style: TextStyle(color: context.colors.error)),
                 ],
                 const SizedBox(height: 16),
                 FilledButton(
@@ -156,9 +162,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                   onPressed: _loading ? null : _guest,
-                  child: const Text(
+                  child: Text(
                     'Endelea bila kuingia / Continue without account',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: context.colors.onSurfaceVariant),
                   ),
                 ),
               ],

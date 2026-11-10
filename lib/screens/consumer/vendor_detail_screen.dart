@@ -54,6 +54,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'consumer_order_dialog.dart';
 
+import '../../core/theme_ext.dart';
+
 class VendorDetailScreen extends StatefulWidget {
   const VendorDetailScreen({
     super.key,
@@ -100,10 +102,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
         elevation: 0,
         title: Text(
           widget.businessName,
@@ -126,8 +126,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             builder: (context, productSnap) {
               if (vendorSnap.connectionState == ConnectionState.waiting &&
                   productSnap.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Colors.orange),
+                return Center(
+                  child: CircularProgressIndicator(color: context.colors.primary),
                 );
               }
 
@@ -220,7 +220,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.colors.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -234,11 +234,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: context.colors.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.storefront,
-                      color: Colors.orange, size: 28),
+                  child: Icon(Icons.storefront,
+                      color: context.colors.primary, size: 28),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -253,14 +253,14 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.verified,
-                              size: 14, color: Colors.blue),
+                          Icon(Icons.verified,
+                              size: 14, color: context.gasColors.info),
                           const SizedBox(width: 4),
                           Text(
                             'Duka Lililothibitishwa',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.blue.shade700,
+                              color: context.gasColors.info,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -275,8 +275,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             // Neighborhood Address & Hours
             Row(
               children: [
-                const Icon(Icons.location_on_outlined,
-                    size: 16, color: Colors.grey),
+                Icon(Icons.location_on_outlined,
+                    size: 16, color: context.colors.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -292,11 +292,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                Icon(Icons.access_time, size: 16, color: context.colors.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text(
                   'Masaa ya Kazi: $openingHours',
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  style: TextStyle(fontSize: 13, color: context.colors.onSurface),
                 ),
               ],
             ),
@@ -304,14 +304,14 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             // Dynamic Average ETA Badge Row
             Row(
               children: [
-                const Icon(Icons.timer_outlined,
-                    size: 16, color: Colors.orange),
+                Icon(Icons.timer_outlined,
+                    size: 16, color: context.colors.primary),
                 const SizedBox(width: 6),
                 Text(
                   'Muda wa Kuwasilisha: $displayEta',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Colors.orange,
+                    color: context.colors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -320,14 +320,14 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.local_shipping_outlined,
-                    size: 16, color: Colors.green),
+                Icon(Icons.local_shipping_outlined,
+                    size: 16, color: context.gasColors.success),
                 const SizedBox(width: 6),
                 Text(
                   deliveryText,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 13,
-                      color: Colors.green,
+                      color: context.gasColors.success,
                       fontWeight: FontWeight.bold),
                 ),
               ],
@@ -335,29 +335,29 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             // Vendor About Summary
             if (aboutSummary.isNotEmpty) ...[
               const Divider(height: 24),
-              const Text(
+              Text(
                 'Kuhusu Duka / About Us:',
                 style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey),
+                    color: context.colors.onSurfaceVariant),
               ),
               const SizedBox(height: 4),
               Text(
                 aboutSummary,
-                style: const TextStyle(
-                    fontSize: 13, color: Colors.black87, height: 1.3),
+                style: TextStyle(
+                    fontSize: 13, color: context.colors.onSurface, height: 1.3),
               ),
             ],
             // Extra Services Chips
             if (offeredServices.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Huduma za Ziada / Offered Services:',
                 style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey),
+                    color: context.colors.onSurfaceVariant),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -369,22 +369,22 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: context.colors.primaryContainer,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.orange.shade200),
+                      border: Border.all(color: context.colors.primaryContainer),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_circle_outline,
-                            size: 13, color: Colors.orange),
+                        Icon(Icons.check_circle_outline,
+                            size: 13, color: context.colors.primary),
                         const SizedBox(width: 4),
                         Text(
                           chipText,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: Colors.orange.shade900,
+                            color: context.colors.primary,
                           ),
                         ),
                       ],
@@ -403,7 +403,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   Widget _buildCategoryToggle() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: context.colors.outlineVariant,
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(4),
@@ -416,7 +416,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: _selectedCategoryIndex == 0
-                      ? Colors.orange
+                      ? context.colors.primary
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -427,8 +427,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                       color: _selectedCategoryIndex == 0
-                          ? Colors.white
-                          : Colors.grey.shade700,
+                          ? context.colors.onPrimary
+                          : context.colors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -442,7 +442,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: _selectedCategoryIndex == 1
-                      ? Colors.orange
+                      ? context.colors.primary
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -453,8 +453,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                       color: _selectedCategoryIndex == 1
-                          ? Colors.white
-                          : Colors.grey.shade700,
+                          ? context.colors.onPrimary
+                          : context.colors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -475,11 +475,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           child: Column(
             children: [
               Icon(Icons.inventory_2_outlined,
-                  size: 40, color: Colors.grey.shade400),
+                  size: 40, color: context.colors.outline),
               const SizedBox(height: 8),
               Text(
                 'Muuzaji ${widget.businessName} hajaweka mitungi bado.',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13),
               ),
             ],
           ),
@@ -521,7 +521,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           margin: const EdgeInsets.only(bottom: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: context.colors.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -546,9 +546,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     return ChoiceChip(
                       label: Text(weight),
                       selected: isSelected,
-                      selectedColor: Colors.orange,
+                      selectedColor: context.colors.primary,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
+                        color: isSelected
+                            ? context.colors.onPrimary
+                            : context.colors.onSurface,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -571,11 +573,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: context.colors.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.propane_tank,
-                          color: Colors.orange, size: 30),
+                      child: Icon(Icons.propane_tank,
+                          color: context.colors.primary, size: 30),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -590,8 +592,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                           const SizedBox(height: 2),
                           Text(
                             'TZS ${_formatPrice(price)}',
-                            style: const TextStyle(
-                              color: Colors.green,
+                            style: TextStyle(
+                              color: context.gasColors.success,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
@@ -602,8 +604,10 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            inStock ? Colors.orange : Colors.grey.shade300,
-                        foregroundColor: Colors.white,
+                            inStock ? context.colors.primary : context.colors.outlineVariant,
+                        foregroundColor: inStock
+                            ? context.colors.onPrimary
+                            : context.colors.onSurface,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -648,11 +652,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              Icon(Icons.build_outlined, size: 40, color: Colors.grey.shade400),
+              Icon(Icons.build_outlined, size: 40, color: context.colors.outline),
               const SizedBox(height: 8),
               Text(
                 'Muuzaji ${widget.businessName} hajaweka vifaa au aksesari bado.',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13),
               ),
             ],
           ),
@@ -680,7 +684,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: context.colors.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.all(10.0),
@@ -692,11 +696,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: context.colors.surfaceContainerLow,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.build_outlined,
-                        color: Colors.orange, size: 28),
+                    child: Icon(Icons.build_outlined,
+                        color: context.colors.primary, size: 28),
                   ),
                 ),
                 Column(
@@ -712,8 +716,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'TZS ${_formatPrice(price)}',
-                      style: const TextStyle(
-                          color: Colors.green, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: context.gasColors.success, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -721,7 +725,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.orange),
+                      side: BorderSide(color: context.colors.primary),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6)),
                     ),
@@ -743,7 +747,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     child: Text(
                       inStock ? 'Oda Kifaa' : 'Imeisha',
                       style:
-                          const TextStyle(color: Colors.orange, fontSize: 12),
+                          TextStyle(color: context.colors.primary, fontSize: 12),
                     ),
                   ),
                 ),
