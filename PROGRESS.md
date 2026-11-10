@@ -1,11 +1,12 @@
 # GasLink — Master Progress Report
 
-> **Last updated:** 2026-11-10
+> **Last updated:** 2026-11-11
 > **Branch:** `harden-source-of-truth`
 > **Project state:** Working Flutter + Firebase application for LPG gas distribution in Dar es Salaam, Tanzania.
 > **Documentation:** [`ROADMAP.md`](ROADMAP.md) is the high-level project plan; `phases/<phase>/` holds per-phase plans and implementation records. This file is the authoritative status tracker.
 > **Theme:** Phase 1 complete — see `phases/phase-01-theme/implementation.md`.
-> **Current phase:** Phase 2 — Admin & Operations Console (in progress).
+> **Admin console:** Phase 2 complete — see `phases/phase-02-admin-panel/implementation.md`.
+> **Current phase:** Phase 3 — Vendor Verified Role (next).
 
 ---
 
@@ -21,11 +22,11 @@
 | Role Router | ✅ **Complete** |
 | Circle FIFO Logic | ✅ **Complete** |
 | Theme System | ✅ **Complete** — Forest Green light/dark/system palette, persisted picker, semantic tokens, all screens migrated |
-| Admin & Operations Console | 🚧 **Phase 2 in progress** — shell, vendors, orders, consumers, analytics, inventory, settings |
-| Operational Analytics | 🚧 **In Phase 2** — merged into the admin console |
+| Admin & Operations Console | ✅ **Complete** — responsive shell, dashboard, vendors, orders, consumers, inventory, settings, audit, guard |
+| Operational Analytics | ✅ **Complete** — 7/30/90-day KPIs, trends, scorecards, demand mix, CSV export |
 | Vendor verified Role | ❌ **Not done** — Phase 3 |
 | Vendor Profile | ⚠️ **Exists** but no image upload (Phase 4) |
-| Stock Visibility | ⚠️ **Partial** — admin inventory view lands in Phase 2 |
+| Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
 
@@ -44,12 +45,31 @@
 | 9 | Theme system | ProviderScope root, light/dark/system `ThemeMode`, persisted preference, picker on all role entry points |
 | 10 | Theme migration | All `lib/screens` and `lib/widgets` use `context.colors` / `context.gasColors`; no legacy orange/black/grey/light-hex colors |
 | 11 | Theme tests | test/theme_test.dart verifies startup in light/dark, theme values, status extension, persistence, and legacy-color guard |
+| 12 | Admin console | `admin_shell.dart` routes admins; compact bottom navigation and wide `NavigationRail`; `AdminGuard` blocks non-admin roles |
+| 13 | Vendor lifecycle | `Vendor.status` (`pending/active/suspended/rejected`), KYC review fields, reason-required reject/suspend, audited transitions |
+| 14 | Global orders | Search/status/district/date filters; detail timeline; audited cancellation with reason; delivered orders protected |
+| 15 | Consumers | Search/list/detail, order history, cylinder holdings, lifetime delivered value; no PIN material loaded |
+| 16 | Operational analytics | `AnalyticsService` fixed definitions; 7/30/90-day KPIs, trend, status mix, top vendors, demand, districts, scorecards, CSV |
+| 17 | Inventory & settings | Brand/size aggregation with out-of-stock filter and vendor offers; commission/support settings with audit trail |
+| 18 | Admin test coverage | `test/admin_console_test.dart` (6) + `test/analytics_test.dart` (5); full suite 41/41 passing; analyzer 0 errors / 0 warnings |
 
 ### Hardcoded Login (Seed Credential)
 
 - Phone: 0767304776 (or +255767304776)
 - PIN: 0000
 - Route: login -> auth_service.dart -> adminLogin() -> AuthService.roleAdmin
+- **Follow-up:** replace with secure server-side admin identity before production.
+
+### Phase 2 Verification
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | 0 errors, 0 warnings, 51 pre-existing info lints |
+| `flutter test` | 41/41 passing |
+| Admin/analytics tests | 11 new tests (6 admin console, 5 analytics) |
+| Responsive shell | 400×800 bottom navigation; 1280×900 `NavigationRail` |
+| Dark mode | Admin shell renders without exceptions |
+| Manual device QA | Still recommended before pilot (local macOS/web build constraints) |
 
 ---
 
@@ -70,22 +90,28 @@
 | Status tokens | lib/core/theme_status_colors.dart | Success/warning/info `ThemeExtension` for light and dark |
 | Theme helpers | lib/core/theme_ext.dart | `context.colors`, `context.gasColors`, `context.isDark` |
 | Theme picker | lib/widgets/theme_mode_button.dart | System/Light/Dark picker |
-| Admin console | lib/screens/admin/ | Phase 2 shell and operational screens |
-| Admin service | lib/services/admin_service.dart | Vendor lifecycle, orders, consumers, analytics, audit |
-| Analytics | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
+| Admin shell | lib/screens/admin/admin_shell.dart | Responsive console navigation and admin entry point |
+| Admin guard | lib/core/admin_guard.dart | Central client-side admin access check |
+| Admin service | lib/services/admin_service.dart | Vendor lifecycle, orders, consumers, inventory, settings, audit |
+| Admin models | lib/models/admin_models.dart | Audit log, consumer/product/cylinder/settings/dashboard projections |
+| Analytics service | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
+| Analytics models | lib/models/analytics.dart | Reporting value objects and fixed timezone/currency |
+| Admin UI kit | lib/screens/admin/widgets/admin_ui.dart | Cards, badges, filters, empty/error/loading states, formatters |
+| Formatters | lib/utils/formatters.dart | TZS, percent, date/time, duration, initials |
+| Admin tests | test/admin_console_test.dart | Guard, lifecycle, responsive shell, dark mode |
+| Analytics tests | test/analytics_test.dart | KPI math, trend range, breakdowns, CSV |
 | Roadmap | ROADMAP.md | Project roadmap and later phases |
 
 ---
 
 ## 🎯 Current Gaps (Priority Order)
 
-### 🚧 Phase 2 — Admin & Operations Console
-- Replacing the admin stub with a responsive operations console.
-- Vendor lifecycle + KYC review with audit logging.
-- Global orders, consumer lookup, inventory visibility, settings.
-- Operational analytics: 7/30/90-day KPIs, trends, top vendors, demand mix,
-  district performance, vendor scorecards, CSV export.
-- Plan: `phases/phase-02-admin-panel/plan.md`.
+### ✅ Phase 2 — Admin & Operations Console (complete)
+- Shipped and verified: shell/navigation, dashboard, vendor lifecycle + KYC,
+  global orders, consumers, inventory, settings, audit trail, analytics, guard.
+- Record: `phases/phase-02-admin-panel/implementation.md`.
+- Follow-ups: Firestore rules/server-side admin enforcement, pagination,
+  analytics daily rollups, secure admin identity.
 
 ### ❌ Phase 3 — Vendor Verified Role
 - No verified field in Vendor model.
@@ -100,8 +126,7 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Finish Phase 2 implementation and record it in
-   `phases/phase-02-admin-panel/implementation.md`.
-2. Update this file with verified Phase 2 evidence and test results.
-3. Phase 3 — vendor verified role.
-4. Phase 4 — vendor settings and profile.
+1. Phase 3 — vendor verified role.
+2. Phase 4 — vendor settings and profile.
+3. Scale/security hardening: Firestore rules, server-side admin checks, daily
+   analytics rollups, order pagination, secure admin identity.

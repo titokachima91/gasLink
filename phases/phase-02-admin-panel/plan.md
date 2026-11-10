@@ -1,6 +1,6 @@
 # Phase 02 — Admin & Operations Console
 
-> **Status:** 🚧 In progress
+> **Status:** ✅ Complete — see [`implementation.md`](implementation.md)
 > **Roadmap:** [`../../ROADMAP.md`](../../ROADMAP.md)
 > **Goal:** replace the admin stub with a real operations console for vendor
 > approval, order oversight, consumer lookup, inventory visibility, and audit.

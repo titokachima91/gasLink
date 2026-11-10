@@ -1,7 +1,7 @@
 # GasLink — Project Guide
 
-> **Last updated:** 2026-11-10
-> **Branch:** `harden-source-of-truth`  
+> **Last updated:** 2026-11-11
+> **Branch:** `harden-source-of-truth`
 > **Primary reference:** `PROGRESS.md` is the authoritative master file for this project.
 
 ---
@@ -20,7 +20,7 @@ This is a **documentation-first project**: plan before code, record after code.
 | File | Role | When to Update |
 |------|------|----------------|
 | **`PROGRESS.md`** | **Master reference** — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
-| **`ROADMAP.md`** | Project-wide roadmap and Phase 1 completion checklist | When priorities or phase status change |
+| **`ROADMAP.md`** | Project-wide roadmap and phase status | When priorities or phase status change |
 | `phases/<phase-name>/plan.md` | Per-phase implementation plan — what the issue is, why it matters, how to fix | When starting a new phase |
 | `phases/<phase-name>/implementation.md` | Per-phase implementation record — what was done, steps taken, problems/pivots | **After** each phase is implemented |
 
@@ -43,14 +43,17 @@ This is a **documentation-first project**: plan before code, record after code.
 | 7 | Role Router | `lib/screens/role_router.dart` |
 | 8 | Circle FIFO | `lib/utils/cylinder_fifo.dart` |
 | 9 | Theme System | `lib/core/theme.dart`, `lib/core/theme_controller.dart`, `lib/core/theme_ext.dart` |
+| 10 | Admin Console | `lib/screens/admin/`, `lib/services/admin_service.dart`, `lib/core/admin_guard.dart` |
+| 11 | Operational Analytics | `lib/services/analytics_service.dart`, `lib/models/analytics.dart` |
+| 12 | Admin Inventory & Audit | `lib/screens/admin/admin_inventory_screen.dart`, `lib/screens/admin/admin_audit_log_screen.dart` |
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🚧 | Admin & Operations Console (includes analytics) | `lib/screens/admin/`, `lib/services/admin_service.dart` |
 | 🔴 | Vendor verified Role | `lib/models/vendor.dart` (no `verified` field) |
 | 🟡 | Vendor Settings | No file exists |
+| 🟡 | Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination |
 
 ---
 
@@ -107,6 +110,7 @@ Record phase rollback points here after each push.
 
 | Checkpoint | Commit | Remote | Notes |
 |---|---|---|---|
-| Phase 1 + docs baseline | _pending_ | `origin/harden-source-of-truth` | Pre-Phase 2 rollback point |
-| Phase 2 complete | _pending_ | `origin/harden-source-of-truth` | Admin & Operations Console |
+| Phase 1 + docs baseline | `4c89d66` | `origin/harden-source-of-truth` | Pre-Phase 2 rollback point |
+| Phase 2 code | `5bed4fb` | `origin/harden-source-of-truth` | Admin & Operations Console + analytics |
+| Phase 2 docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
 ---
