@@ -3,9 +3,10 @@
 > **Last updated:** 2026-11-11
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 3 — Vendor Verified Role
+> **Current focus:** Phase 4 — Vendor Settings & Profile
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
+> **Phase 3:** ✅ Vendor verified role complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -24,6 +25,7 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Screen-level theme migration | ✅ Complete |
 | Theme QA / guardrails | ✅ Complete (automated guard + startup smoke) |
 | Admin & Operations Console | ✅ Complete — Phase 2 |
+| Vendor verification | ✅ Complete — Phase 3 |
 
 ---
 
@@ -75,13 +77,23 @@ Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
 
 ---
 
+## ✅ Phase 3 — Vendor Verified Role (COMPLETE)
+
+Record: [`phases/phase-03-vendor-verified/implementation.md`](phases/phase-03-vendor-verified/implementation.md)
+
+- `Vendor` stores `verified`, `verifiedAt`, and `verifiedBy`.
+- Admins verify active vendors or remove verification with a required reason.
+- `verify_vendor` and `unverify_vendor` are written to the audit trail.
+- Consumer badges render only when the stored flag is true.
+- The consumer "Verified only" filter uses the real field instead of phone
+  presence.
+
+Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
+45/45 passing, including 4 new Phase 3 tests.
+
+---
+
 ## 🔜 Later Phases
-
-### Phase 3 — Vendor Verified Role
-
-- Add `verified` to the vendor model.
-- Set/clear verification from the admin console.
-- Show a verified badge on consumer-facing vendor cards and details.
 
 ### Phase 4 — Vendor Settings & Profile
 

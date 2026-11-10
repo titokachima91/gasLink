@@ -6,7 +6,8 @@
 > **Documentation:** [`ROADMAP.md`](ROADMAP.md) is the high-level project plan; `phases/<phase>/` holds per-phase plans and implementation records. This file is the authoritative status tracker.
 > **Theme:** Phase 1 complete — see `phases/phase-01-theme/implementation.md`.
 > **Admin console:** Phase 2 complete — see `phases/phase-02-admin-panel/implementation.md`.
-> **Current phase:** Phase 3 — Vendor Verified Role (next).
+> **Vendor verification:** Phase 3 complete — see `phases/phase-03-vendor-verified/implementation.md`.
+> **Current phase:** Phase 4 — Vendor Settings & Profile (next).
 
 ---
 
@@ -24,7 +25,7 @@
 | Theme System | ✅ **Complete** — Forest Green light/dark/system palette, persisted picker, semantic tokens, all screens migrated |
 | Admin & Operations Console | ✅ **Complete** — responsive shell, dashboard, vendors, orders, consumers, inventory, settings, audit, guard |
 | Operational Analytics | ✅ **Complete** — 7/30/90-day KPIs, trends, scorecards, demand mix, CSV export |
-| Vendor verified Role | ❌ **Not done** — Phase 3 |
+| Vendor verified Role | ✅ **Complete** — explicit `verified` field, audited admin action, consumer badges, real verified-only filter |
 | Vendor Profile | ⚠️ **Exists** but no image upload (Phase 4) |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
@@ -52,6 +53,7 @@
 | 16 | Operational analytics | `AnalyticsService` fixed definitions; 7/30/90-day KPIs, trend, status mix, top vendors, demand, districts, scorecards, CSV |
 | 17 | Inventory & settings | Brand/size aggregation with out-of-stock filter and vendor offers; commission/support settings with audit trail |
 | 18 | Admin test coverage | `test/admin_console_test.dart` (6) + `test/analytics_test.dart` (5); full suite 41/41 passing; analyzer 0 errors / 0 warnings |
+| 19 | Vendor verification | `Vendor.verified/verifiedAt/verifiedBy`; audited `verify_vendor`/`unverify_vendor`; consumer badges gated by the flag; `verifiedOnly` filter uses the field |
 
 ### Hardcoded Login (Seed Credential)
 
@@ -70,6 +72,16 @@
 | Responsive shell | 400×800 bottom navigation; 1280×900 `NavigationRail` |
 | Dark mode | Admin shell renders without exceptions |
 | Manual device QA | Still recommended before pilot (local macOS/web build constraints) |
+
+### Phase 3 Verification
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | 0 errors, 0 warnings, 51 pre-existing info lints |
+| `flutter test` | 45/45 passing |
+| Vendor verification tests | 4 new tests: model round-trip, verified-only filter, badge light/dark, icon-only badge |
+| Audit coverage | `verify_vendor` and `unverify_vendor` written in the same batch as the vendor update |
+| Consumer gating | Badges render only when `verified == true` on all updated discovery surfaces |
 
 ---
 
@@ -92,7 +104,9 @@
 | Theme picker | lib/widgets/theme_mode_button.dart | System/Light/Dark picker |
 | Admin shell | lib/screens/admin/admin_shell.dart | Responsive console navigation and admin entry point |
 | Admin guard | lib/core/admin_guard.dart | Central client-side admin access check |
-| Admin service | lib/services/admin_service.dart | Vendor lifecycle, orders, consumers, inventory, settings, audit |
+| Admin service | lib/services/admin_service.dart | Vendor lifecycle/verification, orders, consumers, inventory, settings, audit |
+| Vendor model | lib/models/vendor.dart | Lifecycle, KYC, and verified trust fields |
+| Verified badge | lib/widgets/verified_badge.dart | Shared consumer trust badge, gated by the vendor flag |
 | Admin models | lib/models/admin_models.dart | Audit log, consumer/product/cylinder/settings/dashboard projections |
 | Analytics service | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
 | Analytics models | lib/models/analytics.dart | Reporting value objects and fixed timezone/currency |
@@ -100,6 +114,7 @@
 | Formatters | lib/utils/formatters.dart | TZS, percent, date/time, duration, initials |
 | Admin tests | test/admin_console_test.dart | Guard, lifecycle, responsive shell, dark mode |
 | Analytics tests | test/analytics_test.dart | KPI math, trend range, breakdowns, CSV |
+| Verification tests | test/vendor_verified_test.dart | Model round-trip, verified-only filter, badge rendering |
 | Roadmap | ROADMAP.md | Project roadmap and later phases |
 
 ---
@@ -113,9 +128,12 @@
 - Follow-ups: Firestore rules/server-side admin enforcement, pagination,
   analytics daily rollups, secure admin identity.
 
-### ❌ Phase 3 — Vendor Verified Role
-- No verified field in Vendor model.
-- Target: Add verified field, set via admin panel, display on consumer side.
+### ✅ Phase 3 — Vendor Verified Role (complete)
+- Shipped and verified: explicit `verified` flag, audited verify/unverify
+  actions, admin indicators, consumer badges, real verified-only filter.
+- Record: `phases/phase-03-vendor-verified/implementation.md`.
+- Follow-ups: Firestore rules for `verified`, verification expiry/re-review,
+  vendor-facing verification status panel.
 
 ### ⚠️ Phase 4 — Vendor Settings
 - No vendor settings screen.
@@ -126,7 +144,7 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Phase 3 — vendor verified role.
-2. Phase 4 — vendor settings and profile.
+1. Phase 4 — vendor settings and profile.
+2. Phase 5 — notifications and polish.
 3. Scale/security hardening: Firestore rules, server-side admin checks, daily
    analytics rollups, order pagination, secure admin identity.
