@@ -34,6 +34,8 @@ class Order {
   final double? longitude;
   final DateTime createdAt;
   final DateTime? deliveredAt;
+  final DateTime? cancelledAt;
+  final String cancellationReason;
 
   Order({
     required this.id,
@@ -60,6 +62,8 @@ class Order {
     this.longitude,
     required this.createdAt,
     this.deliveredAt,
+    this.cancelledAt,
+    this.cancellationReason = '',
   });
 
   Map<String, dynamic> toMap() => {
@@ -87,6 +91,9 @@ class Order {
         'created_at': Timestamp.fromDate(createdAt),
         'delivered_at':
             deliveredAt == null ? null : Timestamp.fromDate(deliveredAt!),
+        'cancelled_at':
+            cancelledAt == null ? null : Timestamp.fromDate(cancelledAt!),
+        'cancellation_reason': cancellationReason,
       };
 
   factory Order.fromDoc(DocumentSnapshot doc) {
@@ -121,6 +128,10 @@ class Order {
           (d['createdAt'] as Timestamp?)?.toDate() ??
           DateTime.now(),
       deliveredAt: (d['delivered_at'] as Timestamp?)?.toDate(),
+      cancelledAt: (d['cancelled_at'] as Timestamp?)?.toDate(),
+      cancellationReason:
+          (d['cancellation_reason'] ?? d['cancellationReason'] ?? '')
+              .toString(),
     );
   }
 }

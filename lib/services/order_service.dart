@@ -254,6 +254,10 @@ class OrderService {
             notificationTitle = 'Imewasili! / Delivered!';
             notificationBody =
                 'Oda yako ya $brandName imekamilika kikamilifu. Asante!';
+          } else if (status == 'cancelled' || status == 'rejected') {
+            notificationTitle = 'Oda Imesitishwa / Order Cancelled';
+            notificationBody =
+                'Oda yako ya $brandName imesitishwa. Wasiliana na msaada kama una swali.';
           }
 
           await NotificationService.instance.sendNotificationToUser(

@@ -139,6 +139,7 @@ class _BrandEditorScreenState extends State<BrandEditorScreen> {
                 'size': size,
                 'price': price,
                 'in_stock': _inStock[size] ?? true,
+                'inStock': _inStock[size] ?? true,
                 'updated_at': FieldValue.serverTimestamp(),
               },
               SetOptions(merge: true));

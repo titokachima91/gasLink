@@ -85,6 +85,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
         'size': size,
         'price': double.tryParse(_priceController.text.trim()) ?? 0.0,
         'in_stock': true,
+        'inStock': true,
         'category':
             _selectedCategory, // refill | full_set | accessories | services
         'updated_at': FieldValue.serverTimestamp(),

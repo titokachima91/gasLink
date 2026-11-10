@@ -39,7 +39,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Future<void> _toggleStock(String docId, bool currentStatus) async {
     try {
-      await _productsRef.doc(docId).update({'inStock': !currentStatus});
+      await _productsRef.doc(docId).update({
+        'inStock': !currentStatus,
+        'in_stock': !currentStatus,
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,10 +115,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   if (context.mounted) Navigator.pop(context);
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
-              child:
-                  Text('Hifadhi',
-                      style: TextStyle(color: context.colors.onPrimary)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: context.colors.primary),
+              child: Text('Hifadhi',
+                  style: TextStyle(color: context.colors.onPrimary)),
             ),
           ],
         );
@@ -167,7 +170,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'Bado huna bidhaa zozote / No products added',
-                    style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 14),
+                    style: TextStyle(
+                        color: context.colors.onSurfaceVariant, fontSize: 14),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -226,7 +230,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               Text(
                                 'TZS $price',
                                 style: TextStyle(
-                                    color: context.colors.onSurfaceVariant, fontSize: 12),
+                                    color: context.colors.onSurfaceVariant,
+                                    fontSize: 12),
                               ),
                             ],
                           ),
@@ -239,7 +244,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             inStock ? 'Ipo' : 'Hakuna',
                             style: TextStyle(
                               fontSize: 12,
-                              color: inStock ? context.gasColors.success : context.colors.error,
+                              color: inStock
+                                  ? context.gasColors.success
+                                  : context.colors.error,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -250,7 +257,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           ),
                           IconButton(
                             icon: Icon(Icons.delete_outline,
-                                color: context.colors.onSurfaceVariant, size: 20),
+                                color: context.colors.onSurfaceVariant,
+                                size: 20),
                             onPressed: () =>
                                 _deleteProduct(docId, '$brand $size'),
                           ),

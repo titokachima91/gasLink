@@ -6,6 +6,43 @@ library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Canonical vendor lifecycle states used by the admin console.
+class VendorStatus {
+  VendorStatus._();
+
+  static const String pending = 'pending';
+  static const String active = 'active';
+  static const String suspended = 'suspended';
+  static const String rejected = 'rejected';
+
+  static const List<String> values = [pending, active, suspended, rejected];
+
+  static String normalize(String? raw, {bool? legacyActive}) {
+    final value = (raw ?? '').trim().toLowerCase();
+    if (values.contains(value)) return value;
+    if (value == 'approved' || value == 'verified') return active;
+    if (value == 'disabled' || value == 'inactive') return suspended;
+    if (value == 'declined') return rejected;
+    if (legacyActive != null) return legacyActive ? active : suspended;
+    return active;
+  }
+
+  static String label(String status) {
+    switch (status) {
+      case pending:
+        return 'Pending review';
+      case active:
+        return 'Active';
+      case suspended:
+        return 'Suspended';
+      case rejected:
+        return 'Rejected';
+      default:
+        return 'Unknown';
+    }
+  }
+}
+
 class Vendor {
   final String id; // = Auth UID (doc ID), set by admin during onboarding
   final String ownerUid;
@@ -38,6 +75,13 @@ class Vendor {
   final bool active;
   final double rating;
   final DateTime createdAt;
+
+  // --- Lifecycle & KYC (Phase 2 admin console) ---
+  final String status; // pending | active | suspended | rejected
+  final String statusReason;
+  final DateTime? kycReviewedAt;
+  final String kycReviewedBy;
+  final DateTime? updatedAt;
 
   // --- TIER 1: MANDATORY REQUIREMENTS ---
   final bool hasOperationalScale;
@@ -80,6 +124,11 @@ class Vendor {
     this.active = true,
     this.rating = 0,
     required this.createdAt,
+    this.status = VendorStatus.active,
+    this.statusReason = '',
+    this.kycReviewedAt,
+    this.kycReviewedBy = '',
+    this.updatedAt,
     this.hasOperationalScale = false,
     this.offeredServices = const [],
     this.businessLicenseUrl,
@@ -92,6 +141,66 @@ class Vendor {
   });
 
   String get displayName => businessName.isEmpty ? 'Vendor' : businessName;
+
+  bool get isActive => status == VendorStatus.active;
+  bool get isPending => status == VendorStatus.pending;
+  bool get isSuspended => status == VendorStatus.suspended;
+  bool get isRejected => status == VendorStatus.rejected;
+
+  String get statusLabel => VendorStatus.label(status);
+
+  /// Status-aware copy used by the admin console. The vendor profile form can
+  /// update business fields without silently changing the lifecycle state.
+  Vendor copyWith({
+    String? status,
+    String? statusReason,
+    DateTime? kycReviewedAt,
+    String? kycReviewedBy,
+    DateTime? updatedAt,
+    bool? active,
+  }) {
+    return Vendor(
+      id: id,
+      ownerUid: ownerUid,
+      businessName: businessName,
+      phone: phone,
+      secondaryPhone: secondaryPhone,
+      email: email,
+      region: region,
+      district: district,
+      ward: ward,
+      street: street,
+      areaText: areaText,
+      latitude: latitude,
+      longitude: longitude,
+      deliveryRadiusKm: deliveryRadiusKm,
+      deliveryFeeModel: deliveryFeeModel,
+      openingHours: openingHours,
+      acceptsCash: acceptsCash,
+      acceptsMobileMoney: acceptsMobileMoney,
+      lipaNumber: lipaNumber,
+      imageUrl: imageUrl,
+      stockedBrandNames: stockedBrandNames,
+      commissionRate: commissionRate,
+      active: active ?? this.active,
+      rating: rating,
+      createdAt: createdAt,
+      status: status ?? this.status,
+      statusReason: statusReason ?? this.statusReason,
+      kycReviewedAt: kycReviewedAt ?? this.kycReviewedAt,
+      kycReviewedBy: kycReviewedBy ?? this.kycReviewedBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      hasOperationalScale: hasOperationalScale,
+      offeredServices: offeredServices,
+      businessLicenseUrl: businessLicenseUrl,
+      wmaStickerUrl: wmaStickerUrl,
+      superDealerProofUrl: superDealerProofUrl,
+      agreedToConsumerProtection: agreedToConsumerProtection,
+      completedOrders: completedOrders,
+      avgDeliveryTimeMinutes: avgDeliveryTimeMinutes,
+      currentTier: currentTier,
+    );
+  }
 
   /// Dynamic completion percentage logic
   int get completionPercentage {
@@ -163,9 +272,15 @@ class Vendor {
         'imageUrl': imageUrl,
         'stockedBrandNames': stockedBrandNames,
         'commissionRate': commissionRate,
-        'active': active,
+        'active': status == VendorStatus.active,
         'rating': rating,
         'createdAt': Timestamp.fromDate(createdAt),
+        'status': status,
+        'statusReason': statusReason,
+        'kycReviewedAt':
+            kycReviewedAt == null ? null : Timestamp.fromDate(kycReviewedAt!),
+        'kycReviewedBy': kycReviewedBy,
+        'updatedAt': updatedAt == null ? null : Timestamp.fromDate(updatedAt!),
         // Tier 1
         'hasOperationalScale': hasOperationalScale,
         'offeredServices': offeredServices,
@@ -181,9 +296,16 @@ class Vendor {
       };
 
   factory Vendor.fromDoc(DocumentSnapshot doc) {
-    final d = doc.data() as Map<String, dynamic>? ?? {};
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return Vendor.fromMap(doc.id, data);
+  }
+
+  /// Testable map constructor. Existing documents may predate the lifecycle
+  /// fields, so `status` is derived from `active` when absent.
+  factory Vendor.fromMap(String id, Map<String, dynamic> d) {
+    final legacyActive = d['active'] as bool?;
     return Vendor(
-      id: doc.id,
+      id: id,
       ownerUid: d['ownerUid'] as String? ?? '',
       businessName: d['businessName'] as String? ?? '',
       phone: d['phone'] as String? ?? '',
@@ -207,9 +329,17 @@ class Vendor {
           .whereType<String>()
           .toList(),
       commissionRate: (d['commissionRate'] as num? ?? 0.03).toDouble(),
-      active: d['active'] as bool? ?? true,
+      active: legacyActive ?? true,
       rating: (d['rating'] as num? ?? 0).toDouble(),
-      createdAt: (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: _readDate(d['createdAt']) ?? DateTime.now(),
+      status: VendorStatus.normalize(
+        d['status'] as String?,
+        legacyActive: legacyActive,
+      ),
+      statusReason: d['statusReason'] as String? ?? '',
+      kycReviewedAt: _readDate(d['kycReviewedAt']),
+      kycReviewedBy: d['kycReviewedBy'] as String? ?? '',
+      updatedAt: _readDate(d['updatedAt']),
       // Tier 1
       hasOperationalScale: d['hasOperationalScale'] as bool? ?? false,
       offeredServices: (d['offeredServices'] as List<dynamic>? ?? [])
@@ -228,6 +358,13 @@ class Vendor {
       currentTier: (d['currentTier'] as num? ?? 1).toInt(),
     );
   }
+}
+
+DateTime? _readDate(dynamic value) {
+  if (value is Timestamp) return value.toDate();
+  if (value is DateTime) return value;
+  if (value is String && value.isNotEmpty) return DateTime.tryParse(value);
+  return null;
 }
 
 class SizeEntry {
