@@ -6,6 +6,7 @@
 > **Plan:** [`plan.md`](plan.md)
 > **Rollback baseline:** `20174c7`
 > **Phase 3 code commit:** `645126d`
+> **Phase 3 docs commit:** `4a93d24`
 
 ---
 

@@ -116,5 +116,5 @@ Record phase rollback points here after each push.
 | Phase 2 docs | `0ca4080` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 | Phase 2 push point | `20174c7` | `origin/harden-source-of-truth` | Pre-Phase 3 rollback point |
 | Phase 3 code | `645126d` | `origin/harden-source-of-truth` | Vendor verified role + tests (pushed) |
-| Phase 3 docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
+| Phase 3 docs | `4a93d24` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 ---
