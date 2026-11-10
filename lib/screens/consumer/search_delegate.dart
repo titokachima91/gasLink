@@ -17,6 +17,7 @@ library;
 
 import 'package:flutter/material.dart';
 import '../../core/session_data.dart';
+import '../../widgets/verified_badge.dart';
 import 'vendor_detail_screen.dart';
 
 import '../../core/theme_ext.dart';
@@ -157,14 +158,24 @@ class VendorSearchDelegate extends SearchDelegate<VendorOffer?> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          vendor.businessName.isEmpty
-                              ? 'Duka la Gesi'
-                              : vendor.businessName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                vendor.businessName.isEmpty
+                                    ? 'Duka la Gesi'
+                                    : vendor.businessName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            if (vendor.verified) ...[
+                              const SizedBox(width: 4),
+                              const VerifiedBadge(compact: true),
+                            ],
+                          ],
                         ),
                         if (vendor.area.isNotEmpty)
                           Text(

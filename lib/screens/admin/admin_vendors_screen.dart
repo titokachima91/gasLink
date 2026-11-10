@@ -248,6 +248,14 @@ class _VendorTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    if (vendor.verified) ...[
+                      Icon(
+                        Icons.verified,
+                        size: 16,
+                        color: context.gasColors.info,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     AdminStatusBadge(
                       status: vendor.status,
                       label: vendor.statusLabel,

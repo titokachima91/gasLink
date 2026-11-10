@@ -19,6 +19,7 @@ library;
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
+import '../../widgets/verified_badge.dart';
 import 'vendor_detail_screen.dart';
 
 import '../../core/theme_ext.dart';
@@ -66,7 +67,10 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
           offer.weights.any(
               (w) => w.weight.toLowerCase() == _selectedWeight!.toLowerCase());
 
-      return matchesQuery && matchesBrand && matchesWeight;
+      // 4. Verified-only filter uses the stored admin decision.
+      final matchesVerified = !_verifiedOnly || vendor.verified;
+
+      return matchesQuery && matchesBrand && matchesWeight && matchesVerified;
     }).toList();
 
     return Scaffold(
@@ -292,11 +296,8 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                               ),
                                             ),
                                             const SizedBox(width: 4),
-                                            Icon(
-                                              Icons.verified,
-                                              size: 16,
-                                              color: context.gasColors.info,
-                                            ),
+                                            if (vendor.verified)
+                                              const VerifiedBadge(compact: true),
                                           ],
                                         ),
                                         Text(

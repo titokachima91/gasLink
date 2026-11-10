@@ -56,7 +56,7 @@ class FilterSort {
           );
 
       // 4. Verified Status
-      final matchesVerified = !criteria.verifiedOnly || vendor.phone.isNotEmpty;
+      final matchesVerified = !criteria.verifiedOnly || vendor.verified;
 
       return matchesQuery && matchesBrand && matchesWeight && matchesVerified;
     }).toList();

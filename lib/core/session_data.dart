@@ -46,6 +46,7 @@ class Vendor {
   final String area;
   final double? latitude;
   final double? longitude;
+  final bool verified;
 
   const Vendor({
     required this.id,
@@ -54,6 +55,7 @@ class Vendor {
     required this.area,
     this.latitude,
     this.longitude,
+    this.verified = false,
   });
 }
 
@@ -149,6 +151,7 @@ class SessionData {
         area: combinedArea.isNotEmpty ? combinedArea : district,
         latitude: (m['latitude'] as num?)?.toDouble(),
         longitude: (m['longitude'] as num?)?.toDouble(),
+        verified: m['verified'] as bool? ?? false,
       );
       vendorBrandsMap[d.id] =
           List<String>.from(m['brands'] ?? m['stockedBrandNames'] ?? []);

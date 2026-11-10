@@ -129,6 +129,56 @@ class AdminService {
     await batch.commit();
   }
 
+  /// Grants or removes the public verified badge.
+  ///
+  /// Verification is an explicit trust decision, independent of lifecycle and
+  /// tier. Only active vendors can be verified; removal always requires a
+  /// reason so the audit trail explains why trust was withdrawn.
+  Future<void> setVendorVerified({
+    required String vendorId,
+    required bool verified,
+    String reason = '',
+  }) async {
+    final ref = _vendors.doc(vendorId);
+    final doc = await ref.get();
+    if (!doc.exists) throw StateError('Vendor not found');
+
+    final data = doc.data() ?? {};
+    final previousVerified = data['verified'] as bool? ?? false;
+    if (previousVerified == verified) return;
+
+    final status = VendorStatus.normalize(
+      data['status'] as String?,
+      legacyActive: data['active'] as bool?,
+    );
+    if (verified && status != VendorStatus.active) {
+      throw StateError('Only active vendors can be verified');
+    }
+
+    final batch = _db.batch();
+    batch.update(ref, {
+      'verified': verified,
+      'verifiedAt': verified ? FieldValue.serverTimestamp() : null,
+      'verifiedBy': verified ? _actorUid : '',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    final audit = AdminAuditLog(
+      id: '',
+      actorUid: _actorUid,
+      actorRole: AuthService.roleAdmin,
+      action: verified ? 'verify_vendor' : 'unverify_vendor',
+      entityType: 'vendor',
+      entityId: vendorId,
+      before: {'verified': previousVerified},
+      after: {'verified': verified},
+      reason: reason.trim(),
+      createdAt: DateTime.now(),
+    );
+    batch.set(_audit.doc(), audit.toMap());
+    await batch.commit();
+  }
+
   // ---------------------------------------------------------------------------
   // Orders
   // ---------------------------------------------------------------------------

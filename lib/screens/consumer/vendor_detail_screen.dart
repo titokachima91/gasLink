@@ -55,6 +55,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'consumer_order_dialog.dart';
 
 import '../../core/theme_ext.dart';
+import '../../widgets/verified_badge.dart';
 
 class VendorDetailScreen extends StatefulWidget {
   const VendorDetailScreen({
@@ -177,6 +178,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   /// Builds Vendor Profile Card (Location, Working Hours, About Summary & Extra Services)
   /// Builds Vendor Profile Card (Location, Working Hours, Dynamic ETA, About Summary & Extra Services)
   Widget _buildVendorHeaderCard(Map<String, dynamic> data) {
+    final verified = data['verified'] as bool? ?? false;
     final street = (data['street'] ?? data['area'] ?? '') as String;
     final district = (data['district'] ?? '') as String;
     final openingHours = (data['openingHours'] ??
@@ -251,21 +253,10 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             fontSize: 17, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Icon(Icons.verified,
-                              size: 14, color: context.gasColors.info),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Duka Lililothibitishwa',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: context.gasColors.info,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                      if (verified)
+                        const VerifiedBadge(
+                          label: 'Duka Lililothibitishwa',
+                        ),
                     ],
                   ),
                 ),

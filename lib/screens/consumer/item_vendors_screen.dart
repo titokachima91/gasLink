@@ -2,6 +2,7 @@
 //This screen displays a list of vendors offering a specific item (brand or accessory/service) in a given category (refill, full set, accessories, services). Users can sort the vendors by price and select a vendor to place an order.
 import 'package:flutter/material.dart';
 import '../../core/session_data.dart';
+import '../../widgets/verified_badge.dart';
 import 'consumer_order_dialog.dart';
 
 import '../../core/theme_ext.dart';
@@ -171,13 +172,24 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          vendor.businessName.isNotEmpty
-                                              ? vendor.businessName
-                                              : 'Muuzaji',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                vendor.businessName.isNotEmpty
+                                                    ? vendor.businessName
+                                                    : 'Muuzaji',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14),
+                                              ),
+                                            ),
+                                            if (vendor.verified) ...[
+                                              const SizedBox(width: 4),
+                                              const VerifiedBadge(
+                                                  compact: true),
+                                            ],
+                                          ],
                                         ),
                                         Text(
                                           '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',

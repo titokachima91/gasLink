@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
+import '../../widgets/verified_badge.dart';
 import 'consumer_order_dialog.dart';
 
 import '../../core/theme_ext.dart';
@@ -313,17 +314,11 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.verified,
-                              size: 14, color: context.gasColors.info),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Verified Vendor',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: context.gasColors.info,
-                              fontWeight: FontWeight.w600,
+                          if (vendor.verified)
+                            const VerifiedBadge(
+                              label: 'Verified Vendor',
+                              compact: true,
                             ),
-                          ),
                           if (vendor.phone.isNotEmpty) ...[
                             const SizedBox(width: 8),
                             Text(

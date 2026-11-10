@@ -15,6 +15,7 @@ import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
 import '../../widgets/theme_mode_button.dart';
+import '../../widgets/verified_badge.dart';
 import 'item_vendors_screen.dart';
 
 import '../../core/theme_ext.dart';
@@ -1332,14 +1333,11 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.verified,
-                            size: 12, color: context.gasColors.info),
-                        const SizedBox(width: 4),
-                        Text('Verified Shop',
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: context.gasColors.info,
-                                fontWeight: FontWeight.w600)),
+                        if (vendor.verified)
+                          const VerifiedBadge(
+                            label: 'Verified Shop',
+                            compact: true,
+                          ),
                         if (minPrice > 0) ...[
                           const SizedBox(width: 8),
                           Text(

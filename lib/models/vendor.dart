@@ -83,6 +83,11 @@ class Vendor {
   final String kycReviewedBy;
   final DateTime? updatedAt;
 
+  // --- Trust (Phase 3 verified role) ---
+  final bool verified;
+  final DateTime? verifiedAt;
+  final String verifiedBy;
+
   // --- TIER 1: MANDATORY REQUIREMENTS ---
   final bool hasOperationalScale;
   final List<String> offeredServices; // Must select >= 2 services
@@ -129,6 +134,9 @@ class Vendor {
     this.kycReviewedAt,
     this.kycReviewedBy = '',
     this.updatedAt,
+    this.verified = false,
+    this.verifiedAt,
+    this.verifiedBy = '',
     this.hasOperationalScale = false,
     this.offeredServices = const [],
     this.businessLicenseUrl,
@@ -146,6 +154,7 @@ class Vendor {
   bool get isPending => status == VendorStatus.pending;
   bool get isSuspended => status == VendorStatus.suspended;
   bool get isRejected => status == VendorStatus.rejected;
+  bool get isVerified => verified;
 
   String get statusLabel => VendorStatus.label(status);
 
@@ -157,6 +166,9 @@ class Vendor {
     DateTime? kycReviewedAt,
     String? kycReviewedBy,
     DateTime? updatedAt,
+    bool? verified,
+    DateTime? verifiedAt,
+    String? verifiedBy,
     bool? active,
   }) {
     return Vendor(
@@ -190,6 +202,9 @@ class Vendor {
       kycReviewedAt: kycReviewedAt ?? this.kycReviewedAt,
       kycReviewedBy: kycReviewedBy ?? this.kycReviewedBy,
       updatedAt: updatedAt ?? this.updatedAt,
+      verified: verified ?? this.verified,
+      verifiedAt: verifiedAt ?? this.verifiedAt,
+      verifiedBy: verifiedBy ?? this.verifiedBy,
       hasOperationalScale: hasOperationalScale,
       offeredServices: offeredServices,
       businessLicenseUrl: businessLicenseUrl,
@@ -281,6 +296,10 @@ class Vendor {
             kycReviewedAt == null ? null : Timestamp.fromDate(kycReviewedAt!),
         'kycReviewedBy': kycReviewedBy,
         'updatedAt': updatedAt == null ? null : Timestamp.fromDate(updatedAt!),
+        'verified': verified,
+        'verifiedAt':
+            verifiedAt == null ? null : Timestamp.fromDate(verifiedAt!),
+        'verifiedBy': verifiedBy,
         // Tier 1
         'hasOperationalScale': hasOperationalScale,
         'offeredServices': offeredServices,
@@ -340,6 +359,9 @@ class Vendor {
       kycReviewedAt: _readDate(d['kycReviewedAt']),
       kycReviewedBy: d['kycReviewedBy'] as String? ?? '',
       updatedAt: _readDate(d['updatedAt']),
+      verified: d['verified'] as bool? ?? false,
+      verifiedAt: _readDate(d['verifiedAt']),
+      verifiedBy: d['verifiedBy'] as String? ?? '',
       // Tier 1
       hasOperationalScale: d['hasOperationalScale'] as bool? ?? false,
       offeredServices: (d['offeredServices'] as List<dynamic>? ?? [])

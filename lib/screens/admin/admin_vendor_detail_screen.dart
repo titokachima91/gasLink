@@ -73,6 +73,7 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
   Future<String?> _askReason({
     required String title,
     required String hint,
+    bool required = true,
   }) async {
     final controller = TextEditingController();
     final result = await showDialog<String>(
@@ -94,7 +95,7 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
           FilledButton(
             onPressed: () {
               final reason = controller.text.trim();
-              if (reason.isEmpty) return;
+              if (required && reason.isEmpty) return;
               Navigator.pop(dialogContext, reason);
             },
             child: const Text('Confirm'),
@@ -103,8 +104,47 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
       ),
     );
     controller.dispose();
-    if (result == null || result.trim().isEmpty) return null;
+    if (result == null) return null;
     return result.trim();
+  }
+
+  Future<void> _setVerified(Vendor vendor, bool verified) async {
+    final reason = await _askReason(
+      title: verified ? 'Verify vendor' : 'Remove verification',
+      hint: verified
+          ? 'Optional note for the audit trail'
+          : 'Why is verification being removed?',
+      required: !verified,
+    );
+    if (reason == null) return;
+
+    setState(() => _busy = true);
+    try {
+      await AdminService.instance.setVendorVerified(
+        vendorId: vendor.id,
+        verified: verified,
+        reason: reason,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            verified ? 'Vendor is now verified' : 'Vendor verification removed',
+          ),
+          backgroundColor: context.gasColors.success,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not update verification: $error'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _openDocument(String url) async {
@@ -161,6 +201,17 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
                   requireReason: true,
                 ),
                 onReactivate: () => _setStatus(vendor, VendorStatus.active),
+              ),
+              const SizedBox(height: 22),
+              const AdminSectionHeader(
+                title: 'Trust & verification',
+                subtitle: 'Explicit admin decision shown as a public badge.',
+              ),
+              _VerificationCard(
+                vendor: vendor,
+                busy: _busy,
+                onVerify: () => _setVerified(vendor, true),
+                onUnverify: () => _setVerified(vendor, false),
               ),
               const SizedBox(height: 22),
               const AdminSectionHeader(
@@ -451,6 +502,12 @@ class _VendorHeader extends StatelessWidget {
                       status: vendor.status,
                       label: vendor.statusLabel,
                     ),
+                    if (vendor.verified)
+                      AdminKeyValueChip(
+                        label: 'Trust',
+                        value: 'Verified',
+                        color: context.gasColors.success,
+                      ),
                     AdminKeyValueChip(
                       label: 'Tier',
                       value: '${vendor.currentTier}',
@@ -537,6 +594,101 @@ class _LifecycleActions extends StatelessWidget {
       children: [
         for (final child in children) SizedBox(width: 160, child: child),
       ],
+    );
+  }
+}
+
+class _VerificationCard extends StatelessWidget {
+  const _VerificationCard({
+    required this.vendor,
+    required this.busy,
+    required this.onVerify,
+    required this.onUnverify,
+  });
+
+  final Vendor vendor;
+  final bool busy;
+  final VoidCallback onVerify;
+  final VoidCallback onUnverify;
+
+  @override
+  Widget build(BuildContext context) {
+    final verified = vendor.verified;
+    final detail = [
+      if (vendor.verifiedAt != null)
+        'Verified ${formatDateTime(vendor.verifiedAt)}',
+      if (vendor.verifiedBy.isNotEmpty) 'by ${vendor.verifiedBy}',
+    ].join(' ');
+
+    return AdminCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                verified ? Icons.verified : Icons.gpp_maybe_outlined,
+                color: verified
+                    ? context.gasColors.success
+                    : context.colors.outline,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      verified ? 'Verified vendor' : 'Not verified',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      verified
+                          ? 'The public badge is visible to consumers.'
+                          : 'The public badge is hidden from consumers.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (verified && detail.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              detail,
+              style: TextStyle(
+                fontSize: 11,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          if (verified)
+            OutlinedButton.icon(
+              onPressed: busy ? null : onUnverify,
+              icon: const Icon(Icons.remove_moderator_outlined),
+              label: const Text('Remove verification'),
+            )
+          else if (vendor.isActive)
+            FilledButton.icon(
+              onPressed: busy ? null : onVerify,
+              icon: const Icon(Icons.verified),
+              label: const Text('Verify vendor'),
+            )
+          else
+            Text(
+              'Activate the vendor before granting verification.',
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
