@@ -3,11 +3,12 @@
 > **Last updated:** 2026-11-11
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 5 — Notifications & Polish
+> **Current focus:** Phase 6 — Scale & Security Hardening
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
 > **Phase 4:** ✅ Vendor settings & profile complete
+> **Phase 5:** ✅ Notifications & polish complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -28,6 +29,7 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Admin & Operations Console | ✅ Complete — Phase 2 |
 | Vendor verification | ✅ Complete — Phase 3 |
 | Vendor settings & commission | ✅ Complete — Phase 4 |
+| Notifications & polish | ✅ Complete — Phase 5 |
 
 ---
 
@@ -112,13 +114,22 @@ Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
 
 ---
 
+## ✅ Phase 5 — Notifications & Polish (COMPLETE)
+
+Record: [`phases/phase-05-notifications/implementation.md`](phases/phase-05-notifications/implementation.md)
+
+- Role-aware tap-through routing for order notifications.
+- In-app banner for foreground notifications with a "View" action.
+- Background tap and cold-start message handling via the global navigator.
+- Offline banner on consumer home, vendor dashboard, and admin shell.
+- Accessibility polish on the vendor store status toggle.
+
+Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
+58/58 passing, including 4 new Phase 5 tests.
+
+---
+
 ## 🔜 Later Phases
-
-### Phase 5 — Notifications & Polish
-
-- Push notification routing polish.
-- Offline/error states.
-- Performance and accessibility pass.
 
 ### Phase 6 — Scale & Security Hardening
 

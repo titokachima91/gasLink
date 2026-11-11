@@ -8,7 +8,8 @@
 > **Admin console:** Phase 2 complete — see `phases/phase-02-admin-panel/implementation.md`.
 > **Vendor verification:** Phase 3 complete — see `phases/phase-03-vendor-verified/implementation.md`.
 > **Vendor settings:** Phase 4 complete — see `phases/phase-04-vendor-settings/implementation.md`.
-> **Current phase:** Phase 5 — Notifications & Polish (next).
+> **Notifications & polish:** Phase 5 complete — see `phases/phase-05-notifications/implementation.md`.
+> **Current phase:** Phase 6 — Scale & Security Hardening (next).
 
 ---
 
@@ -29,6 +30,7 @@
 | Vendor verified Role | ✅ **Complete** — explicit `verified` field, audited admin action, consumer badges, real verified-only filter |
 | Vendor Settings & Profile | ✅ **Complete** — settings screen, admin-controlled commission model, secure Storage photo upload |
 | Vendor Profile | ✅ **Complete** — profile management plus gallery photo upload to Firebase Storage |
+| Notifications & Polish | ✅ **Complete** — tap-through routing, in-app banners, offline banners, store-toggle semantics |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -59,6 +61,10 @@
 | 20 | Commission model | `Vendor.commissionModel/subscriptionFee`; admin-only editor with audit; orders stamp `commission_model`; subscription vendors pay no per-order cut |
 | 21 | Vendor settings | `vendor_settings_screen.dart` with billing terms, profile shortcut, theme, notifications, about, sign-out; wired from dashboard and drawer |
 | 22 | Shop photo upload | `VendorImageService` uploads to Storage (`vendor_images/`) with 5 MB/image-type rules; picker + preview in profile |
+| 23 | Notification routing | Role-aware tap-through: admin → order detail, vendor → orders, consumer → live tracker; cold-start + background taps |
+| 24 | In-app banners | Foreground order notifications show a MaterialBanner with a View action |
+| 25 | Offline visibility | `OfflineBanner` on consumer home, vendor dashboard, and admin shell via `connectivity_plus` |
+| 26 | Accessibility | Semantics on the vendor OPEN/CLOSED toggle; tooltips on admin and vendor app bar actions |
 
 ### Hardcoded Login (Seed Credential)
 
@@ -99,6 +105,15 @@
 | Storage | `storage.rules` limits writes to authenticated users, `image/*`, < 5 MB |
 | Runtime storage QA | Requires Firebase anonymous auth + `firebase deploy --only storage`; client degrades with a clear error |
 
+### Phase 5 Verification
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | 0 errors, 0 warnings, 51 pre-existing info lints |
+| `flutter test` | 58/58 passing |
+| Phase 5 tests | 4 new tests: payload parsing, role routing, offline banner show/hide, dark mode |
+| Tap-through | Handled via FCM APIs; live-device QA recommended before pilot |
+
 ---
 
 ## 🔍 Key Code Locations
@@ -126,6 +141,8 @@
 | Vendor settings | lib/screens/vendor/vendor_settings_screen.dart | Vendor settings with billing terms, theme, notifications, sign-out |
 | Image upload | lib/services/vendor_image_service.dart | Storage upload with size/type validation and rules |
 | Storage rules | storage.rules | Public reads; authenticated, size/type-limited writes |
+| Notification routing | lib/core/notification_routing.dart | Role-aware order tap destinations |
+| Offline banner | lib/widgets/offline_banner.dart | Injectable connectivity stream |
 | Admin models | lib/models/admin_models.dart | Audit log, consumer/product/cylinder/settings/dashboard projections |
 | Analytics service | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
 | Analytics models | lib/models/analytics.dart | Reporting value objects and fixed timezone/currency |
@@ -135,6 +152,8 @@
 | Analytics tests | test/analytics_test.dart | KPI math, trend range, breakdowns, CSV |
 | Verification tests | test/vendor_verified_test.dart | Model round-trip, verified-only filter, badge rendering |
 | Vendor settings tests | test/vendor_settings_test.dart | Commission model, order stamping, image validation, billing card |
+| Notification routing tests | test/notification_routing_test.dart | Payload parsing and role mapping |
+| Offline banner tests | test/offline_banner_test.dart | Show/hide with injected connectivity |
 | Roadmap | ROADMAP.md | Project roadmap and later phases |
 
 ---
@@ -163,15 +182,23 @@
   path ownership (Phase 6), Storage retention cleanup, Firebase console
   enablement (anonymous auth + storage rules deploy).
 
-### ⚠️ Phase 5 — Notifications & Polish
-- Notification routing polish, offline/error states, performance and
-  accessibility pass.
+### ✅ Phase 5 — Notifications & Polish (complete)
+- Shipped and verified: role-aware notification tap-through, in-app banners,
+  offline banners, accessibility semantics.
+- Record: `phases/phase-05-notifications/implementation.md`.
+- Follow-ups: deep links, server-side notification preferences, full
+  screen-reader audit.
+
+### ⚠️ Phase 6 — Scale & Security Hardening
+- Firestore security rules and Cloud Functions for server-side admin checks.
+- Daily analytics rollups and scheduled exports.
+- Multi-country/multi-currency configuration.
+- Rider dispatch, payments, payouts, and settlement.
+- Subscription billing and invoicing.
 
 ---
 
 ## 🔜 Immediate Next Steps
 
-1. Phase 5 — notifications and polish.
-2. Scale/security hardening: Firestore rules, server-side admin checks, daily
-   analytics rollups, order pagination, secure admin identity, subscription
-   billing.
+1. Phase 6 — scale and security hardening (rules, server-side checks,
+   analytics rollups, pagination, subscription billing).
