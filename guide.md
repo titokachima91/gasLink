@@ -130,5 +130,5 @@ Record phase rollback points here after each push.
 | Phase 5B design + landing | `2f30d8b` | `origin/harden-source-of-truth` | Design kit, landing page (pushed) |
 | Phase 5B restyles | `5e2c6d2` | `origin/harden-source-of-truth` | Vendor detail, home, dashboard (pushed) |
 | Phase 5B ads | `c1f44a8` | `origin/harden-source-of-truth` | Ad slots, AdvertiseScreen, admin review (pushed) |
-| Phase 5B docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
+| Phase 5B docs | `5e30bb5` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 ---
