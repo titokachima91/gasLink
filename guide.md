@@ -122,5 +122,5 @@ Record phase rollback points here after each push.
 | Phase 4 docs | `c72ee3b` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 | Phase 4 push point | `dcaed5a` | `origin/harden-source-of-truth` | Pre-Phase 5 rollback point |
 | Phase 5 code | `04f539a` | `origin/harden-source-of-truth` | Notification routing, banners, offline, a11y (pushed) |
-| Phase 5 docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
+| Phase 5 docs | `0f6ea00` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 ---
