@@ -145,7 +145,25 @@ class AuthService {
     await _persistSession();
   }
 
-  Future<void> register(String phone, String pin) async {
+  /// Records consent on the user document. Skipped for the hardcoded admin
+  /// identity, which has no user document.
+  Future<void> saveConsents({
+    required String uid,
+    required bool adsConsent,
+  }) async {
+    if (uid.isEmpty || uid == 'admin_local') return;
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'termsAcceptedAt': FieldValue.serverTimestamp(),
+        'adsConsent': adsConsent,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Consent save warning: $e');
+    }
+  }
+
+  Future<void> register(String phone, String pin,
+      {bool adsConsent = true}) async {
     final cleanPhone = Utils.normalizePhone(phone);
     final cleanPin = pin.trim();
 
@@ -175,6 +193,8 @@ class AuthService {
       'pinAttempts': 0,
       'lockedUntil': null,
       'mustChangePin': false,
+      'termsAcceptedAt': FieldValue.serverTimestamp(),
+      'adsConsent': adsConsent,
       'createdAt': FieldValue.serverTimestamp(),
     });
 

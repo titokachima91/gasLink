@@ -1,11 +1,15 @@
-//lib/screens/auth/login_screen.dart
-//This is the login screen. It is used to login to the app. It is also used to register a new user. It is also used to continue without an account.
+// lib/screens/auth/login_screen.dart
+// Branded login screen: logo, phone + PIN, Terms & ads consent, and links to
+// register, guest mode, and the landing page.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
 import '../role_router.dart';
 import '../../widgets/theme_mode_button.dart';
 import 'register_screen.dart';
+import 'landing_screen.dart';
+import 'widgets/auth_widgets.dart';
 
 import '../../core/theme_ext.dart';
 
@@ -20,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();
   final _pinCtrl = TextEditingController();
   bool _loading = false;
+  bool _termsAccepted = false;
+  bool _adsConsent = true;
   String? _error;
 
   @override
@@ -50,8 +56,17 @@ class _LoginScreenState extends State<LoginScreen> {
             'Akaunti haina wadhifa sahihi / Account role is not configured');
         return;
       }
-      if (!mounted) return;
 
+      // Record consent on the user document (skipped for admin).
+      final uid = AuthService.instance.currentUserId;
+      if (uid != null && uid != 'admin_local') {
+        await AuthService.instance.saveConsents(
+          uid: uid,
+          adsConsent: _adsConsent,
+        );
+      }
+
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => RoleRouter(userRole: role)),
@@ -72,6 +87,17 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(builder: (_) => const RoleRouter(userRole: 'guest')),
       (_) => false,
     );
+  }
+
+  void _backToLanding() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LandingScreen()),
+        (_) => false,
+      );
+    }
   }
 
   @override
@@ -107,6 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Karibu / Welcome'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _backToLanding,
+          ),
           actions: const [ThemeModeButton()],
         ),
         body: SafeArea(
@@ -115,16 +145,19 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const AuthHeader(subtitle: 'Gesi mkononi, uthibitisho kwanza.'),
+                const SizedBox(height: 24),
                 TextField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     labelText: 'Namba ya simu / Phone number',
                     hintText: '+255777000777',
+                    prefixIcon: Icon(Icons.phone_outlined),
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 TextField(
                   controller: _pinCtrl,
                   obscureText: true,
@@ -132,8 +165,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   maxLength: 4,
                   decoration: const InputDecoration(
                     labelText: 'PIN (namba 4) / 4-digit PIN',
+                    counterText: '',
+                    prefixIcon: Icon(Icons.lock_outline),
                     border: OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 12),
+                AuthConsents(
+                  onChanged: ({required termsAccepted, required adsConsent}) {
+                    setState(() {
+                      _termsAccepted = termsAccepted;
+                      _adsConsent = adsConsent;
+                    });
+                  },
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
@@ -141,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: _loading ? null : _login,
+                  onPressed: (_loading || !_termsAccepted) ? null : _login,
                   child: _loading
                       ? const SizedBox(
                           height: 20,
@@ -149,6 +193,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Ingia / Login'),
                 ),
+                if (!_termsAccepted) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Kubali Vigezo na Masharti kuendelea.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: _loading
@@ -165,6 +220,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(
                     'Endelea bila kuingia / Continue without account',
                     style: TextStyle(color: context.colors.onSurfaceVariant),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    '🔒 PIN yako ni siri. Data salama na GasLink.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: context.colors.outline,
+                    ),
                   ),
                 ),
               ],

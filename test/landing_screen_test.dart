@@ -16,24 +16,14 @@ void main() {
     await tester.pump();
 
     expect(find.text('GasLink'), findsOneWidget);
-    expect(find.text('Ingia / Log in'), findsWidgets);
+    expect(find.text('Ingia / Log in'), findsOneWidget);
     expect(find.text('Mgeni / Guest'), findsOneWidget);
     expect(find.text('Jiandikishe / Register'), findsOneWidget);
     expect(find.textContaining('Advertise Here'), findsOneWidget);
     expect(find.textContaining('Inavyofanya kazi'), findsOneWidget);
 
-    // The blended login section lives at the bottom of the same page.
-    await tester.scrollUntilVisible(
-      find.text('Huna akaunti? Jiandikishe / Register'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pump();
-    expect(find.byType(TextField), findsNWidgets(2));
-    expect(
-      find.text('Huna akaunti? Jiandikishe / Register'),
-      findsOneWidget,
-    );
+    // No form on the landing page — login lives on its own screen.
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('landing page renders in dark mode without exceptions',

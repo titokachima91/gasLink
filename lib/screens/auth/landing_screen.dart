@@ -1,6 +1,6 @@
 // lib/screens/auth/landing_screen.dart
-// Blended landing + login: visitors learn about GasLink, and the login form
-// lives right on the same page (no boring standalone login wall).
+// Visitor landing page: pitch first, then links to the dedicated login /
+// register screens or guest mode. No form on this page.
 
 import 'package:flutter/material.dart';
 
@@ -11,76 +11,19 @@ import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../advertise_screen.dart';
 import '../role_router.dart';
+import 'login_screen.dart';
 import 'register_screen.dart';
 
-class LandingScreen extends StatefulWidget {
+class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
-  @override
-  State<LandingScreen> createState() => _LandingScreenState();
-}
-
-class _LandingScreenState extends State<LandingScreen> {
-  final _scrollController = ScrollController();
-  final _loginKey = GlobalKey();
-  final _phone = TextEditingController();
-  final _pin = TextEditingController();
-  bool _loggingIn = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _phone.dispose();
-    _pin.dispose();
-    super.dispose();
-  }
-
-  Future<void> _exploreAsGuest() async {
+  Future<void> _exploreAsGuest(BuildContext context) async {
     await AuthService.instance.loginAsGuest();
-    if (!mounted) return;
+    if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const RoleRouter(userRole: 'guest')),
       (_) => false,
     );
-  }
-
-  void _scrollToLogin() {
-    final target = _loginKey.currentContext;
-    if (target == null) return;
-    Scrollable.ensureVisible(
-      target,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  Future<void> _login() async {
-    final phone = _phone.text.trim();
-    final pin = _pin.text.trim();
-    if (phone.isEmpty || pin.isEmpty) {
-      setState(
-          () => _error = 'Weka namba ya simu na PIN / Enter phone and PIN');
-      return;
-    }
-    setState(() {
-      _loggingIn = true;
-      _error = null;
-    });
-    try {
-      final data = await AuthService.instance.login(phone, pin);
-      if (!mounted) return;
-      final role = (data?['role'] ?? AuthService.roleConsumer) as String;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => RoleRouter(userRole: role)),
-        (_) => false,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      if (mounted) setState(() => _loggingIn = false);
-    }
   }
 
   @override
@@ -88,7 +31,6 @@ class _LandingScreenState extends State<LandingScreen> {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          controller: _scrollController,
           padding: EdgeInsets.zero,
           children: [
             _buildHero(context),
@@ -97,15 +39,20 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Compact account entry points; "Ingia" slides the page
-                  // down to reveal the login form below the details.
+                  // Account entry points; forms live on dedicated screens.
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 8,
                     runSpacing: 4,
                     children: [
                       TextButton.icon(
-                        onPressed: _scrollToLogin,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                          );
+                        },
                         icon: const Icon(Icons.login, size: 18),
                         label: const Text('Ingia / Log in'),
                       ),
@@ -121,7 +68,7 @@ class _LandingScreenState extends State<LandingScreen> {
                         label: const Text('Jiandikishe / Register'),
                       ),
                       TextButton.icon(
-                        onPressed: _exploreAsGuest,
+                        onPressed: () => _exploreAsGuest(context),
                         icon: const Icon(Icons.visibility_outlined, size: 18),
                         label: const Text('Mgeni / Guest'),
                       ),
@@ -205,8 +152,6 @@ class _LandingScreenState extends State<LandingScreen> {
                       child: const Text('Tangaza nasi / Advertise with us'),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _buildLoginSection(context),
                 ],
               ),
             ),
@@ -281,104 +226,6 @@ class _LandingScreenState extends State<LandingScreen> {
             style: TextStyle(
               fontSize: 12.5,
               color: Colors.white.withOpacity(0.85),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Compact login form at the bottom of the landing page. The "Ingia" link
-  /// at the top scrolls here.
-  Widget _buildLoginSection(BuildContext context) {
-    return AppCard(
-      key: _loginKey,
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Ingia / Log in',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Weka namba ya simu na PIN yako.',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _phone,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Namba ya Simu / Phone',
-              hintText: 'e.g. 0767304776',
-              prefixIcon: Icon(Icons.phone_outlined),
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _pin,
-            keyboardType: TextInputType.number,
-            obscureText: true,
-            maxLength: 4,
-            decoration: const InputDecoration(
-              labelText: 'PIN',
-              counterText: '',
-              prefixIcon: Icon(Icons.lock_outline),
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _error!,
-              style: TextStyle(
-                fontSize: 12,
-                color: context.colors.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              onPressed: _loggingIn ? null : _login,
-              child: _loggingIn
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text(
-                      'Ingia / Log in',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                );
-              },
-              child: const Text('Huna akaunti? Jiandikishe / Register'),
             ),
           ),
         ],
