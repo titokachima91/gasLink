@@ -10,6 +10,7 @@ import '../../services/auth_service.dart';
 import '../../services/order_service.dart';
 import '../../utils/cylinder_fifo.dart';
 import '../auth/login_screen.dart';
+import '../auth/register_screen.dart';
 import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
@@ -1100,6 +1101,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final guestMode = AuthService.instance.isGuest;
     final liveOffers = SessionData.instance.offers.where((offer) {
       final lowercaseIntent = _selectedIntent.toLowerCase();
       if (lowercaseIntent.contains('refill')) {
@@ -1161,10 +1163,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               const OfflineBanner(),
-              // 🟢 DYNAMIC PERMANENT LIVE MULTI-ORDER INTERFACE CONTAINER BANNER TRACKER
-              _buildPersistentOdaZanguBanner(),
-              _buildGasEstimatorCard(),
-              const SizedBox(height: 12),
+              if (guestMode) ...[
+                _buildGuestBanner(),
+                const SizedBox(height: 12),
+              ] else ...[
+                // 🟢 DYNAMIC PERMANENT LIVE MULTI-ORDER INTERFACE CONTAINER BANNER TRACKER
+                _buildPersistentOdaZanguBanner(),
+                _buildGasEstimatorCard(),
+                const SizedBox(height: 12),
+              ],
 
               Text(
                 'Unataka kufanya nini? / Choose Service',
@@ -1272,6 +1279,94 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 ...liveOffers.map((offer) => _buildLiveVendorCard(offer)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Guest-only card: explains the visitor mode and pushes account creation.
+  /// Replaces the order tracker and cylinder gauges for unregistered users.
+  Widget _buildGuestBanner() {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.colors.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.visibility_outlined,
+                    color: context.colors.primary,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Unaangalia kama mgeni / Browsing as guest',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Ingia kuagiza, kufuatilia oda, na kusimamia mitungi yako.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.login, size: 18),
+                    label: const Text('Ingia / Log in'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const RegisterScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.person_add_alt, size: 18),
+                    label: const Text('Unda Akaunti'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

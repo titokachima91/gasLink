@@ -119,13 +119,17 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Hali ya oda imebadilishwa: $newStatus'),
-          backgroundColor: newStatus == 'cancelled' ? context.colors.error : context.gasColors.success,
+          backgroundColor: newStatus == 'cancelled'
+              ? context.colors.error
+              : context.gasColors.success,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hitilafu: $e'), backgroundColor: context.colors.error),
+        SnackBar(
+            content: Text('Hitilafu: $e'),
+            backgroundColor: context.colors.error),
       );
     }
   }
@@ -202,7 +206,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   const SizedBox(height: 6),
                   Text(
                     'Mteja ataona muda huu kwenye app yake mara tu utakapothibitisha.',
-                    style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+                    style: TextStyle(
+                        fontSize: 12, color: context.colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -214,7 +219,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                         selected: isSelected,
                         selectedColor: context.colors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? context.colors.onPrimary : context.colors.onSurface,
+                          color: isSelected
+                              ? context.colors.onPrimary
+                              : context.colors.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (_) {
@@ -415,44 +422,44 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       onTap: () => _toggleStoreStatus(isOpen),
                       borderRadius: BorderRadius.circular(20),
                       child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isOpen
-                            ? context.gasColors.success
-                            : context.colors.error,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isOpen ? Icons.circle : Icons.circle_outlined,
-                            size: 8,
-                            color: isOpen
-                                ? context.gasColors.onSuccess
-                                : context.colors.onError,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isOpen ? 'OPEN 🟢' : 'CLOSED 🔴',
-                            style: TextStyle(
+                        duration: const Duration(milliseconds: 250),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isOpen
+                              ? context.gasColors.success
+                              : context.colors.error,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isOpen ? Icons.circle : Icons.circle_outlined,
+                              size: 8,
                               color: isOpen
                                   ? context.gasColors.onSuccess
                                   : context.colors.onError,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Text(
+                              isOpen ? 'OPEN 🟢' : 'CLOSED 🔴',
+                              style: TextStyle(
+                                color: isOpen
+                                    ? context.gasColors.onSuccess
+                                    : context.colors.onError,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               ),
             ],
           ),
@@ -503,7 +510,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   const OfflineBanner(),
                   // ── SECTION 1: DYNAMIC DAILY METRIC COUNTERS ──────────
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: _vendorDocRef.collection('products').snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection('products')
+                        .where('vendor_id', isEqualTo: _vendorUid)
+                        .snapshots(),
                     builder: (context, productsSnap) {
                       final products = productsSnap.data?.docs ?? [];
                       final lowStockCount = products.where((doc) {
@@ -535,7 +545,9 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             value: '$lowStockCount',
                             subtitle: 'Bidhaa',
                             icon: Icons.warning_amber_rounded,
-                            color: lowStockCount > 0 ? context.colors.error : context.colors.onSurfaceVariant,
+                            color: lowStockCount > 0
+                                ? context.colors.error
+                                : context.colors.onSurfaceVariant,
                           ),
                         ],
                       );
@@ -591,8 +603,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               ),
                             );
                           },
-                          icon:
-                              Icon(Icons.list_alt, color: context.colors.primary),
+                          icon: Icon(Icons.list_alt,
+                              color: context.colors.primary),
                           label: Text(
                             'Oda Zote / Orders',
                             style: TextStyle(
@@ -656,7 +668,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               SizedBox(width: 8),
                               Text(
                                 'Hakuna oda mpya kwa sasa.',
-                                style: TextStyle(color: context.colors.onSurfaceVariant),
+                                style: TextStyle(
+                                    color: context.colors.onSurfaceVariant),
                               ),
                             ],
                           ),
@@ -748,8 +761,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   decoration: BoxDecoration(
                                     color: context.gasColors.infoContainer,
                                     borderRadius: BorderRadius.circular(4),
-                                    border:
-                                        Border.all(color: context.gasColors.infoContainer),
+                                    border: Border.all(
+                                        color: context.gasColors.infoContainer),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -807,8 +820,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                                 BorderRadius.circular(8)),
                                       ),
                                       child: Text('View',
-                                          style:
-                                              TextStyle(color: context.colors.primary)),
+                                          style: TextStyle(
+                                              color: context.colors.primary)),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
@@ -832,8 +845,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         onPressed: () =>
                                             _showAcceptOrderDialog(doc.id),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: context.colors.primary,
-                                          foregroundColor: context.colors.onPrimary,
+                                          backgroundColor:
+                                              context.colors.primary,
+                                          foregroundColor:
+                                              context.colors.onPrimary,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(8)),
@@ -900,8 +915,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                             });
                                           },
                                           style: ElevatedButton.styleFrom(
-                                              backgroundColor: context.colors.tertiary,
-                                              foregroundColor: context.colors.onTertiary),
+                                              backgroundColor:
+                                                  context.colors.tertiary,
+                                              foregroundColor:
+                                                  context.colors.onTertiary),
                                           child: const Text('Hifadhi'),
                                         ),
                                       ],
@@ -928,8 +945,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         });
                                       },
                                       style: ElevatedButton.styleFrom(
-                                          backgroundColor: context.gasColors.success,
-                                          foregroundColor: context.gasColors.onSuccess),
+                                          backgroundColor:
+                                              context.gasColors.success,
+                                          foregroundColor:
+                                              context.gasColors.onSuccess),
                                       child: const Text('Imefika / Delivered'),
                                     ),
                                   ],
@@ -943,7 +962,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                   children: [
                                     Text('Inasubiri Mteja...',
                                         style: TextStyle(
-                                            color: context.colors.onSurfaceVariant,
+                                            color:
+                                                context.colors.onSurfaceVariant,
                                             fontStyle: FontStyle.italic)),
                                     TextButton(
                                       onPressed: () async {
@@ -1011,11 +1031,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             if (subtitle != null)
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 9, color: context.colors.onSurfaceVariant),
+                style: TextStyle(
+                    fontSize: 9, color: context.colors.onSurfaceVariant),
               ),
             Text(
               title,
-              style: TextStyle(fontSize: 10, color: context.colors.onSurfaceVariant),
+              style: TextStyle(
+                  fontSize: 10, color: context.colors.onSurfaceVariant),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

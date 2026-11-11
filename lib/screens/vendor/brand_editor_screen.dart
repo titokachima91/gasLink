@@ -125,8 +125,13 @@ class _BrandEditorScreenState extends State<BrandEditorScreen> {
 
       for (final size in allSizes) {
         // Composite doc id: same size always maps to same doc -> upsert.
-        final docId = '{_uid}__{widget.brand}__$size';
+        final docId = '${_uid}__${widget.brand}__$size';
         final ref = _db.collection('products').doc(docId);
+        // Legacy corrupted id from older builds (uid/brand were not
+        // interpolated). Always cleaned up so stale docs never resurface.
+        final legacyRef =
+            _db.collection('products').doc('{_uid}__{widget.brand}__$size');
+        batch.delete(legacyRef);
 
         if (_ticked.contains(size)) {
           final price = num.parse(_priceControllers[size]!.text.trim());

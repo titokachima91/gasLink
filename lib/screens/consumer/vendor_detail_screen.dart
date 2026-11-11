@@ -54,6 +54,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'consumer_order_dialog.dart';
 
+import '../../core/session_gate.dart';
 import '../../core/theme_ext.dart';
 import '../../widgets/verified_badge.dart';
 
@@ -605,7 +606,12 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         ),
                       ),
                       onPressed: inStock
-                          ? () {
+                          ? () async {
+                              if (!await SessionGate.requireConsumer(
+                                  context)) {
+                                return;
+                              }
+                              if (!mounted) return;
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -721,7 +727,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                           borderRadius: BorderRadius.circular(6)),
                     ),
                     onPressed: inStock
-                        ? () {
+                        ? () async {
+                            if (!await SessionGate.requireConsumer(context)) {
+                              return;
+                            }
+                            if (!context.mounted) return;
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,

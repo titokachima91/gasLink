@@ -40,6 +40,16 @@ class AuthService {
   String? currentPhone;
   String? currentUserId;
 
+  /// The active session belongs to a visitor browsing without an account.
+  bool get isGuest => currentRole == 'guest';
+
+  /// The active session belongs to a registered consumer.
+  bool get isRegisteredConsumer => currentRole == roleConsumer;
+
+  bool get isVendor => currentRole == roleVendor;
+
+  bool get isAdmin => currentRole == roleAdmin;
+
   Future<void> signOut() async {
     // FIXED: Safely wipe the FCM token from the database BEFORE clearing local session variables
     if (currentUserId != null) {

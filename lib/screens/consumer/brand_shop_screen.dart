@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
+import '../../core/session_gate.dart';
 import '../../widgets/verified_badge.dart';
 import 'consumer_order_dialog.dart';
 
@@ -360,7 +361,9 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                   ],
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    if (!await SessionGate.requireConsumer(context)) return;
+                    if (!mounted) return;
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,

@@ -85,6 +85,22 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
               (data['imageUrl'] as String? ?? '').trim().isNotEmpty ||
                   (data['photoUrl'] as String? ?? '').trim().isNotEmpty;
 
+          // Tier 1 criteria computed from real data (display only; the
+          // authoritative tier calculation lives in the Vendor model).
+          final List<String> services =
+              ((data['offeredServices'] as List?) ?? const [])
+                  .whereType<String>()
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+          final bool hasCoreInfo =
+              (data['businessName'] as String? ?? '').trim().isNotEmpty &&
+                  (data['phone'] as String? ?? '').trim().isNotEmpty;
+          final bool hasLocation =
+              (data['district'] as String? ?? '').trim().isNotEmpty &&
+                  (data['latitude'] as num?) != null;
+          final bool hasScale = data['hasOperationalScale'] as bool? ?? false;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -211,11 +227,14 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                     'Pokea Oda za Wateja',
                     'Alama ya Mizani',
                   ],
-                  requirements: const [
-                    {'title': 'Taarifa Kuu za Duka', 'done': true},
-                    {'title': 'Eneo & GPS Coordinates', 'done': true},
-                    {'title': 'Mizani Inafanya Kazi', 'done': true},
-                    {'title': 'Huduma 2+ za Wateja Selected', 'done': true},
+                  requirements: [
+                    {'title': 'Taarifa Kuu za Duka', 'done': hasCoreInfo},
+                    {'title': 'Eneo & GPS Coordinates', 'done': hasLocation},
+                    {'title': 'Mizani Inafanya Kazi', 'done': hasScale},
+                    {
+                      'title': 'Huduma 2+ za Wateja Selected',
+                      'done': services.length >= 2,
+                    },
                   ],
                   onTapAction: () => _navigateToProfile(context),
                 ),
@@ -350,8 +369,9 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                       ),
                       Text(
                         subtitle,
-                        style:
-                            TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: context.colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -389,7 +409,8 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Row(
                   children: [
-                    Icon(Icons.star, size: 14, color: context.gasColors.warning),
+                    Icon(Icons.star,
+                        size: 14, color: context.gasColors.warning),
                     const SizedBox(width: 6),
                     Text(b, style: const TextStyle(fontSize: 12)),
                   ],
@@ -412,7 +433,9 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                           ? Icons.check_circle
                           : Icons.cancel_outlined,
                       size: 16,
-                      color: r['done'] == true ? context.gasColors.success : context.colors.onSurfaceVariant,
+                      color: r['done'] == true
+                          ? context.gasColors.success
+                          : context.colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 6),
                     Expanded(

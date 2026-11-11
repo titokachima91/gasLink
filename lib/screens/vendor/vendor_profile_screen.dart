@@ -16,6 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
 import '../../services/vendor_image_service.dart';
+import '../../utils/service_normalizer.dart';
 import '../../core/constants.dart';
 
 import '../../core/theme_ext.dart';
@@ -231,12 +232,15 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
         _imageUrlController.text = _currentVendor!.imageUrl ?? '';
         _hasOperationalScale = _currentVendor!.hasOperationalScale;
 
-        // FIXED: Clear first, then add trimmed services for exact string matching
+        // FIXED: Normalize stored services to the canonical list so the
+        // counter equals the number of genuinely ticked boxes. The weighing
+        // consent is separate and never counted as a service.
         _offeredServices.clear();
         _offeredServices.addAll(
-          _currentVendor!.offeredServices
-              .map((e) => e.trim())
-              .where((e) => e.isNotEmpty),
+          normalizeOfferedServices(
+            _currentVendor!.offeredServices,
+            _availableServices,
+          ),
         );
 
         _businessLicenseUrlController.text =
