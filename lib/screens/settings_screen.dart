@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme_controller.dart';
 import '../services/auth_service.dart';
-import 'auth/login_screen.dart';
+import 'auth/landing_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -297,7 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await AuthService.instance.signOut();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const LandingScreen()),
           (route) => false,
         );
       }

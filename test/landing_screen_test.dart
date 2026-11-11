@@ -20,6 +20,13 @@ void main() {
     expect(find.text('Chunguza kama mgeni / Explore as guest'), findsOneWidget);
     expect(find.textContaining('Advertise Here'), findsOneWidget);
     expect(find.textContaining('Inavyofanya kazi'), findsOneWidget);
+
+    // Blended login section lives on the same page.
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(
+      find.text('Huna akaunti? Jiandikishe / Register'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('landing page renders in dark mode without exceptions',

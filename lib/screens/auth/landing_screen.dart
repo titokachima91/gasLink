@@ -1,6 +1,6 @@
 // lib/screens/auth/landing_screen.dart
-// First impression for visitors: what GasLink is, why it matters, and a
-// low-commitment way in (log in, register, or explore as a guest).
+// Blended landing + login: visitors learn about GasLink, and the login form
+// lives right on the same page (no boring standalone login wall).
 
 import 'package:flutter/material.dart';
 
@@ -11,19 +11,76 @@ import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../advertise_screen.dart';
 import '../role_router.dart';
-import 'login_screen.dart';
 import 'register_screen.dart';
 
-class LandingScreen extends StatelessWidget {
+class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
 
-  Future<void> _exploreAsGuest(BuildContext context) async {
+  @override
+  State<LandingScreen> createState() => _LandingScreenState();
+}
+
+class _LandingScreenState extends State<LandingScreen> {
+  final _scrollController = ScrollController();
+  final _loginKey = GlobalKey();
+  final _phone = TextEditingController();
+  final _pin = TextEditingController();
+  bool _loggingIn = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _phone.dispose();
+    _pin.dispose();
+    super.dispose();
+  }
+
+  Future<void> _exploreAsGuest() async {
     await AuthService.instance.loginAsGuest();
-    if (!context.mounted) return;
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const RoleRouter(userRole: 'guest')),
       (_) => false,
     );
+  }
+
+  void _scrollToLogin() {
+    final target = _loginKey.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Future<void> _login() async {
+    final phone = _phone.text.trim();
+    final pin = _pin.text.trim();
+    if (phone.isEmpty || pin.isEmpty) {
+      setState(
+          () => _error = 'Weka namba ya simu na PIN / Enter phone and PIN');
+      return;
+    }
+    setState(() {
+      _loggingIn = true;
+      _error = null;
+    });
+    try {
+      final data = await AuthService.instance.login(phone, pin);
+      if (!mounted) return;
+      final role = (data?['role'] ?? AuthService.roleConsumer) as String;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => RoleRouter(userRole: role)),
+        (_) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _loggingIn = false);
+    }
   }
 
   @override
@@ -31,6 +88,7 @@ class LandingScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: ListView(
+          controller: _scrollController,
           padding: EdgeInsets.zero,
           children: [
             _buildHero(context),
@@ -39,6 +97,33 @@ class LandingScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: _scrollToLogin,
+                      icon: const Icon(Icons.login),
+                      label: const Text('Pata Gesi / Get Gas'),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: _exploreAsGuest,
+                      icon: const Icon(Icons.visibility_outlined),
+                      label:
+                          const Text('Chunguza kama mgeni / Explore as guest'),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  _buildLoginSection(context),
+                  const SizedBox(height: 22),
                   const AppSectionHeader(
                     title: 'Kwa nini GasLink? / Why GasLink?',
                     subtitle: 'Uthibitisho kabla ya ununuzi.',
@@ -104,55 +189,6 @@ class LandingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 22),
                   const AdSlot(placementId: 'landing'),
-                  const SizedBox(height: 22),
-                  const AppSectionHeader(
-                    title: 'Anza sasa / Get started',
-                    icon: Icons.rocket_launch_outlined,
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.login),
-                      label: const Text('Pata Gesi / Get Gas'),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () => _exploreAsGuest(context),
-                      icon: const Icon(Icons.visibility_outlined),
-                      label:
-                          const Text('Chunguza kama mgeni / Explore as guest'),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const RegisterScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text('Huna akaunti? Jiandikishe / Register'),
-                    ),
-                  ),
                   Center(
                     child: TextButton(
                       onPressed: () {
@@ -176,7 +212,7 @@ class LandingScreen extends StatelessWidget {
 
   Widget _buildHero(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 34),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -190,18 +226,26 @@ class LandingScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.14),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.35)),
-            ),
-            child: const Icon(
-              Icons.local_fire_department,
-              size: 40,
-              color: Colors.white,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.asset(
+              'assets/gaslinklogo.png',
+              width: 88,
+              height: 88,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.local_fire_department,
+                  size: 44,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 14),
@@ -231,6 +275,93 @@ class LandingScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.5,
               color: Colors.white.withOpacity(0.85),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginSection(BuildContext context) {
+    return AppCard(
+      key: _loginKey,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AppSectionHeader(
+            title: 'Ingia / Log in',
+            subtitle: 'Namba ya simu na PIN yako ya siri.',
+            icon: Icons.account_circle_outlined,
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              labelText: 'Namba ya Simu / Phone',
+              hintText: 'e.g. 0767304776',
+              prefixIcon: Icon(Icons.phone_outlined),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _pin,
+            keyboardType: TextInputType.number,
+            obscureText: true,
+            maxLength: 4,
+            decoration: const InputDecoration(
+              labelText: 'PIN',
+              counterText: '',
+              prefixIcon: Icon(Icons.lock_outline),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+              onPressed: _loggingIn ? null : _login,
+              child: _loggingIn
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(
+                      'Ingia / Log in',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                );
+              },
+              child: const Text('Huna akaunti? Jiandikishe / Register'),
             ),
           ),
         ],

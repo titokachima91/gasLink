@@ -9,7 +9,7 @@ import '../../core/session_data.dart';
 import '../../services/auth_service.dart';
 import '../../services/order_service.dart';
 import '../../utils/cylinder_fifo.dart';
-import '../auth/login_screen.dart';
+import '../auth/landing_screen.dart';
 import '../auth/register_screen.dart';
 import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
@@ -280,7 +280,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       await AuthService.instance.signOut();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const LandingScreen()),
           (route) => false,
         );
       }
@@ -1377,7 +1377,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
+                        builder: (_) => const LandingScreen(),
                       ),
                     ),
                     icon: const Icon(Icons.login, size: 18),

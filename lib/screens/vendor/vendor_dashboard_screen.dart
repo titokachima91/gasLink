@@ -16,7 +16,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/ad_slot.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
-import '../auth/login_screen.dart';
+import '../auth/landing_screen.dart';
 import 'inventory_screen.dart';
 import 'vendor_order_screen.dart';
 import 'vendor_profile_screen.dart';
@@ -336,7 +336,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    MaterialPageRoute(builder: (_) => const LandingScreen()),
                     (_) => false,
                   );
                 },
@@ -377,7 +377,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
               if (context.mounted) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
                   (_) => false,
                 );
               }
@@ -1052,45 +1052,43 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
     required IconData icon,
     required Color color,
   }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.colors.outlineVariant),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 8),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ),
-            if (subtitle != null)
-              Text(
-                subtitle,
-                style: TextStyle(
-                    fontSize: 9, color: context.colors.onSurfaceVariant),
-              ),
-            Text(
-              title,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colors.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
               style: TextStyle(
-                  fontSize: 10, color: context.colors.onSurfaceVariant),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
-          ],
-        ),
+          ),
+          if (subtitle != null)
+            Text(
+              subtitle,
+              style: TextStyle(
+                  fontSize: 9, color: context.colors.onSurfaceVariant),
+            ),
+          Text(
+            title,
+            style:
+                TextStyle(fontSize: 10, color: context.colors.onSurfaceVariant),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

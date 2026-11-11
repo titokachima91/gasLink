@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme_controller.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
-import '../auth/login_screen.dart';
+import '../auth/landing_screen.dart';
 import 'vendor_profile_screen.dart';
 import 'widgets/vendor_commission_card.dart';
 
@@ -76,7 +76,7 @@ class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const LandingScreen()),
       (_) => false,
     );
   }

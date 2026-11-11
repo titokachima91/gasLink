@@ -5,7 +5,7 @@ import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
-import '../auth/login_screen.dart';
+import '../auth/landing_screen.dart';
 import 'admin_analytics_screen.dart';
 import 'admin_audit_log_screen.dart';
 import 'admin_consumer_list_screen.dart';
@@ -120,7 +120,7 @@ class _AdminShellState extends State<AdminShell> {
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const LandingScreen()),
       (_) => false,
     );
   }

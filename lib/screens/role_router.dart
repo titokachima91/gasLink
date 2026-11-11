@@ -5,7 +5,7 @@
 /// Dynamic role router using `AuthService.instance` session data.
 /// Routes admins to `AdminShell`, vendors to `VendorDashboardScreen`,
 /// consumers/guests to `ConsumerHomeScreen`, and unauthenticated users to
-/// `LoginScreen`.
+/// the blended landing + login screen.
 /// ============================================================================
 library;
 

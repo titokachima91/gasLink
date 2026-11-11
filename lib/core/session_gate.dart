@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/auth/login_screen.dart';
+import '../screens/auth/landing_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../services/auth_service.dart';
 
@@ -68,7 +68,7 @@ class SessionGate {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
+                          builder: (_) => const LandingScreen(),
                         ),
                       );
                     },

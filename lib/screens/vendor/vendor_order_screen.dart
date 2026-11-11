@@ -89,7 +89,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-                child: CircularProgressIndicator(color: context.colors.primary));
+                child:
+                    CircularProgressIndicator(color: context.colors.primary));
           }
           final allDocs = snapshot.data?.docs ??
               <QueryDocumentSnapshot<Map<String, dynamic>>>[];
@@ -163,7 +164,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
             Icon(Icons.inbox_outlined, size: 48, color: context.colors.outline),
             const SizedBox(height: 12),
             Text('Hakuna oda katika orodha hii',
-                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13)),
+                style: TextStyle(
+                    color: context.colors.onSurfaceVariant, fontSize: 13)),
           ],
         ),
       );
@@ -232,18 +234,24 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                         children: [
                           Text(
                               'ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                   color: context.colors.onSurface)),
                           Text('Mteja: $customerName',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                  fontSize: 11, color: context.colors.onSurfaceVariant)),
+                                  fontSize: 11,
+                                  color: context.colors.onSurfaceVariant)),
                         ],
                       ),
                     ),
                     if (phone.isNotEmpty)
                       SizedBox(
+                        width: 96,
                         height: 32,
                         child: ElevatedButton.icon(
                           onPressed: () => _makePhoneCall(phone),
@@ -252,6 +260,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                               style: TextStyle(
                                   fontSize: 10, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
                               backgroundColor: context.gasColors.success,
                               foregroundColor: context.gasColors.onSuccess,
                               elevation: 0),
@@ -308,7 +318,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                     decoration: BoxDecoration(
                         color: context.gasColors.infoContainer,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: context.gasColors.infoContainer)),
+                        border:
+                            Border.all(color: context.gasColors.infoContainer)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -329,10 +340,14 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('📞 Mpokeaji: $receiverPhone',
-                                  style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold)),
+                              Expanded(
+                                child: Text('📞 Mpokeaji: $receiverPhone',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold)),
+                              ),
                               TextButton(
                                   onPressed: () =>
                                       _makePhoneCall(receiverPhone),
@@ -516,7 +531,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(children: [
-              Icon(Icons.hourglass_top, size: 16, color: context.gasColors.info),
+              Icon(Icons.hourglass_top,
+                  size: 16, color: context.gasColors.info),
               SizedBox(width: 6),
               Text('Inasubiri Ithibitishwe na Mteja',
                   style: TextStyle(
@@ -527,7 +543,8 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
             SizedBox(height: 4),
             Text(
                 'Mzigo umewasilishwa. Inasubiri mteja athibitishe kupokea au muda wa dakika 10 uishe kiotomatiki.',
-                style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant)),
+                style: TextStyle(
+                    fontSize: 11, color: context.colors.onSurfaceVariant)),
           ],
         ),
       );

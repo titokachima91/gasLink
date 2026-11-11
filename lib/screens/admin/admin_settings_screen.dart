@@ -7,7 +7,7 @@ import '../../services/admin_service.dart';
 import '../../services/auth_service.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/theme_mode_button.dart';
-import '../auth/login_screen.dart';
+import '../auth/landing_screen.dart';
 import 'widgets/admin_ui.dart';
 import 'admin_audit_log_screen.dart';
 
@@ -137,7 +137,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const LandingScreen()),
       (_) => false,
     );
   }
