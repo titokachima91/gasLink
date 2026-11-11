@@ -1,6 +1,6 @@
 # Phase 05C — Auth Flow Polish & Consumer Completeness
 
-> **Status:** 🚧 Plan proposed — layouts only, awaiting approval before building
+> **Status:** 🚧 Plan proposed — **not started, zero code written.** Layouts only, awaiting approval before building
 > **Branch:** `harden-source-of-truth`
 > **Rollback baseline:** `cbae13e`
 > **Phase 6 (security hardening):** intentionally set aside this round.

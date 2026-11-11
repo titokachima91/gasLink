@@ -34,8 +34,8 @@
 | Notifications & Polish | ✅ **Complete** — tap-through routing, in-app banners, offline banners, store-toggle semantics |
 | App Polish & First Impressions | ✅ **Complete** — landing page, guest/consumer split, catalogue & service fixes, restyled screens, audience-aware ads |
 | Vendor Catalogue Consistency | ✅ **Complete** — merged inventory view; consumers see everything vendors manage |
-| Auth Flow & Consumer Completeness | 🚧 **Planned (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder |
-| Vendor Polish & Growth Hooks | 🚧 **Planned (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
+| Auth Flow & Consumer Completeness | 🛑 **Planned — not started (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder |
+| Vendor Polish & Growth Hooks | 🛑 **Planned — not started (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -236,16 +236,16 @@
 - Follow-ups: admin campaign creation form, ad image banners, legacy
   subcollection cleanup reminder for vendors.
 
-### 🚧 Phase 5C — Auth Flow Polish & Consumer Completeness (planned)
-- Dedicated branded login/register with Terms + ads-consent checkboxes.
-- Consumer Settings and Profile screens; polished history/cylinders/tracker.
-- Home reorder: My Cylinders above the Gas Estimator.
+### 🛑 Phase 5C — Auth Flow Polish & Consumer Completeness (planned — not started)
+- Zero code written. Dedicated branded login/register with Terms + ads-consent
+  checkboxes, consumer Settings and Profile screens, polished
+  history/cylinders/tracker, home reorder (cylinders above estimator).
 - Plan: `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval).
 
-### 🚧 Phase 5D — Vendor Polish & Growth Hooks (planned)
-- Vendor drawer/inventory/orders/profile/badge/dashboard polish.
-- Referral foundation for consumers and vendors (rewards coming soon).
-- GasPlan kwa Waajiriwa teaser inside Consumer Settings → Features only.
+### 🛑 Phase 5D — Vendor Polish & Growth Hooks (planned — not started)
+- Zero code written. Vendor drawer/inventory/orders/profile/badge/dashboard
+  polish, referral foundation (rewards coming soon), and the GasPlan kwa
+  Waajiriwa teaser inside Consumer Settings → Features only.
 - Plan: `phases/phase-05d-vendor-growth/plan.md` (awaiting approval).
 
 ### ⚠️ Phase 6 — Scale & Security Hardening

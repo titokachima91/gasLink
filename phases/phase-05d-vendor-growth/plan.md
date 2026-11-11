@@ -1,6 +1,6 @@
 # Phase 05D — Vendor Polish & Growth Hooks (Referral + GasPlan Teaser)
 
-> **Status:** 🚧 Plan proposed — layouts only, awaiting approval before building
+> **Status:** 🚧 Plan proposed — **not started, zero code written.** Layouts only, awaiting approval before building
 > **Branch:** `harden-source-of-truth`
 > **Rollback baseline:** `cbae13e` (with 05C commits if approved first)
 > **Phase 6 (security hardening):** set aside.

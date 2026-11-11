@@ -53,7 +53,7 @@ This is a **documentation-first project**: plan before code, record after code.
 | 17 | Guest vs Consumer | `lib/core/session_gate.dart`, `lib/services/auth_service.dart` |
 | 18 | Vendor Catalogue | `lib/services/catalog_service.dart`, `lib/utils/service_normalizer.dart` |
 
-### Planned (awaiting owner approval — not built)
+### Planned (awaiting owner approval — **not started, zero code written**)
 
 - Phase 5C: `phases/phase-05c-consumer-completeness/plan.md`
 - Phase 5D: `phases/phase-05d-vendor-growth/plan.md`
@@ -62,8 +62,8 @@ This is a **documentation-first project**: plan before code, record after code.
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🚧 | Phase 5C — Auth flow & consumer completeness | `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval) |
-| 🚧 | Phase 5D — Vendor polish & growth hooks | `phases/phase-05d-vendor-growth/plan.md` (awaiting approval) |
+| 🛑 | Phase 5C — Auth flow & consumer completeness (not started) | `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval) |
+| 🛑 | Phase 5D — Vendor polish & growth hooks (not started) | `phases/phase-05d-vendor-growth/plan.md` (awaiting approval) |
 | 🟡 | Phase 6 — Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing |
 
 ---
