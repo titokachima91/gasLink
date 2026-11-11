@@ -15,6 +15,7 @@ import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
+import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
@@ -1252,6 +1253,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   ),
                 ],
               ),
+
+              const SizedBox(height: 14),
+              const AdSlot(placementId: 'consumer_home'),
 
               const SizedBox(height: 20),
 

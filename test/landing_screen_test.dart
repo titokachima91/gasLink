@@ -18,7 +18,7 @@ void main() {
     expect(find.text('GasLink'), findsOneWidget);
     expect(find.text('Pata Gesi / Get Gas'), findsOneWidget);
     expect(find.text('Chunguza kama mgeni / Explore as guest'), findsOneWidget);
-    expect(find.text('Advertise Here'), findsOneWidget);
+    expect(find.textContaining('Advertise Here'), findsOneWidget);
     expect(find.textContaining('Inavyofanya kazi'), findsOneWidget);
   });
 

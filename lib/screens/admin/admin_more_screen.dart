@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import 'widgets/admin_ui.dart';
+import 'admin_ad_requests_screen.dart';
 import 'admin_consumer_list_screen.dart';
 import 'admin_inventory_screen.dart';
 import 'admin_settings_screen.dart';
@@ -79,6 +80,18 @@ class AdminMoreScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const AdminInventoryScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _MoreTile(
+                icon: Icons.campaign_outlined,
+                title: 'Ad requests',
+                subtitle: 'Review stakeholder advertising submissions',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AdminAdRequestsScreen(),
                   ),
                 ),
               ),

@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/ad_slot.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/login_screen.dart';
@@ -629,6 +630,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 14),
+                  const AdSlot(placementId: 'vendor_dashboard'),
                   const SizedBox(height: 24),
                   // ── SECTION 3: REAL-TIME INCOMING ORDER ALERTS ───────
                   Row(

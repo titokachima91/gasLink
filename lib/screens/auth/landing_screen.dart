@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
+import '../advertise_screen.dart';
 import '../role_router.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -101,7 +103,7 @@ class LandingScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 22),
-                  const _AdvertiseHereBanner(),
+                  const AdSlot(placementId: 'landing'),
                   const SizedBox(height: 22),
                   const AppSectionHeader(
                     title: 'Anza sasa / Get started',
@@ -149,6 +151,18 @@ class LandingScreen extends StatelessWidget {
                         );
                       },
                       child: const Text('Huna akaunti? Jiandikishe / Register'),
+                    ),
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AdvertiseScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text('Tangaza nasi / Advertise with us'),
                     ),
                   ),
                 ],
@@ -332,57 +346,6 @@ class _StepRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: context.colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Placeholder ad pitch; replaced by the audience-aware AdSlot later in the
-/// phase.
-class _AdvertiseHereBanner extends StatelessWidget {
-  const _AdvertiseHereBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: context.colors.outlineVariant,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.campaign_outlined,
-              size: 20, color: context.colors.outline),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Advertise Here',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  'Nafasi ya matangazo · +255767304776',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: context.colors.outline,
                   ),
                 ),
               ],
