@@ -24,6 +24,7 @@ class Order {
   final double commissionRate;
   final double commissionDue;
   final bool billed;
+  final String commissionModel; // 'percentage' | 'subscription' at order time
   final String status; // See AppConstants.orderStatuses for the canonical list
   final String deliveryAddress;
   final String contactPhone;
@@ -52,6 +53,7 @@ class Order {
     required this.commissionRate,
     required this.commissionDue,
     this.billed = false,
+    this.commissionModel = 'percentage',
     required this.status,
     required this.deliveryAddress,
     this.contactPhone = '',
@@ -80,6 +82,7 @@ class Order {
         'commission_rate': commissionRate,
         'commission_due': commissionDue,
         'billed': billed,
+        'commission_model': commissionModel,
         'status': status,
         'delivery_address': deliveryAddress,
         'contact_phone': contactPhone,
@@ -116,6 +119,10 @@ class Order {
       commissionDue:
           (d['commission_due'] ?? d['commissionDue'] ?? 0).toDouble(),
       billed: d['billed'] ?? false,
+      commissionModel:
+          (d['commission_model'] ?? d['commissionModel'] ?? 'percentage')
+              .toString()
+              .toLowerCase(),
       status: d['status'] ?? 'placed',
       deliveryAddress: d['delivery_address'] ?? d['deliveryAddress'] ?? '',
       contactPhone: d['contact_phone'] ?? d['consumerPhone'] ?? '',

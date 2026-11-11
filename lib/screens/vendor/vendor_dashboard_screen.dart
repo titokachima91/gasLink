@@ -18,6 +18,7 @@ import '../auth/login_screen.dart';
 import 'inventory_screen.dart';
 import 'vendor_order_screen.dart';
 import 'vendor_profile_screen.dart';
+import 'vendor_settings_screen.dart';
 import 'widgets/vendor_drawer.dart';
 
 import '../../core/theme_ext.dart';
@@ -385,6 +386,21 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
               ),
             ),
             actions: [
+              IconButton(
+                tooltip: 'Settings',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const VendorSettingsScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: Colors.white,
+                ),
+              ),
               const ThemeModeButton(),
               // Store Status Switch (OPEN 🟢 / CLOSED 🔴)
               Padding(

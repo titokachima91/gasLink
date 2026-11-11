@@ -24,6 +24,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   final _commission = TextEditingController();
   final _supportPhone = TextEditingController();
   final _supportEmail = TextEditingController();
+  final _subscriptionFee = TextEditingController();
+  String _defaultModel = 'percentage';
   bool _initialized = false;
   bool _saving = false;
 
@@ -32,6 +34,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     _commission.dispose();
     _supportPhone.dispose();
     _supportEmail.dispose();
+    _subscriptionFee.dispose();
     super.dispose();
   }
 
@@ -41,11 +44,16 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     final commission = (settings.commissionRate * 100).toStringAsFixed(1);
     final phone = settings.supportPhone;
     final email = settings.supportEmail;
+    final fee = settings.defaultSubscriptionFee.toStringAsFixed(0);
+    _defaultModel = settings.defaultCommissionModel == 'subscription'
+        ? 'subscription'
+        : 'percentage';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _commission.text = commission;
       _supportPhone.text = phone;
       _supportEmail.text = email;
+      _subscriptionFee.text = fee;
     });
   }
 
@@ -60,6 +68,16 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       );
       return;
     }
+    final fee = double.tryParse(_subscriptionFee.text.trim()) ?? 0;
+    if (fee < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Subscription fee cannot be negative.'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+      return;
+    }
 
     setState(() => _saving = true);
     try {
@@ -67,6 +85,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         commissionRate: percent / 100,
         supportPhone: _supportPhone.text,
         supportEmail: _supportEmail.text,
+        defaultCommissionModel: _defaultModel,
+        defaultSubscriptionFee: fee,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -157,6 +177,35 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                       prefixIcon: Icon(Icons.percent),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'percentage',
+                        icon: Icon(Icons.percent),
+                        label: Text('Percentage'),
+                      ),
+                      ButtonSegment(
+                        value: 'subscription',
+                        icon: Icon(Icons.event_repeat),
+                        label: Text('Subscription'),
+                      ),
+                    ],
+                    selected: {_defaultModel},
+                    onSelectionChanged: (selection) =>
+                        setState(() => _defaultModel = selection.first),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_defaultModel == 'subscription')
+                    TextField(
+                      controller: _subscriptionFee,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Default monthly fee',
+                        suffixText: 'TZS',
+                        prefixIcon: Icon(Icons.payments_outlined),
+                      ),
+                    ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _supportPhone,

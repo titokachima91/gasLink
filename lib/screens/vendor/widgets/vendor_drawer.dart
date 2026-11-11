@@ -10,7 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import '../vendor_badge_screen.dart';
-import '../../settings_screen.dart';
+import '../vendor_settings_screen.dart';
 
 import '../../../core/theme_ext.dart';
 
@@ -100,7 +100,8 @@ class VendorDrawer extends StatelessWidget {
                   ? NetworkImage(imageUrl!)
                   : null,
               child: imageUrl == null || imageUrl!.isEmpty
-                  ? Icon(Icons.storefront, color: context.colors.primary, size: 36)
+                  ? Icon(Icons.storefront,
+                      color: context.colors.primary, size: 36)
                   : null,
             ),
           ),
@@ -117,7 +118,8 @@ class VendorDrawer extends StatelessWidget {
                   children: [
                     Text(
                       'Ukamilifu wa Akaunti',
-                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 12, color: context.colors.onSurfaceVariant),
                     ),
                     Text(
                       '$completionPercentage%',
@@ -169,8 +171,8 @@ class VendorDrawer extends StatelessWidget {
                 // 1: Badges & Gamified Progress Hub
                 // NEW CODE:
                 ListTile(
-                  leading:
-                      Icon(Icons.workspace_premium, color: context.colors.primary),
+                  leading: Icon(Icons.workspace_premium,
+                      color: context.colors.primary),
                   title: const Text('Tuzo na Uthibitisho'),
                   subtitle: const Text('Hatua za Badge & Badges Hub'),
                   onTap: () {
@@ -242,21 +244,23 @@ class VendorDrawer extends StatelessWidget {
 
           // ── Footer Actions ───────────────────────────────────────────
           ListTile(
-            leading: Icon(Icons.settings_outlined, color: context.colors.primary),
+            leading:
+                Icon(Icons.settings_outlined, color: context.colors.primary),
             title: const Text('Mipangilio / Settings'),
             onTap: () {
               Navigator.pop(context); // Close drawer
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
+                  builder: (_) => const VendorSettingsScreen(),
                 ),
               );
             },
           ),
           ListTile(
             leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-            title: Text('Logout', style: TextStyle(color: context.colors.error)),
+            title:
+                Text('Logout', style: TextStyle(color: context.colors.error)),
             onTap: () {
               Navigator.pop(context);
               onLogout();
@@ -304,8 +308,8 @@ class VendorDrawer extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading:
-                  Icon(Icons.support_agent_rounded, color: context.colors.primary),
+              leading: Icon(Icons.support_agent_rounded,
+                  color: context.colors.primary),
               title: const Text('Msaada / Support'),
               subtitle: const Text('Piga au Tuma ujumbe WhatsApp'),
               onTap: () => Navigator.pop(context),

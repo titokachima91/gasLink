@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'consumer_order_screen.dart';
+import '../../core/constants.dart';
 import '../../services/order_service.dart';
 import '../../services/auth_service.dart';
 
@@ -211,7 +212,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: context.colors.primary, size: 24),
+              Icon(Icons.warning_amber_rounded,
+                  color: context.colors.primary, size: 24),
               SizedBox(width: 8),
               Text('Gas Yako Haijaisha!',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
@@ -263,7 +265,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                       );
                     },
                     child: Text('Badili Mtungi / Change Cylinder',
-                        style: TextStyle(color: context.colors.onSurface, fontSize: 12)),
+                        style: TextStyle(
+                            color: context.colors.onSurface, fontSize: 12)),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -272,7 +275,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   child: OutlinedButton(
                     onPressed: null,
                     child: Text('Agizia Mwenzako (Soon)',
-                        style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: context.colors.onSurfaceVariant)),
                   ),
                 ),
                 const Divider(),
@@ -321,6 +326,24 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         return;
       }
 
+      // Fetch the vendor's commission terms so the order stamps them correctly.
+      double vendorRate = AppConstants.defaultCommissionRate;
+      String commissionModel = 'percentage';
+      try {
+        final vendorDoc = await FirebaseFirestore.instance
+            .collection('vendors')
+            .doc(widget.vendorId)
+            .get();
+        if (vendorDoc.exists) {
+          final vd = vendorDoc.data() ?? {};
+          commissionModel =
+              (vd['commissionModel'] ?? 'percentage').toString().toLowerCase();
+          vendorRate = (vd['commissionRate'] as num? ?? 0.03).toDouble();
+        }
+      } catch (e) {
+        debugPrint('Commission fetch warning during order placement: $e');
+      }
+
       // 1. Save order to Firestore via OrderService and retrieve real database reference ID[cite: 5]
       final docRef = await OrderService.instance.placeOrder(
         consumerUid: uid,
@@ -333,7 +356,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         orderIntent: _orderIntent,
         quantity: _quantity,
         unitPrice: widget.price,
-        vendorCommissionRate: 0.03, // Standard vendor commission rate
+        vendorCommissionRate: vendorRate,
+        commissionModel: commissionModel,
         deliveryAddress: deliveryAddress,
         contactPhone: contactPhone,
         receiverPhone: receiverPhone,
@@ -433,11 +457,13 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                             Text('Muuzaji: ${widget.vendorName}',
                                 style: TextStyle(
-                                    fontSize: 12, color: context.colors.onSurface)),
+                                    fontSize: 12,
+                                    color: context.colors.onSurface)),
                             Text(
                                 'TZS ${widget.price.toStringAsFixed(0)} kwa moja',
                                 style: TextStyle(
-                                    fontSize: 11, color: context.colors.onSurfaceVariant)),
+                                    fontSize: 11,
+                                    color: context.colors.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -586,7 +612,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Jumla Kuu / Total Price',
-                          style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant)),
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: context.colors.onSurfaceVariant)),
                       Text('TZS ${totalPrice.toStringAsFixed(0)}',
                           style: TextStyle(
                               fontSize: 16,
@@ -612,7 +640,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                                 height: 18,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    color: context.colors.onPrimary, strokeWidth: 2))
+                                    color: context.colors.onPrimary,
+                                    strokeWidth: 2))
                             : const Text('Thibitisha Oda ➔',
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),

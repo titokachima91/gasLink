@@ -289,7 +289,9 @@ class _VendorTile extends StatelessWidget {
                     ),
                     AdminKeyValueChip(
                       label: 'Commission',
-                      value: formatPercent(vendor.commissionRate),
+                      value: vendor.isSubscription
+                          ? 'TZS ${vendor.subscriptionFee.toStringAsFixed(0)}/mo'
+                          : formatPercent(vendor.commissionRate),
                     ),
                     if (vendor.isPending)
                       AdminKeyValueChip(

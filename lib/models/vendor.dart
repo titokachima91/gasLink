@@ -71,6 +71,9 @@ class Vendor {
 
   // --- General App Attributes ---
   final List<String> stockedBrandNames;
+  // --- Commission (Phase 4, admin-controlled) ---
+  final String commissionModel; // percentage | subscription
+  final double subscriptionFee; // Monthly TZS when model is subscription
   final double commissionRate;
   final bool active;
   final double rating;
@@ -125,6 +128,8 @@ class Vendor {
     this.lipaNumber,
     this.imageUrl,
     this.stockedBrandNames = const [],
+    this.commissionModel = 'percentage',
+    this.subscriptionFee = 0,
     this.commissionRate = 0.03,
     this.active = true,
     this.rating = 0,
@@ -156,6 +161,15 @@ class Vendor {
   bool get isRejected => status == VendorStatus.rejected;
   bool get isVerified => verified;
 
+  /// Subscription vendors pay no per-order percentage; their fee is monthly.
+  bool get isSubscription => commissionModel == 'subscription';
+  double get effectiveCommissionRate => isSubscription ? 0 : commissionRate;
+
+  /// Human-readable commission term shown to vendors and admins.
+  String get commissionLabel => isSubscription
+      ? 'TZS ${subscriptionFee.toStringAsFixed(0)}/month'
+      : '${(commissionRate * 100).toStringAsFixed(1)}% per order';
+
   String get statusLabel => VendorStatus.label(status);
 
   /// Status-aware copy used by the admin console. The vendor profile form can
@@ -169,6 +183,9 @@ class Vendor {
     bool? verified,
     DateTime? verifiedAt,
     String? verifiedBy,
+    String? commissionModel,
+    double? subscriptionFee,
+    double? commissionRate,
     bool? active,
   }) {
     return Vendor(
@@ -193,7 +210,9 @@ class Vendor {
       lipaNumber: lipaNumber,
       imageUrl: imageUrl,
       stockedBrandNames: stockedBrandNames,
-      commissionRate: commissionRate,
+      commissionModel: commissionModel ?? this.commissionModel,
+      subscriptionFee: subscriptionFee ?? this.subscriptionFee,
+      commissionRate: commissionRate ?? this.commissionRate,
       active: active ?? this.active,
       rating: rating,
       createdAt: createdAt,
@@ -286,6 +305,8 @@ class Vendor {
         'lipaNumber': lipaNumber,
         'imageUrl': imageUrl,
         'stockedBrandNames': stockedBrandNames,
+        'commissionModel': commissionModel,
+        'subscriptionFee': subscriptionFee,
         'commissionRate': commissionRate,
         'active': status == VendorStatus.active,
         'rating': rating,
@@ -347,6 +368,13 @@ class Vendor {
       stockedBrandNames: (d['stockedBrandNames'] as List<dynamic>? ?? [])
           .whereType<String>()
           .toList(),
+      commissionModel: (d['commissionModel'] as String? ?? 'percentage')
+                  .toString()
+                  .toLowerCase() ==
+              'subscription'
+          ? 'subscription'
+          : 'percentage',
+      subscriptionFee: (d['subscriptionFee'] as num? ?? 0).toDouble(),
       commissionRate: (d['commissionRate'] as num? ?? 0.03).toDouble(),
       active: legacyActive ?? true,
       rating: (d['rating'] as num? ?? 0).toDouble(),

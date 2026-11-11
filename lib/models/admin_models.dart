@@ -167,6 +167,8 @@ class AdminCylinder {
 class AdminSettings {
   const AdminSettings({
     this.commissionRate = 0.03,
+    this.defaultCommissionModel = 'percentage',
+    this.defaultSubscriptionFee = 50000,
     this.supportPhone = '+255767304776',
     this.supportEmail = '',
     this.updatedAt,
@@ -174,6 +176,8 @@ class AdminSettings {
   });
 
   final double commissionRate;
+  final String defaultCommissionModel;
+  final double defaultSubscriptionFee;
   final String supportPhone;
   final String supportEmail;
   final DateTime? updatedAt;
@@ -181,6 +185,8 @@ class AdminSettings {
 
   Map<String, dynamic> toMap() => {
         'commissionRate': commissionRate,
+        'defaultCommissionModel': defaultCommissionModel,
+        'defaultSubscriptionFee': defaultSubscriptionFee,
         'supportPhone': supportPhone,
         'supportEmail': supportEmail,
         'updatedAt': FieldValue.serverTimestamp(),
@@ -192,6 +198,12 @@ class AdminSettings {
     final updated = d['updatedAt'];
     return AdminSettings(
       commissionRate: (d['commissionRate'] as num? ?? 0.03).toDouble(),
+      defaultCommissionModel:
+          (d['defaultCommissionModel'] as String? ?? 'percentage')
+              .toString()
+              .toLowerCase(),
+      defaultSubscriptionFee:
+          (d['defaultSubscriptionFee'] as num? ?? 50000).toDouble(),
       supportPhone: d['supportPhone'] as String? ?? '+255767304776',
       supportEmail: d['supportEmail'] as String? ?? '',
       updatedAt: updated is Timestamp ? updated.toDate() : null,

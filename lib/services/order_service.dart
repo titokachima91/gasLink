@@ -33,6 +33,7 @@ class OrderService {
     required int quantity,
     required double unitPrice,
     required double vendorCommissionRate,
+    String commissionModel = 'percentage',
     required String deliveryAddress,
     String contactPhone = '',
     String receiverPhone = '',
@@ -42,6 +43,10 @@ class OrderService {
     double? longitude,
   }) async {
     final total = unitPrice * quantity;
+
+    // Subscription vendors pay a monthly fee instead of a per-order cut.
+    final isSubscription = commissionModel == 'subscription';
+    final effectiveRate = isSubscription ? 0.0 : vendorCommissionRate;
 
     // Create the standardized Order model object
     final newOrder = models.Order(
@@ -56,8 +61,9 @@ class OrderService {
       quantity: quantity,
       unitPrice: unitPrice,
       total: total,
-      commissionRate: vendorCommissionRate,
-      commissionDue: total * vendorCommissionRate,
+      commissionRate: effectiveRate,
+      commissionDue: total * effectiveRate,
+      commissionModel: isSubscription ? 'subscription' : 'percentage',
       status: AppConstants.statusPlaced,
       deliveryAddress: deliveryAddress,
       contactPhone: contactPhone,

@@ -12,8 +12,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
+import '../../services/vendor_image_service.dart';
 import '../../core/constants.dart';
 
 import '../../core/theme_ext.dart';
@@ -43,6 +45,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _uploadingImage = false;
 
   String get _uid =>
       FirebaseAuth.instance.currentUser?.uid ??
@@ -112,6 +115,91 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
     _wmaStickerUrlController.dispose();
     _superDealerProofUrlController.dispose();
     super.dispose();
+  }
+
+  Widget _buildShopImagePreview() {
+    final url = _imageUrlController.text.trim();
+    return Container(
+      width: 72,
+      height: 72,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: context.colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colors.outlineVariant),
+      ),
+      child: url.isEmpty
+          ? Icon(Icons.storefront, color: context.colors.outline, size: 30)
+          : Image.network(
+              url,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.broken_image_outlined,
+                color: context.colors.outline,
+                size: 30,
+              ),
+            ),
+    );
+  }
+
+  /// Picks a photo from the gallery and uploads it to Firebase Storage.
+  /// The URL is saved to the vendor document immediately.
+  Future<void> _pickAndUploadShopImage() async {
+    final XFile? file;
+    try {
+      file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+    } catch (e) {
+      debugPrint('Image picker error: $e');
+      return;
+    }
+    if (file == null || !mounted) return;
+
+    final sizeError = VendorImageService.validateSize(await file.length());
+    if (sizeError != null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(sizeError),
+          backgroundColor: context.colors.error,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _uploadingImage = true);
+    try {
+      final url = await VendorImageService.instance.uploadShopImage(
+        vendorId: _uid,
+        file: file,
+      );
+      _imageUrlController.text = url;
+      await _vendorDoc.update({
+        'imageUrl': url,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Picha ya duka imewekwa! / Photo uploaded.'),
+          backgroundColor: context.gasColors.success,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Image upload error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Imeshindikana kupakia picha / Upload failed: $e'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
+    }
   }
 
   Future<void> _loadVendorProfile() async {
@@ -278,7 +366,8 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Center(child: CircularProgressIndicator(color: context.colors.primary)),
+        body: Center(
+            child: CircularProgressIndicator(color: context.colors.primary)),
       );
     }
 
@@ -463,6 +552,36 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    // Shop photo: upload to Storage or paste a URL manually.
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildShopImagePreview(),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _uploadingImage
+                                ? null
+                                : _pickAndUploadShopImage,
+                            icon: _uploadingImage
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.add_a_photo_outlined),
+                            label: Text(
+                              _uploadingImage
+                                  ? 'Inapakia… / Uploading…'
+                                  : 'Chagua Picha / Choose Photo',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _imageUrlController,
                       decoration: const InputDecoration(
@@ -610,14 +729,16 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                         Text(
                           '${_offeredServices.length} zimechaguliwa',
                           style: TextStyle(
-                              color: context.gasColors.success, fontWeight: FontWeight.bold),
+                              color: context.gasColors.success,
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Chagua angalau huduma 2 ili kukamilisha sehemu hii / Choose at least 2 services *:',
-                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 12, color: context.colors.onSurfaceVariant),
                     ),
                     const Divider(),
                     const SizedBox(height: 8),

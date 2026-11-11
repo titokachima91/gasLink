@@ -147,6 +147,45 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
     }
   }
 
+  Future<void> _editCommission(Vendor vendor) async {
+    final edit = await showDialog<_CommissionEdit>(
+      context: context,
+      builder: (_) => _CommissionDialog(
+        initialModel: vendor.commissionModel,
+        initialRate: vendor.commissionRate,
+        initialFee: vendor.subscriptionFee,
+      ),
+    );
+    if (edit == null) return;
+
+    setState(() => _busy = true);
+    try {
+      await AdminService.instance.updateVendorCommission(
+        vendorId: vendor.id,
+        model: edit.model,
+        percentageRate: edit.rate,
+        subscriptionFee: edit.fee,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Commission terms updated and audited.'),
+          backgroundColor: context.gasColors.success,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not update commission: $error'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _openDocument(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
@@ -258,11 +297,6 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
                       ].join(' · '),
                     ),
                     AdminInfoRow(
-                      icon: Icons.percent,
-                      label: 'Commission',
-                      value: formatPercent(vendor.commissionRate),
-                    ),
-                    AdminInfoRow(
                       icon: Icons.workspace_premium_outlined,
                       label: 'Tier',
                       value: 'Tier ${vendor.currentTier}',
@@ -299,6 +333,52 @@ class _AdminVendorDetailScreenState extends State<AdminVendorDetailScreen> {
                         label: 'Status note',
                         value: vendor.statusReason,
                       ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              const AdminSectionHeader(
+                title: 'Commission terms',
+                subtitle: 'Admin-controlled billing terms for this vendor.',
+              ),
+              AdminCard(
+                child: Row(
+                  children: [
+                    Icon(
+                      vendor.isSubscription
+                          ? Icons.event_repeat
+                          : Icons.percent,
+                      color: context.colors.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vendor.commissionLabel,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            vendor.isSubscription
+                                ? 'Monthly subscription — no per-order cut.'
+                                : 'Percentage taken on delivered orders.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _busy ? null : () => _editCommission(vendor),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit'),
+                    ),
                   ],
                 ),
               ),
@@ -722,6 +802,157 @@ class _DocumentTile extends StatelessWidget {
           : Icon(Icons.warning_amber_rounded,
               size: 18, color: context.gasColors.warning),
       onTap: available ? () => onOpen(value) : null,
+    );
+  }
+}
+
+/// Result of the admin commission editor.
+class _CommissionEdit {
+  const _CommissionEdit({
+    required this.model,
+    required this.rate,
+    required this.fee,
+  });
+
+  final String model;
+  final double rate;
+  final double fee;
+}
+
+/// Dialog that lets admins switch a vendor between percentage and
+/// subscription commission models.
+class _CommissionDialog extends StatefulWidget {
+  const _CommissionDialog({
+    required this.initialModel,
+    required this.initialRate,
+    required this.initialFee,
+  });
+
+  final String initialModel;
+  final double initialRate;
+  final double initialFee;
+
+  @override
+  State<_CommissionDialog> createState() => _CommissionDialogState();
+}
+
+class _CommissionDialogState extends State<_CommissionDialog> {
+  late String _model =
+      widget.initialModel == 'subscription' ? 'subscription' : 'percentage';
+  late final TextEditingController _rate = TextEditingController(
+    text: (widget.initialRate * 100).toStringAsFixed(1),
+  );
+  late final TextEditingController _fee = TextEditingController(
+    text: widget.initialFee.toStringAsFixed(0),
+  );
+
+  @override
+  void dispose() {
+    _rate.dispose();
+    _fee.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final isSubscription = _model == 'subscription';
+    final percent = double.tryParse(_rate.text.trim()) ?? 0;
+    final fee = double.tryParse(_fee.text.trim()) ?? 0;
+    if (!isSubscription && (percent < 0 || percent > 100)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Percentage must be between 0 and 100.'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+      return;
+    }
+    if (isSubscription && fee < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Subscription fee cannot be negative.'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+      return;
+    }
+    Navigator.pop(
+      context,
+      _CommissionEdit(
+        model: _model,
+        rate: percent / 100,
+        fee: isSubscription ? fee : 0,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSubscription = _model == 'subscription';
+    return AlertDialog(
+      title: const Text('Commission terms'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(
+                value: 'percentage',
+                icon: Icon(Icons.percent),
+                label: Text('Percentage'),
+              ),
+              ButtonSegment(
+                value: 'subscription',
+                icon: Icon(Icons.event_repeat),
+                label: Text('Subscription'),
+              ),
+            ],
+            selected: {_model},
+            onSelectionChanged: (selection) =>
+                setState(() => _model = selection.first),
+          ),
+          const SizedBox(height: 16),
+          if (isSubscription)
+            TextField(
+              controller: _fee,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Monthly fee (TZS)',
+                border: OutlineInputBorder(),
+              ),
+            )
+          else
+            TextField(
+              controller: _rate,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Commission percentage',
+                suffixText: '%',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            isSubscription
+                ? 'Subscription vendors pay no per-order percentage.'
+                : 'The percentage is charged on delivered order totals.',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }

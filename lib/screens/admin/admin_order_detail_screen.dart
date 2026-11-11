@@ -305,8 +305,10 @@ class _AdminOrderDetailScreenState extends State<AdminOrderDetailScreen> {
                     AdminInfoRow(
                       icon: Icons.percent,
                       label: 'Commission',
-                      value: '${formatPercent(order.commissionRate)} · '
-                          '${formatTzs(order.commissionDue)}',
+                      value: order.commissionModel == 'subscription'
+                          ? 'Subscription (no per-order cut)'
+                          : '${formatPercent(order.commissionRate)} · '
+                              '${formatTzs(order.commissionDue)}',
                     ),
                     AdminInfoRow(
                       icon: Icons.receipt_outlined,
@@ -434,7 +436,9 @@ class _VendorLookupState extends State<_VendorLookup> {
                   const SizedBox(width: 6),
                   AdminKeyValueChip(
                     label: 'Commission',
-                    value: formatPercent(vendor.commissionRate),
+                    value: vendor.isSubscription
+                        ? 'TZS ${vendor.subscriptionFee.toStringAsFixed(0)}/mo'
+                        : formatPercent(vendor.commissionRate),
                   ),
                 ],
               ),

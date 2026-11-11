@@ -179,6 +179,68 @@ class AdminService {
     await batch.commit();
   }
 
+  /// Updates a vendor's commission terms. Vendors cannot change their own
+  /// terms; only admins call this, and the change is audited.
+  Future<void> updateVendorCommission({
+    required String vendorId,
+    required String model,
+    double? percentageRate,
+    double subscriptionFee = 0,
+    String reason = '',
+  }) async {
+    if (model != 'percentage' && model != 'subscription') {
+      throw ArgumentError.value(model, 'model', 'Unknown commission model');
+    }
+    final rate = percentageRate ?? 0.03;
+    if (rate < 0 || rate > 1) {
+      throw ArgumentError('Percentage commission must be between 0 and 1');
+    }
+    if (subscriptionFee < 0) {
+      throw ArgumentError('Subscription fee cannot be negative');
+    }
+
+    final ref = _vendors.doc(vendorId);
+    final doc = await ref.get();
+    if (!doc.exists) throw StateError('Vendor not found');
+
+    final data = doc.data() ?? {};
+    final previousModel =
+        (data['commissionModel'] as String? ?? 'percentage').toLowerCase();
+    final previousRate = (data['commissionRate'] as num? ?? 0.03).toDouble();
+    final previousFee = (data['subscriptionFee'] as num? ?? 0).toDouble();
+
+    final batch = _db.batch();
+    batch.update(ref, {
+      'commissionModel': model,
+      'commissionRate': rate,
+      'subscriptionFee': model == 'subscription' ? subscriptionFee : 0,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    final audit = AdminAuditLog(
+      id: '',
+      actorUid: _actorUid,
+      actorRole: AuthService.roleAdmin,
+      action: 'update_vendor_commission',
+      entityType: 'vendor',
+      entityId: vendorId,
+      before: {
+        'commissionModel': previousModel,
+        'commissionRate': previousRate,
+        'subscriptionFee': previousFee,
+      },
+      after: {
+        'commissionModel': model,
+        'commissionRate': rate,
+        'subscriptionFee': model == 'subscription' ? subscriptionFee : 0,
+      },
+      reason: reason.trim(),
+      createdAt: DateTime.now(),
+    );
+    batch.set(_audit.doc(), audit.toMap());
+    await batch.commit();
+  }
+
   // ---------------------------------------------------------------------------
   // Orders
   // ---------------------------------------------------------------------------
@@ -355,9 +417,19 @@ class AdminService {
     required double commissionRate,
     required String supportPhone,
     required String supportEmail,
+    String defaultCommissionModel = 'percentage',
+    double defaultSubscriptionFee = 50000,
   }) async {
     if (commissionRate < 0 || commissionRate > 1) {
       throw ArgumentError('Commission must be between 0% and 100%');
+    }
+    if (defaultCommissionModel != 'percentage' &&
+        defaultCommissionModel != 'subscription') {
+      throw ArgumentError.value(
+          defaultCommissionModel, 'defaultCommissionModel', 'Unknown model');
+    }
+    if (defaultSubscriptionFee < 0) {
+      throw ArgumentError('Subscription fee cannot be negative');
     }
 
     final ref = _db.collection('app_settings').doc('admin');
@@ -368,6 +440,8 @@ class AdminService {
         ref,
         {
           'commissionRate': commissionRate,
+          'defaultCommissionModel': defaultCommissionModel,
+          'defaultSubscriptionFee': defaultSubscriptionFee,
           'supportPhone': supportPhone.trim(),
           'supportEmail': supportEmail.trim(),
           'updatedAt': FieldValue.serverTimestamp(),
@@ -384,11 +458,15 @@ class AdminService {
       entityId: 'admin',
       before: {
         'commissionRate': before['commissionRate'],
+        'defaultCommissionModel': before['defaultCommissionModel'],
+        'defaultSubscriptionFee': before['defaultSubscriptionFee'],
         'supportPhone': before['supportPhone'],
         'supportEmail': before['supportEmail'],
       },
       after: {
         'commissionRate': commissionRate,
+        'defaultCommissionModel': defaultCommissionModel,
+        'defaultSubscriptionFee': defaultSubscriptionFee,
         'supportPhone': supportPhone.trim(),
         'supportEmail': supportEmail.trim(),
       },

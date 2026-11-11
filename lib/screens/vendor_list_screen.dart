@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/vendor.dart';
+import '../widgets/verified_badge.dart';
 import 'consumer/vendor_detail_screen.dart';
 
 import '../core/theme_ext.dart';
@@ -85,8 +86,20 @@ class _VendorListScreenState extends State<VendorListScreen> {
           final v = _vendors[i];
           return Card(
             child: ListTile(
-              title: Text(v.displayName,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      v.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  if (v.verified) ...[
+                    const SizedBox(width: 6),
+                    const VerifiedBadge(compact: true),
+                  ],
+                ],
+              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
