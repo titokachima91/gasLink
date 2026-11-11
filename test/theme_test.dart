@@ -11,10 +11,10 @@ import 'package:gaslink_app/core/theme.dart';
 import 'package:gaslink_app/core/theme_controller.dart';
 import 'package:gaslink_app/core/theme_preferences.dart';
 import 'package:gaslink_app/core/theme_status_colors.dart';
-import 'package:gaslink_app/screens/auth/login_screen.dart';
+import 'package:gaslink_app/screens/auth/landing_screen.dart';
 
 void main() {
-  testWidgets('app starts inside a ProviderScope and renders the login screen',
+  testWidgets('app starts inside a ProviderScope and renders the landing page',
       (tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -27,7 +27,7 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(LandingScreen), findsOneWidget);
   });
 
   testWidgets('app renders in dark mode when the persisted mode is dark',
@@ -43,7 +43,7 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    final context = tester.element(find.byType(LoginScreen));
+    final context = tester.element(find.byType(LandingScreen));
     expect(Theme.of(context).brightness, Brightness.dark);
     expect(
       Theme.of(context).appBarTheme.backgroundColor,
@@ -123,7 +123,9 @@ void main() {
 
     expect(container.read(themeControllerProvider), ThemeMode.system);
 
-    await container.read(themeControllerProvider.notifier).setMode(ThemeMode.dark);
+    await container
+        .read(themeControllerProvider.notifier)
+        .setMode(ThemeMode.dark);
 
     expect(container.read(themeControllerProvider), ThemeMode.dark);
     expect(await ThemePreferences.readThemeMode(), ThemeMode.dark);

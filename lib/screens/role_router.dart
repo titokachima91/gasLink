@@ -12,7 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'admin/admin_shell.dart';
-import 'auth/login_screen.dart';
+import 'auth/landing_screen.dart';
 import 'vendor/vendor_dashboard_screen.dart';
 import 'consumer/consumer_home_screen.dart';
 
@@ -41,7 +41,7 @@ class RoleRouter extends StatelessWidget {
       return const ConsumerHomeScreen();
     }
 
-    // 5. Unauthenticated Default -> Show LoginScreen
-    return const LoginScreen();
+    // 5. Unauthenticated Default -> Landing page (login is one tap away).
+    return const LandingScreen();
   }
 }
