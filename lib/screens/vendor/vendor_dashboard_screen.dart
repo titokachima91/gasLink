@@ -523,7 +523,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             true;
                         return !inStock;
                       }).length;
-                      return Row(
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 1.7,
                         children: [
                           _buildMetricCard(
                             title: 'Oda Leo',
@@ -531,7 +537,6 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             icon: Icons.shopping_bag_outlined,
                             color: context.gasColors.info,
                           ),
-                          const SizedBox(width: 8),
                           _buildMetricCard(
                             title: 'Mapato Leo',
                             value: todayRevenue.toStringAsFixed(0),
@@ -539,7 +544,15 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             icon: Icons.payments_outlined,
                             color: context.gasColors.success,
                           ),
-                          const SizedBox(width: 8),
+                          _buildMetricCard(
+                            title: 'Zinazosubiri',
+                            value: '${pendingOrders.length}',
+                            subtitle: 'Oda Mpya',
+                            icon: Icons.mark_email_unread_outlined,
+                            color: pendingOrders.isNotEmpty
+                                ? context.gasColors.warning
+                                : context.colors.onSurfaceVariant,
+                          ),
                           _buildMetricCard(
                             title: 'OutOfStock',
                             value: '$lowStockCount',
@@ -653,26 +666,58 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       elevation: 0,
                       color: context.colors.surfaceContainerLow,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(color: context.colors.outlineVariant),
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: context.colors.primaryContainer,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.inbox_outlined,
+                                size: 30,
+                                color: context.colors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Hakuna oda bado / No orders yet',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Wateja watakuagiza mara tu bidhaa zako zitakapoonekana kwenye app.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12.5,
                                 color: context.colors.onSurfaceVariant,
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Hakuna oda mpya kwa sasa.',
-                                style: TextStyle(
-                                    color: context.colors.onSurfaceVariant),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 14),
+                            FilledButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const InventoryScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.inventory, size: 18),
+                              label: const Text(
+                                  'Hakiki Bidhaa Zako / Check Inventory'),
+                            ),
+                          ],
                         ),
                       ),
                     )

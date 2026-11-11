@@ -15,6 +15,7 @@ import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
+import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../../widgets/verified_badge.dart';
@@ -47,10 +48,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.primaryContainer : context.colors.surface,
+          color: isSelected
+              ? context.colors.primaryContainer
+              : context.colors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? context.colors.primary : context.colors.outlineVariant,
+            color: isSelected
+                ? context.colors.primary
+                : context.colors.outlineVariant,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -58,7 +63,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: isSelected ? context.colors.primary : context.colors.onSurfaceVariant,
+                color: isSelected
+                    ? context.colors.primary
+                    : context.colors.onSurfaceVariant,
                 size: 26),
             const SizedBox(height: 6),
             Text(
@@ -66,14 +73,18 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: isSelected ? context.colors.primary : context.colors.onSurface,
+                color: isSelected
+                    ? context.colors.primary
+                    : context.colors.onSurface,
               ),
             ),
             Text(
               subtitle,
               style: TextStyle(
                 fontSize: 11,
-                color: isSelected ? context.colors.primary : context.colors.onSurfaceVariant,
+                color: isSelected
+                    ? context.colors.primary
+                    : context.colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -125,7 +136,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           itemName,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
-        trailing: Icon(Icons.chevron_right, color: context.colors.onSurfaceVariant),
+        trailing:
+            Icon(Icons.chevron_right, color: context.colors.onSurfaceVariant),
         onTap: () {
           String category;
           switch (_selectedIntent) {
@@ -257,7 +269,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               child: const Text('Ghairi')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Ondoka', style: TextStyle(color: context.colors.error)),
+            child:
+                Text('Ondoka', style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),
@@ -379,7 +392,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(statusIcon, color: context.colors.primary, size: 20),
+                          Icon(statusIcon,
+                              color: context.colors.primary, size: 20),
                           const SizedBox(width: 6),
                           Text(
                             'ODA ZANGU / ACTIVE TRACKER',
@@ -430,8 +444,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           height: 4,
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
-                            color:
-                                isDone ? context.colors.primary : context.colors.outlineVariant,
+                            color: isDone
+                                ? context.colors.primary
+                                : context.colors.outlineVariant,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -513,7 +528,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       SizedBox(height: 2),
                       Text(
                         'Huna oda inayotembea kwa sasa.',
-                        style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: context.colors.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -634,7 +651,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             const SizedBox(height: 4),
             Text(
               'Weka taarifa kuanza kukadiria matumizi yako.',
-              style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+              style: TextStyle(
+                  fontSize: 12, color: context.colors.onSurfaceVariant),
             ),
           ] else ...[
             ListView.separated(
@@ -698,8 +716,11 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: estimatedRemainingRatio,
-                              backgroundColor: context.colors.surfaceContainerLow,
-                              color: isCriticalLow ? context.colors.error : context.colors.primary,
+                              backgroundColor:
+                                  context.colors.surfaceContainerLow,
+                              color: isCriticalLow
+                                  ? context.colors.error
+                                  : context.colors.primary,
                               minHeight: 8,
                             ),
                           ),
@@ -1052,7 +1073,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.primary),
             onPressed: isSaving
                 ? null
                 : () async {
@@ -1092,7 +1114,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         color: context.colors.onPrimary, strokeWidth: 2))
                 : Text('Hifadhi Mtungi',
                     style: TextStyle(
-                        color: context.colors.onPrimary, fontWeight: FontWeight.bold)),
+                        color: context.colors.onPrimary,
+                        fontWeight: FontWeight.bold)),
           ),
         );
       },
@@ -1163,6 +1186,12 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               const OfflineBanner(),
+              const AppSectionHeader(
+                title: 'Habari! Karibu GasLink 👋',
+                subtitle: 'Gesi mkononi — uthibitisho kabla ya ununuzi.',
+                icon: Icons.local_fire_department,
+              ),
+              const SizedBox(height: 12),
               if (guestMode) ...[
                 _buildGuestBanner(),
                 const SizedBox(height: 12),
@@ -1425,7 +1454,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
-                      style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -1437,12 +1467,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           ),
                         if (minPrice > 0) ...[
                           const SizedBox(width: 8),
-                          Text(
-                            '• Kuanzia TZS ${minPrice.toStringAsFixed(0)}',
-                            style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: context.colors.primary),
+                          AppStatusPill(
+                            label: 'Kuanzia TZS ${minPrice.toStringAsFixed(0)}',
+                            icon: Icons.local_offer_outlined,
+                            color: context.colors.primary,
                           ),
                         ],
                       ],
@@ -1450,7 +1478,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: context.colors.onSurfaceVariant, size: 20),
+              Icon(Icons.chevron_right,
+                  color: context.colors.onSurfaceVariant, size: 20),
             ],
           ),
         ),
@@ -1477,7 +1506,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           Text(
             'Hakuna muuzaji aliyesajiliwa katika eneo lako kwa sasa. Huduma inazidi kusambaa.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
+            style:
+                TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
           ),
         ],
       ),
@@ -1506,7 +1536,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-                child: CircularProgressIndicator(color: context.colors.primary));
+                child:
+                    CircularProgressIndicator(color: context.colors.primary));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -1524,7 +1555,9 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                           color: context.colors.onSurface)),
                   const SizedBox(height: 4),
                   Text('Oda zote utakazofanya zitaonekana hapa.',
-                      style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.onSurfaceVariant)),
                 ],
               ),
             );

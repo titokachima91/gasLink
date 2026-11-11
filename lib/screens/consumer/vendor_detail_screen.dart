@@ -56,6 +56,7 @@ import 'consumer_order_dialog.dart';
 
 import '../../core/session_gate.dart';
 import '../../core/theme_ext.dart';
+import '../../widgets/app_ui.dart';
 import '../../widgets/verified_badge.dart';
 
 class VendorDetailScreen extends StatefulWidget {
@@ -98,9 +99,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   // Category switch: 0 = Mitungi ya Gesi (Cylinders), 1 = Vifaa & Aksesari (Accessories)
   int _selectedCategoryIndex = 0;
 
-  // Selected weight pill per brand (e.g., {'Oryx Gas': '15kg', 'Taifa Gas': '6kg'})
-  final Map<String, String> _selectedWeightPerBrand = {};
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +127,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               if (vendorSnap.connectionState == ConnectionState.waiting &&
                   productSnap.connectionState == ConnectionState.waiting) {
                 return Center(
-                  child: CircularProgressIndicator(color: context.colors.primary),
+                  child:
+                      CircularProgressIndicator(color: context.colors.primary),
                 );
               }
 
@@ -284,11 +283,13 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.access_time, size: 16, color: context.colors.onSurfaceVariant),
+                Icon(Icons.access_time,
+                    size: 16, color: context.colors.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text(
                   'Masaa ya Kazi: $openingHours',
-                  style: TextStyle(fontSize: 13, color: context.colors.onSurface),
+                  style:
+                      TextStyle(fontSize: 13, color: context.colors.onSurface),
                 ),
               ],
             ),
@@ -363,7 +364,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     decoration: BoxDecoration(
                       color: context.colors.primaryContainer,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: context.colors.primaryContainer),
+                      border:
+                          Border.all(color: context.colors.primaryContainer),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -471,7 +473,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               const SizedBox(height: 8),
               Text(
                 'Muuzaji ${widget.businessName} hajaweka mitungi bado.',
-                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13),
+                style: TextStyle(
+                    color: context.colors.onSurfaceVariant, fontSize: 13),
               ),
             ],
           ),
@@ -491,153 +494,137 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
         final brandName = entry.key;
         final brandItems = entry.value;
 
-        // Default selected weight to first item weight if unset
-        final defaultWeight = (brandItems.first['weight'] ??
-            brandItems.first['size'] ??
-            '') as String;
-        final activeWeight =
-            _selectedWeightPerBrand[brandName] ?? defaultWeight;
-
-        // Active item corresponding to chosen weight
-        final activeItem = brandItems.firstWhere(
-          (i) => (i['weight'] ?? i['size'] ?? '') == activeWeight,
-          orElse: () => brandItems.first,
-        );
-
-        final price = (activeItem['price'] as num?)?.toDouble() ?? 0.0;
-        final inStock =
-            (activeItem['in_stock'] ?? activeItem['inStock'] ?? true) as bool;
-
-        return Card(
-          elevation: 0,
+        return AppCard(
           margin: const EdgeInsets.only(bottom: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: context.colors.outlineVariant),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  brandName,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-
-                // Weight Choice Pills
-                Wrap(
-                  spacing: 8,
-                  children: brandItems.map((item) {
-                    final weight =
-                        (item['weight'] ?? item['size'] ?? '') as String;
-                    final isSelected = weight == activeWeight;
-
-                    return ChoiceChip(
-                      label: Text(weight),
-                      selected: isSelected,
-                      selectedColor: context.colors.primary,
-                      labelStyle: TextStyle(
-                        color: isSelected
-                            ? context.colors.onPrimary
-                            : context.colors.onSurface,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      onSelected: (bool selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedWeightPerBrand[brandName] = weight;
-                          });
-                        }
-                      },
-                    );
-                  }).toList(),
-                ),
-                const Divider(height: 20),
-
-                // Active Item Summary Card
-                Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: context.colors.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.propane_tank,
-                          color: context.colors.primary, size: 30),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: context.colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$brandName ($activeWeight) Refill',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'TZS ${_formatPrice(price)}',
-                            style: TextStyle(
-                              color: context.gasColors.success,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                    child: Icon(
+                      Icons.propane_tank,
+                      color: context.colors.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      brandName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            inStock ? context.colors.primary : context.colors.outlineVariant,
-                        foregroundColor: inStock
-                            ? context.colors.onPrimary
-                            : context.colors.onSurface,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: inStock
-                          ? () async {
-                              if (!await SessionGate.requireConsumer(
-                                  context)) {
-                                return;
-                              }
-                              if (!mounted) return;
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (context) => ConsumerOrderDialog(
-                                  vendorId: widget.vendorId,
-                                  brandName: brandName,
-                                  cylinderWeight: activeWeight,
-                                  vendorName: widget.businessName,
-                                  price: price,
-                                ),
-                              );
-                            }
-                          : null,
-                      child: Text(
-                        inStock ? 'Oda Sasa' : 'Imeisha',
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  AppStatusPill(
+                    label: '${brandItems.length} saizi',
+                    icon: Icons.scale_outlined,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              for (var i = 0; i < brandItems.length; i++) ...[
+                if (i > 0) const Divider(height: 18),
+                _buildSizeRow(brandName, brandItems[i]),
               ],
-            ),
+            ],
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// One row per cylinder size: price, stock state, and its own order button.
+  Widget _buildSizeRow(String brandName, Map<String, dynamic> item) {
+    final weight = (item['weight'] ?? item['size'] ?? '').toString();
+    final price = (item['price'] as num?)?.toDouble() ?? 0.0;
+    final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$weight · Refill',
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'TZS ${_formatPrice(price)}',
+                style: TextStyle(
+                  color: context.gasColors.success,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        AppStatusPill(
+          label: inStock ? 'Ipo' : 'Imeisha',
+          icon: inStock
+              ? Icons.check_circle_outline
+              : Icons.remove_circle_outline,
+          color: inStock ? context.gasColors.success : context.colors.error,
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 34,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: inStock
+                  ? context.colors.primary
+                  : context.colors.outlineVariant,
+              foregroundColor:
+                  inStock ? context.colors.onPrimary : context.colors.onSurface,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: inStock
+                ? () async {
+                    if (!await SessionGate.requireConsumer(context)) {
+                      return;
+                    }
+                    if (!mounted) return;
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => ConsumerOrderDialog(
+                        vendorId: widget.vendorId,
+                        brandName: brandName,
+                        cylinderWeight: weight,
+                        vendorName: widget.businessName,
+                        price: price,
+                      ),
+                    );
+                  }
+                : null,
+            child: Text(
+              inStock ? 'Oda Sasa' : 'Imeisha',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -649,11 +636,13 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              Icon(Icons.build_outlined, size: 40, color: context.colors.outline),
+              Icon(Icons.build_outlined,
+                  size: 40, color: context.colors.outline),
               const SizedBox(height: 8),
               Text(
                 'Muuzaji ${widget.businessName} hajaweka vifaa au aksesari bado.',
-                style: TextStyle(color: context.colors.onSurfaceVariant, fontSize: 13),
+                style: TextStyle(
+                    color: context.colors.onSurfaceVariant, fontSize: 13),
               ),
             ],
           ),
@@ -714,7 +703,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     Text(
                       'TZS ${_formatPrice(price)}',
                       style: TextStyle(
-                          color: context.gasColors.success, fontWeight: FontWeight.bold),
+                          color: context.gasColors.success,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -747,8 +737,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         : null,
                     child: Text(
                       inStock ? 'Oda Kifaa' : 'Imeisha',
-                      style:
-                          TextStyle(color: context.colors.primary, fontSize: 12),
+                      style: TextStyle(
+                          color: context.colors.primary, fontSize: 12),
                     ),
                   ),
                 ),
