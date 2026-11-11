@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/login_screen.dart';
 import 'inventory_screen.dart';
@@ -406,10 +407,14 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
                 child: Center(
-                  child: InkWell(
-                    onTap: () => _toggleStoreStatus(isOpen),
-                    borderRadius: BorderRadius.circular(20),
-                    child: AnimatedContainer(
+                  child: Semantics(
+                    button: true,
+                    label: 'Hali ya duka / Store status',
+                    value: isOpen ? 'OPEN' : 'CLOSED',
+                    child: InkWell(
+                      onTap: () => _toggleStoreStatus(isOpen),
+                      borderRadius: BorderRadius.circular(20),
+                      child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -447,6 +452,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     ),
                   ),
                 ),
+              ),
               ),
             ],
           ),
@@ -494,6 +500,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
               return ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
+                  const OfflineBanner(),
                   // ── SECTION 1: DYNAMIC DAILY METRIC COUNTERS ──────────
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: _vendorDocRef.collection('products').snapshots(),

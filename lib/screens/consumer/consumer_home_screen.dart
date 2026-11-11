@@ -14,6 +14,7 @@ import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
+import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../../widgets/verified_badge.dart';
 import 'item_vendors_screen.dart';
@@ -1159,6 +1160,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              const OfflineBanner(),
               // 🟢 DYNAMIC PERMANENT LIVE MULTI-ORDER INTERFACE CONTAINER BANNER TRACKER
               _buildPersistentOdaZanguBanner(),
               _buildGasEstimatorCard(),

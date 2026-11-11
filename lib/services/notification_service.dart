@@ -18,6 +18,28 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
+  /// Called when a background notification is tapped while the app is open.
+  void Function(RemoteMessage message)? onTapMessage;
+
+  /// Called for notifications arriving while the app is in the foreground,
+  /// in addition to the local heads-up.
+  void Function(RemoteMessage message)? onForegroundMessage;
+
+  RemoteMessage? _initialMessage;
+  bool _initialFetched = false;
+
+  /// The message that launched the app from a terminated state, if any.
+  Future<RemoteMessage?> initialMessage() async {
+    if (_initialFetched) return _initialMessage;
+    _initialFetched = true;
+    try {
+      _initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    } catch (e) {
+      debugPrint('Could not read initial FCM message: $e');
+    }
+    return _initialMessage;
+  }
+
   /// Initializes FCM permissions, local channels, and foreground listeners
   Future<void> initialize() async {
     if (_initialized) return;
@@ -54,6 +76,11 @@ class NotificationService {
             body: notification.body ?? '',
           );
         }
+        onForegroundMessage?.call(message);
+      });
+      // Tap-through: notification opened while the app is backgrounded.
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        onTapMessage?.call(message);
       });
       _initialized = true;
     } catch (e, stackTrace) {

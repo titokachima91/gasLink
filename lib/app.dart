@@ -4,21 +4,88 @@
 // restored by [AuthService]. Login and logout navigate explicitly, so the app
 // never re-derives the role from FirebaseAuth.
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/notification_routing.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
 import 'screens/role_router.dart';
 
 // FIXED GLOBAL NAVIGATION KEY: Creates a permanent handle for background and foreground notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-class GasLinkApp extends ConsumerWidget {
+class GasLinkApp extends ConsumerStatefulWidget {
   const GasLinkApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GasLinkApp> createState() => _GasLinkAppState();
+}
+
+class _GasLinkAppState extends ConsumerState<GasLinkApp> {
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.instance.onTapMessage = _handleNotificationTap;
+    NotificationService.instance.onForegroundMessage = _showForegroundBanner;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Cold start from a terminated state.
+      final message = await NotificationService.instance.initialMessage();
+      if (message != null && mounted) {
+        _handleNotificationTap(message);
+      }
+    });
+  }
+
+  void _handleNotificationTap(RemoteMessage message) {
+    final data = NotificationRouteData.fromPayload(message.data);
+    final navigator = navigatorKey.currentState;
+    if (navigator == null || data.orderId.isEmpty) return;
+    NotificationRouting.openOrder(
+      navigator.context,
+      AuthService.instance.currentRole,
+      data.orderId,
+    );
+  }
+
+  void _showForegroundBanner(RemoteMessage message) {
+    final data = NotificationRouteData.fromPayload(message.data);
+    if (data.orderId.isEmpty) return;
+    final navigator = navigatorKey.currentState;
+    final context = navigator?.context;
+    if (context == null || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentMaterialBanner();
+    messenger.showMaterialBanner(
+      MaterialBanner(
+        leading: const Icon(Icons.notifications_active_outlined),
+        content: Text(
+          message.notification?.title ?? 'GasLink',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              messenger.hideCurrentMaterialBanner();
+              NotificationRouting.openOrder(
+                context,
+                AuthService.instance.currentRole,
+                data.orderId,
+              );
+            },
+            child: const Text('Angalia / View'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeControllerProvider);
 
     return MaterialApp(
