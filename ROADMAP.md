@@ -3,10 +3,11 @@
 > **Last updated:** 2026-11-11
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 4 — Vendor Settings & Profile
+> **Current focus:** Phase 5 — Notifications & Polish
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
+> **Phase 4:** ✅ Vendor settings & profile complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -26,6 +27,7 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Theme QA / guardrails | ✅ Complete (automated guard + startup smoke) |
 | Admin & Operations Console | ✅ Complete — Phase 2 |
 | Vendor verification | ✅ Complete — Phase 3 |
+| Vendor settings & commission | ✅ Complete — Phase 4 |
 
 ---
 
@@ -93,13 +95,24 @@ Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
 
 ---
 
+## ✅ Phase 4 — Vendor Settings & Profile (COMPLETE)
+
+Record: [`phases/phase-04-vendor-settings/implementation.md`](phases/phase-04-vendor-settings/implementation.md)
+
+- Admin-controlled commission model: percentage or monthly subscription,
+  editable per vendor with audit trail.
+- Orders stamp the vendor's model; subscription vendors pay no per-order cut.
+- Vendor settings screen with read-only billing terms, profile shortcut,
+  theme, notifications, about, and sign-out.
+- Secure shop photo upload via Firebase Storage with picker, preview, and
+  size/type rules.
+
+Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
+54/54 passing, including 9 new Phase 4 tests.
+
+---
+
 ## 🔜 Later Phases
-
-### Phase 4 — Vendor Settings & Profile
-
-- Commission model toggle (subscription vs percentage).
-- Profile management.
-- Image upload.
 
 ### Phase 5 — Notifications & Polish
 

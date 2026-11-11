@@ -47,14 +47,14 @@ This is a **documentation-first project**: plan before code, record after code.
 | 11 | Operational Analytics | `lib/services/analytics_service.dart`, `lib/models/analytics.dart` |
 | 12 | Admin Inventory & Audit | `lib/screens/admin/admin_inventory_screen.dart`, `lib/screens/admin/admin_audit_log_screen.dart` |
 | 13 | Vendor Verification | `lib/models/vendor.dart`, `lib/services/admin_service.dart`, `lib/widgets/verified_badge.dart` |
+| 14 | Vendor Settings & Commission | `lib/screens/vendor/vendor_settings_screen.dart`, `lib/services/vendor_image_service.dart`, `storage.rules` |
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🔴 | Vendor Settings | No file exists (Phase 4) |
 | 🟡 | Notifications & polish | Phase 5 |
-| 🟡 | Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination |
+| 🟡 | Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing |
 
 ---
 
@@ -117,4 +117,7 @@ Record phase rollback points here after each push.
 | Phase 2 push point | `20174c7` | `origin/harden-source-of-truth` | Pre-Phase 3 rollback point |
 | Phase 3 code | `645126d` | `origin/harden-source-of-truth` | Vendor verified role + tests (pushed) |
 | Phase 3 docs | `4a93d24` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
+| Phase 3 push point | `7d53a0f` | `origin/harden-source-of-truth` | Pre-Phase 4 rollback point |
+| Phase 4 code | `2aeb359` | `origin/harden-source-of-truth` | Vendor settings, commission, photo upload (pushed) |
+| Phase 4 docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
 ---

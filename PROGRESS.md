@@ -7,7 +7,8 @@
 > **Theme:** Phase 1 complete — see `phases/phase-01-theme/implementation.md`.
 > **Admin console:** Phase 2 complete — see `phases/phase-02-admin-panel/implementation.md`.
 > **Vendor verification:** Phase 3 complete — see `phases/phase-03-vendor-verified/implementation.md`.
-> **Current phase:** Phase 4 — Vendor Settings & Profile (next).
+> **Vendor settings:** Phase 4 complete — see `phases/phase-04-vendor-settings/implementation.md`.
+> **Current phase:** Phase 5 — Notifications & Polish (next).
 
 ---
 
@@ -26,7 +27,8 @@
 | Admin & Operations Console | ✅ **Complete** — responsive shell, dashboard, vendors, orders, consumers, inventory, settings, audit, guard |
 | Operational Analytics | ✅ **Complete** — 7/30/90-day KPIs, trends, scorecards, demand mix, CSV export |
 | Vendor verified Role | ✅ **Complete** — explicit `verified` field, audited admin action, consumer badges, real verified-only filter |
-| Vendor Profile | ⚠️ **Exists** but no image upload (Phase 4) |
+| Vendor Settings & Profile | ✅ **Complete** — settings screen, admin-controlled commission model, secure Storage photo upload |
+| Vendor Profile | ✅ **Complete** — profile management plus gallery photo upload to Firebase Storage |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -54,6 +56,9 @@
 | 17 | Inventory & settings | Brand/size aggregation with out-of-stock filter and vendor offers; commission/support settings with audit trail |
 | 18 | Admin test coverage | `test/admin_console_test.dart` (6) + `test/analytics_test.dart` (5); full suite 41/41 passing; analyzer 0 errors / 0 warnings |
 | 19 | Vendor verification | `Vendor.verified/verifiedAt/verifiedBy`; audited `verify_vendor`/`unverify_vendor`; consumer badges gated by the flag; `verifiedOnly` filter uses the field |
+| 20 | Commission model | `Vendor.commissionModel/subscriptionFee`; admin-only editor with audit; orders stamp `commission_model`; subscription vendors pay no per-order cut |
+| 21 | Vendor settings | `vendor_settings_screen.dart` with billing terms, profile shortcut, theme, notifications, about, sign-out; wired from dashboard and drawer |
+| 22 | Shop photo upload | `VendorImageService` uploads to Storage (`vendor_images/`) with 5 MB/image-type rules; picker + preview in profile |
 
 ### Hardcoded Login (Seed Credential)
 
@@ -83,6 +88,17 @@
 | Audit coverage | `verify_vendor` and `unverify_vendor` written in the same batch as the vendor update |
 | Consumer gating | Badges render only when `verified == true` on all updated discovery surfaces |
 
+### Phase 4 Verification
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | 0 errors, 0 warnings, 51 pre-existing info lints |
+| `flutter test` | 54/54 passing |
+| Phase 4 tests | 9 new tests: commission model, order stamping, image validation, billing card variants |
+| Admin commission | Percentage/subscription editor with audit record; list chips show model |
+| Storage | `storage.rules` limits writes to authenticated users, `image/*`, < 5 MB |
+| Runtime storage QA | Requires Firebase anonymous auth + `firebase deploy --only storage`; client degrades with a clear error |
+
 ---
 
 ## 🔍 Key Code Locations
@@ -104,9 +120,12 @@
 | Theme picker | lib/widgets/theme_mode_button.dart | System/Light/Dark picker |
 | Admin shell | lib/screens/admin/admin_shell.dart | Responsive console navigation and admin entry point |
 | Admin guard | lib/core/admin_guard.dart | Central client-side admin access check |
-| Admin service | lib/services/admin_service.dart | Vendor lifecycle/verification, orders, consumers, inventory, settings, audit |
-| Vendor model | lib/models/vendor.dart | Lifecycle, KYC, and verified trust fields |
+| Admin service | lib/services/admin_service.dart | Vendor lifecycle/verification/commission, orders, consumers, inventory, settings, audit |
+| Vendor model | lib/models/vendor.dart | Lifecycle, KYC, verified trust fields, commission model |
 | Verified badge | lib/widgets/verified_badge.dart | Shared consumer trust badge, gated by the vendor flag |
+| Vendor settings | lib/screens/vendor/vendor_settings_screen.dart | Vendor settings with billing terms, theme, notifications, sign-out |
+| Image upload | lib/services/vendor_image_service.dart | Storage upload with size/type validation and rules |
+| Storage rules | storage.rules | Public reads; authenticated, size/type-limited writes |
 | Admin models | lib/models/admin_models.dart | Audit log, consumer/product/cylinder/settings/dashboard projections |
 | Analytics service | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
 | Analytics models | lib/models/analytics.dart | Reporting value objects and fixed timezone/currency |
@@ -115,6 +134,7 @@
 | Admin tests | test/admin_console_test.dart | Guard, lifecycle, responsive shell, dark mode |
 | Analytics tests | test/analytics_test.dart | KPI math, trend range, breakdowns, CSV |
 | Verification tests | test/vendor_verified_test.dart | Model round-trip, verified-only filter, badge rendering |
+| Vendor settings tests | test/vendor_settings_test.dart | Commission model, order stamping, image validation, billing card |
 | Roadmap | ROADMAP.md | Project roadmap and later phases |
 
 ---
@@ -135,16 +155,23 @@
 - Follow-ups: Firestore rules for `verified`, verification expiry/re-review,
   vendor-facing verification status panel.
 
-### ⚠️ Phase 4 — Vendor Settings
-- No vendor settings screen.
-- Target: Commission toggle (subscription vs percentage), profile management,
-  image upload.
+### ✅ Phase 4 — Vendor Settings & Profile (complete)
+- Shipped and verified: vendor settings screen, admin-controlled commission
+  model with audit, order commission stamping, secure Storage photo upload.
+- Record: `phases/phase-04-vendor-settings/implementation.md`.
+- Follow-ups: subscription billing/invoicing (Phase 6), server-side storage
+  path ownership (Phase 6), Storage retention cleanup, Firebase console
+  enablement (anonymous auth + storage rules deploy).
+
+### ⚠️ Phase 5 — Notifications & Polish
+- Notification routing polish, offline/error states, performance and
+  accessibility pass.
 
 ---
 
 ## 🔜 Immediate Next Steps
 
-1. Phase 4 — vendor settings and profile.
-2. Phase 5 — notifications and polish.
-3. Scale/security hardening: Firestore rules, server-side admin checks, daily
-   analytics rollups, order pagination, secure admin identity.
+1. Phase 5 — notifications and polish.
+2. Scale/security hardening: Firestore rules, server-side admin checks, daily
+   analytics rollups, order pagination, secure admin identity, subscription
+   billing.
