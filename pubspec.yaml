@@ -48,7 +48,10 @@ dependencies:
   flutter_riverpod: ^2.6.1
   firebase_storage: ^12.4.10
   image_picker: ^1.1.2
-  connectivity_plus: ^7.3.1
+  # Pinned for Flutter 3.24.5 / AGP 8.3 compatibility.
+  # v7.x requires Flutter >= 3.29 (flutter.compileSdkVersion); do not upgrade
+  # without upgrading the whole Android toolchain.
+  connectivity_plus: 6.1.2
 
 dev_dependencies:
   flutter_test:
