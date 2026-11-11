@@ -53,11 +53,18 @@ This is a **documentation-first project**: plan before code, record after code.
 | 17 | Guest vs Consumer | `lib/core/session_gate.dart`, `lib/services/auth_service.dart` |
 | 18 | Vendor Catalogue | `lib/services/catalog_service.dart`, `lib/utils/service_normalizer.dart` |
 
+### Planned (awaiting owner approval — not built)
+
+- Phase 5C: `phases/phase-05c-consumer-completeness/plan.md`
+- Phase 5D: `phases/phase-05d-vendor-growth/plan.md`
+
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🔴 | Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing (Phase 6) |
+| 🚧 | Phase 5C — Auth flow & consumer completeness | `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval) |
+| 🚧 | Phase 5D — Vendor polish & growth hooks | `phases/phase-05d-vendor-growth/plan.md` (awaiting approval) |
+| 🟡 | Phase 6 — Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing |
 
 ---
 
@@ -131,4 +138,7 @@ Record phase rollback points here after each push.
 | Phase 5B restyles | `5e2c6d2` | `origin/harden-source-of-truth` | Vendor detail, home, dashboard (pushed) |
 | Phase 5B ads | `c1f44a8` | `origin/harden-source-of-truth` | Ad slots, AdvertiseScreen, admin review (pushed) |
 | Phase 5B docs | `5e30bb5` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
+| Phase 5B push point | `aa48414` | `origin/harden-source-of-truth` | Pre-auth-flow-fix rollback point |
+| Auth flow + layout fixes | `31654dc` | `origin/harden-source-of-truth` | Blended login, order header, dashboard KPIs (pushed) |
+| Launcher + rearrange | `cbae13e` | `origin/harden-source-of-truth` | Logo icons, landing rebalance, home/dashboard restructure (pushed) — **current head** |
 ---

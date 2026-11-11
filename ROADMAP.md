@@ -3,12 +3,13 @@
 > **Last updated:** 2026-11-11
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 6 — Scale & Security Hardening
+> **Current focus:** Phase 5C & 5D — planned, awaiting approval (Phase 6 set aside)
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
 > **Phase 4:** ✅ Vendor settings & profile complete
 > **Phase 5:** ✅ Notifications & polish complete
+> **Phase 5B:** ✅ App polish & first impressions complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -31,6 +32,8 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Vendor settings & commission | ✅ Complete — Phase 4 |
 | Notifications & polish | ✅ Complete — Phase 5 |
 | App polish & first impressions | ✅ Complete — Phase 5B |
+| Auth flow & consumer completeness | 🚧 Planned — Phase 5C |
+| Vendor polish & growth hooks | 🚧 Planned — Phase 5D |
 
 ---
 
@@ -146,6 +149,32 @@ Record: [`phases/phase-05b-app-polish/implementation.md`](phases/phase-05b-app-p
 Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
 75/75 passing, including 12 new Phase 5B tests. No business logic changed —
 cylinder hub, FIFO measurement, and order flows are untouched.
+
+---
+
+## 🚧 Phase 5C — Auth Flow Polish & Consumer Completeness (PLANNED)
+
+Plan: [`phases/phase-05c-consumer-completeness/plan.md`](phases/phase-05c-consumer-completeness/plan.md)
+
+- Landing keeps only small Login / Register / Guest links; forms move to
+  dedicated, branded screens.
+- Login/register gain Terms & Conditions + advertising-consent checkboxes.
+- New consumer Settings and Profile screens; existing surfaces polished.
+- Home reorder: My Cylinders above the Gas Estimator.
+- Logout returns to the landing page from every role.
+
+## 🚧 Phase 5D — Vendor Polish & Growth Hooks (PLANNED)
+
+Plan: [`phases/phase-05d-vendor-growth/plan.md`](phases/phase-05d-vendor-growth/plan.md)
+
+- Vendor drawer, inventory, order manager, profile, badge, and dashboard
+  polish (logic untouched).
+- Referral foundation for consumers and vendors (codes, tracking, share;
+  rewards "coming soon").
+- **GasPlan kwa Waajiriwa** teaser, discreetly inside Consumer Settings →
+  Features only — no public advertising until the service materializes.
+
+Both phases keep the standing rule: no business logic changes.
 
 ---
 

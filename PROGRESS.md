@@ -10,7 +10,7 @@
 > **Vendor settings:** Phase 4 complete — see `phases/phase-04-vendor-settings/implementation.md`.
 > **Notifications & polish:** Phase 5 complete — see `phases/phase-05-notifications/implementation.md`.
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
-> **Current phase:** Phase 6 — Scale & Security Hardening (next).
+> **Current phase:** Phase 5C & 5D — planned, awaiting owner approval (Phase 6 set aside).
 
 ---
 
@@ -34,6 +34,8 @@
 | Notifications & Polish | ✅ **Complete** — tap-through routing, in-app banners, offline banners, store-toggle semantics |
 | App Polish & First Impressions | ✅ **Complete** — landing page, guest/consumer split, catalogue & service fixes, restyled screens, audience-aware ads |
 | Vendor Catalogue Consistency | ✅ **Complete** — merged inventory view; consumers see everything vendors manage |
+| Auth Flow & Consumer Completeness | 🚧 **Planned (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder |
+| Vendor Polish & Growth Hooks | 🚧 **Planned (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -73,6 +75,9 @@
 | 29 | Guest separation | `SessionGate.requireConsumer` gates all order CTAs; guest home shows sign-in banner instead of tracker/gauges |
 | 30 | Landing page | Hero, value props, how-it-works, districts, ads, login/register/guest entry |
 | 31 | Ad framework | Audience-aware `AdSlot`, `AdvertiseScreen` request form, admin review queue |
+| 32 | Launcher branding | GasLink logo replaces the default Flutter icon on Android/iOS/web/macOS; bundled as an asset |
+| 33 | Landing rebalance | Details first; compact login/register/guest links on top; logout returns to the landing page |
+| 34 | Home & dashboard rearrange | Consumer home section headers + richer vendor cards; vendor dashboard KPI grid, quick actions, empty states |
 
 ### Hardcoded Login (Seed Credential)
 
@@ -131,6 +136,17 @@
 | Phase 5B tests | 12 new: catalog merge, service normalizer, session gate, landing, ad slot |
 | Logic safety | `cylinder_fifo.dart`, `OrderService`, and `AuthService` flows untouched |
 | Guest gating | All order CTAs route through `SessionGate` |
+
+### Post-5B follow-ups (commits `31654dc`, `cbae13e`)
+
+| Change | Evidence |
+|---|---|
+| Blended login moved out of landing | Landing keeps small text links; login form is a compact bottom section (removed in the 5C plan) |
+| Order manager header fix | Bounded phone button + ellipsis on ODA header |
+| Dashboard KPI fix | Metric cards no longer misuse `Expanded` inside the grid |
+| Launcher icons | Logo applied to Android/iOS/web/macOS icons |
+| Landing rebalance + home/dashboard rearrange | Section headers, quick actions grid, richer vendor cards |
+| Verification | `flutter analyze` 0 errors / 0 warnings; `flutter test` 75/75; APK builds cleanly |
 
 ---
 
@@ -220,6 +236,18 @@
 - Follow-ups: admin campaign creation form, ad image banners, legacy
   subcollection cleanup reminder for vendors.
 
+### 🚧 Phase 5C — Auth Flow Polish & Consumer Completeness (planned)
+- Dedicated branded login/register with Terms + ads-consent checkboxes.
+- Consumer Settings and Profile screens; polished history/cylinders/tracker.
+- Home reorder: My Cylinders above the Gas Estimator.
+- Plan: `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval).
+
+### 🚧 Phase 5D — Vendor Polish & Growth Hooks (planned)
+- Vendor drawer/inventory/orders/profile/badge/dashboard polish.
+- Referral foundation for consumers and vendors (rewards coming soon).
+- GasPlan kwa Waajiriwa teaser inside Consumer Settings → Features only.
+- Plan: `phases/phase-05d-vendor-growth/plan.md` (awaiting approval).
+
 ### ⚠️ Phase 6 — Scale & Security Hardening
 - Firestore security rules and Cloud Functions for server-side admin checks.
 - Daily analytics rollups and scheduled exports.
@@ -231,5 +259,8 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Phase 6 — scale and security hardening (rules, server-side checks,
+1. Owner reviews `phase-05c-consumer-completeness/plan.md` and
+   `phase-05d-vendor-growth/plan.md`.
+2. Build Phase 5C, then Phase 5D (one commit per slice).
+3. Phase 6 — scale and security hardening (rules, server-side checks,
    analytics rollups, pagination, subscription billing).
