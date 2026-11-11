@@ -1197,21 +1197,30 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 _buildGuestBanner(),
                 const SizedBox(height: 12),
               ] else ...[
+                const AppSectionHeader(
+                  title: 'Oda Zangu / My Orders',
+                  subtitle: 'Fuatilia oda zinazoendelea.',
+                  icon: Icons.local_shipping_outlined,
+                ),
+                const SizedBox(height: 10),
                 // 🟢 DYNAMIC PERMANENT LIVE MULTI-ORDER INTERFACE CONTAINER BANNER TRACKER
                 _buildPersistentOdaZanguBanner(),
+                const SizedBox(height: 16),
+                const AppSectionHeader(
+                  title: 'Kikadirio cha Gesi / Gas Estimator',
+                  subtitle: 'Mitungi yako na kiasi kilichobaki.',
+                  icon: Icons.speed_outlined,
+                ),
+                const SizedBox(height: 10),
                 _buildGasEstimatorCard(),
                 const SizedBox(height: 12),
               ],
 
-              Text(
-                'Unataka kufanya nini? / Choose Service',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              const AppSectionHeader(
+                title: 'Unataka kufanya nini? / Choose Service',
+                icon: Icons.grid_view_outlined,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // ===== 2×2 CATEGORY GRID =====
               GridView.count(
@@ -1260,13 +1269,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               const SizedBox(height: 20),
 
               // ===== VERTICAL LIST TITLE =====
-              Text(
-                _getListTitle(),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              AppSectionHeader(
+                title: _getListTitle(),
+                icon: Icons.category_outlined,
               ),
               const SizedBox(height: 10),
 
@@ -1275,26 +1280,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ===== NEARBY VENDORS (kept for now) =====
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Wauza Gesi Walio Karibu Nawe',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    '${liveOffers.length} Wauza Gesi',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              // ===== NEARBY VENDORS =====
+              AppSectionHeader(
+                title: 'Wauza Gesi Walio Karibu Nawe',
+                subtitle: 'Linganisha bei, umbali na uhakiki.',
+                icon: Icons.storefront_outlined,
+                trailing: AppStatusPill(
+                  label: '${liveOffers.length} Wauza Gesi',
+                  color: context.colors.primary,
+                ),
               ),
               const SizedBox(height: 12),
               if (_isLoading)
@@ -1433,13 +1427,13 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
                     color: context.colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(14)),
                 child: Icon(Icons.storefront,
-                    color: context.colors.primary, size: 24),
+                    color: context.colors.primary, size: 28),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1458,10 +1452,12 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         if (vendor.verified)
@@ -1479,6 +1475,20 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         ],
                       ],
                     ),
+                    if (offer.vendorBrands.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          for (final brand in offer.vendorBrands.take(3))
+                            AppStatusPill(
+                              label: brand,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

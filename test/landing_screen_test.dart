@@ -16,12 +16,19 @@ void main() {
     await tester.pump();
 
     expect(find.text('GasLink'), findsOneWidget);
-    expect(find.text('Pata Gesi / Get Gas'), findsOneWidget);
-    expect(find.text('Chunguza kama mgeni / Explore as guest'), findsOneWidget);
+    expect(find.text('Ingia / Log in'), findsWidgets);
+    expect(find.text('Mgeni / Guest'), findsOneWidget);
+    expect(find.text('Jiandikishe / Register'), findsOneWidget);
     expect(find.textContaining('Advertise Here'), findsOneWidget);
     expect(find.textContaining('Inavyofanya kazi'), findsOneWidget);
 
-    // Blended login section lives on the same page.
+    // The blended login section lives at the bottom of the same page.
+    await tester.scrollUntilVisible(
+      find.text('Huna akaunti? Jiandikishe / Register'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
     expect(
       find.text('Huna akaunti? Jiandikishe / Register'),

@@ -97,33 +97,37 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                  // Compact account entry points; "Ingia" slides the page
+                  // down to reveal the login form below the details.
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      TextButton.icon(
+                        onPressed: _scrollToLogin,
+                        icon: const Icon(Icons.login, size: 18),
+                        label: const Text('Ingia / Log in'),
                       ),
-                      onPressed: _scrollToLogin,
-                      icon: const Icon(Icons.login),
-                      label: const Text('Pata Gesi / Get Gas'),
-                    ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.person_add_alt, size: 18),
+                        label: const Text('Jiandikishe / Register'),
+                      ),
+                      TextButton.icon(
+                        onPressed: _exploreAsGuest,
+                        icon: const Icon(Icons.visibility_outlined, size: 18),
+                        label: const Text('Mgeni / Guest'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: _exploreAsGuest,
-                      icon: const Icon(Icons.visibility_outlined),
-                      label:
-                          const Text('Chunguza kama mgeni / Explore as guest'),
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  _buildLoginSection(context),
-                  const SizedBox(height: 22),
                   const AppSectionHeader(
                     title: 'Kwa nini GasLink? / Why GasLink?',
                     subtitle: 'Uthibitisho kabla ya ununuzi.',
@@ -201,6 +205,8 @@ class _LandingScreenState extends State<LandingScreen> {
                       child: const Text('Tangaza nasi / Advertise with us'),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  _buildLoginSection(context),
                 ],
               ),
             ),
@@ -282,19 +288,28 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  /// Compact login form at the bottom of the landing page. The "Ingia" link
+  /// at the top scrolls here.
   Widget _buildLoginSection(BuildContext context) {
     return AppCard(
       key: _loginKey,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppSectionHeader(
-            title: 'Ingia / Log in',
-            subtitle: 'Namba ya simu na PIN yako ya siri.',
-            icon: Icons.account_circle_outlined,
+          const Text(
+            'Ingia / Log in',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 2),
+          Text(
+            'Weka namba ya simu na PIN yako.',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: _phone,
             keyboardType: TextInputType.phone,
@@ -303,9 +318,10 @@ class _LandingScreenState extends State<LandingScreen> {
               hintText: 'e.g. 0767304776',
               prefixIcon: Icon(Icons.phone_outlined),
               border: OutlineInputBorder(),
+              isDense: true,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           TextField(
             controller: _pin,
             keyboardType: TextInputType.number,
@@ -316,10 +332,11 @@ class _LandingScreenState extends State<LandingScreen> {
               counterText: '',
               prefixIcon: Icon(Icons.lock_outline),
               border: OutlineInputBorder(),
+              isDense: true,
             ),
           ),
           if (_error != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               _error!,
               style: TextStyle(
@@ -329,18 +346,18 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 13),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onPressed: _loggingIn ? null : _login,
               child: _loggingIn
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text(
@@ -349,12 +366,12 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 13),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onPressed: () {
                 Navigator.of(context).push(

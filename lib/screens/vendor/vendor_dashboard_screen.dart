@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/ad_slot.dart';
+import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/landing_screen.dart';
@@ -510,6 +511,12 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                 children: [
                   const OfflineBanner(),
                   // ── SECTION 1: DYNAMIC DAILY METRIC COUNTERS ──────────
+                  const AppSectionHeader(
+                    title: 'Leo / Today',
+                    subtitle: 'Muhtasari wa shughuli za leo.',
+                    icon: Icons.insights_outlined,
+                  ),
+                  const SizedBox(height: 10),
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection('products')
@@ -568,19 +575,20 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  // ── SECTION 2: QUICK ACTION BUTTONS ──────────────────
+                  // ── SECTION 2: QUICK ACTIONS GRID ──────────────────
+                  const AppSectionHeader(
+                    title: 'Haraka / Quick Actions',
+                    subtitle: 'Stoki, oda, wasifu na mipangilio.',
+                    icon: Icons.dashboard_customize_outlined,
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.colors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
+                        child: _QuickActionTile(
+                          icon: Icons.inventory,
+                          label: 'Stoki',
+                          onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -588,28 +596,14 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               ),
                             );
                           },
-                          icon: Icon(Icons.inventory,
-                              color: context.colors.onPrimary),
-                          label: Text(
-                            'Stoki / Inventory',
-                            style: TextStyle(
-                              color: context.colors.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: context.colors.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
+                        child: _QuickActionTile(
+                          icon: Icons.list_alt,
+                          label: 'Oda Zote',
+                          onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -617,15 +611,36 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                               ),
                             );
                           },
-                          icon: Icon(Icons.list_alt,
-                              color: context.colors.primary),
-                          label: Text(
-                            'Oda Zote / Orders',
-                            style: TextStyle(
-                              color: context.colors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _QuickActionTile(
+                          icon: Icons.storefront,
+                          label: 'Wasifu',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const VendorProfileScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _QuickActionTile(
+                          icon: Icons.settings_outlined,
+                          label: 'Mipangilio',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const VendorSettingsScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -634,34 +649,18 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   const AdSlot(placementId: 'vendor_dashboard'),
                   const SizedBox(height: 24),
                   // ── SECTION 3: REAL-TIME INCOMING ORDER ALERTS ───────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Oda Mpya Zinazoingia / Incoming Orders',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text('${pendingOrders.length} Mpya'),
-                        backgroundColor: pendingOrders.isNotEmpty
-                            ? context.colors.primaryContainer
-                            : context.colors.outlineVariant,
-                        labelStyle: TextStyle(
-                          fontSize: 11,
-                          color: pendingOrders.isNotEmpty
-                              ? context.colors.primary
-                              : context.colors.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  AppSectionHeader(
+                    title: 'Oda Mpya Zinazoingia / Incoming Orders',
+                    subtitle: pendingOrders.isEmpty
+                        ? 'Hakuna oda mpya kwa sasa.'
+                        : 'Oda zinazosubiri kukubaliwa.',
+                    icon: Icons.mark_email_unread_outlined,
+                    trailing: AppStatusPill(
+                      label: '${pendingOrders.length} Mpya',
+                      color: pendingOrders.isNotEmpty
+                          ? context.gasColors.warning
+                          : context.colors.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   if (pendingOrders.isEmpty)
@@ -1087,6 +1086,42 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                 TextStyle(fontSize: 10, color: context.colors.onSurfaceVariant),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact tappable tile used in the vendor quick actions row.
+class _QuickActionTile extends StatelessWidget {
+  const _QuickActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+      child: Column(
+        children: [
+          Icon(icon, color: context.colors.primary, size: 24),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
