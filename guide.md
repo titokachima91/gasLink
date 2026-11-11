@@ -49,6 +49,9 @@ This is a **documentation-first project**: plan before code, record after code.
 | 13 | Vendor Verification | `lib/models/vendor.dart`, `lib/services/admin_service.dart`, `lib/widgets/verified_badge.dart` |
 | 14 | Vendor Settings & Commission | `lib/screens/vendor/vendor_settings_screen.dart`, `lib/services/vendor_image_service.dart`, `storage.rules` |
 | 15 | Notifications & Offline | `lib/core/notification_routing.dart`, `lib/widgets/offline_banner.dart` |
+| 16 | Landing, Design Kit & Ads | `lib/screens/auth/landing_screen.dart`, `lib/widgets/app_ui.dart`, `lib/widgets/ad_slot.dart` |
+| 17 | Guest vs Consumer | `lib/core/session_gate.dart`, `lib/services/auth_service.dart` |
+| 18 | Vendor Catalogue | `lib/services/catalog_service.dart`, `lib/utils/service_normalizer.dart` |
 
 ### Current Gaps (priority order)
 
@@ -123,4 +126,9 @@ Record phase rollback points here after each push.
 | Phase 4 push point | `dcaed5a` | `origin/harden-source-of-truth` | Pre-Phase 5 rollback point |
 | Phase 5 code | `04f539a` | `origin/harden-source-of-truth` | Notification routing, banners, offline, a11y (pushed) |
 | Phase 5 docs | `0f6ea00` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
+| Phase 5B fixes A–C | `5c7ae57` | `origin/harden-source-of-truth` | Catalogue, service count, guest split (pushed) |
+| Phase 5B design + landing | `2f30d8b` | `origin/harden-source-of-truth` | Design kit, landing page (pushed) |
+| Phase 5B restyles | `5e2c6d2` | `origin/harden-source-of-truth` | Vendor detail, home, dashboard (pushed) |
+| Phase 5B ads | `c1f44a8` | `origin/harden-source-of-truth` | Ad slots, AdvertiseScreen, admin review (pushed) |
+| Phase 5B docs | _pending_ | `origin/harden-source-of-truth` | Implementation record and status updates |
 ---

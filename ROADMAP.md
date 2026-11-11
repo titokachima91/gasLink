@@ -30,6 +30,7 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Vendor verification | ✅ Complete — Phase 3 |
 | Vendor settings & commission | ✅ Complete — Phase 4 |
 | Notifications & polish | ✅ Complete — Phase 5 |
+| App polish & first impressions | ✅ Complete — Phase 5B |
 
 ---
 
@@ -126,6 +127,25 @@ Record: [`phases/phase-05-notifications/implementation.md`](phases/phase-05-noti
 
 Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
 58/58 passing, including 4 new Phase 5 tests.
+
+---
+
+## ✅ Phase 5B — App Polish & First Impressions (COMPLETE)
+
+Record: [`phases/phase-05b-app-polish/implementation.md`](phases/phase-05b-app-polish/implementation.md)
+
+- Fixed the vendor/consumer catalogue split and the corrupted brand doc ids.
+- Fixed the extra-services count (weighing consent no longer counts).
+- Guests browse read-only; ordering and tracking require an account.
+- Landing page for visitors with login/register/guest entry points.
+- Design kit + restyled vendor detail (all sizes visible), consumer home,
+  and vendor dashboard (KPI grid + empty states).
+- Audience-aware, dismissible ad slots plus a stakeholder request screen and
+  an admin review queue.
+
+Verification at close: `flutter analyze` 0 errors / 0 warnings; `flutter test`
+75/75 passing, including 12 new Phase 5B tests. No business logic changed —
+cylinder hub, FIFO measurement, and order flows are untouched.
 
 ---
 

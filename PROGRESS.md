@@ -9,6 +9,7 @@
 > **Vendor verification:** Phase 3 complete — see `phases/phase-03-vendor-verified/implementation.md`.
 > **Vendor settings:** Phase 4 complete — see `phases/phase-04-vendor-settings/implementation.md`.
 > **Notifications & polish:** Phase 5 complete — see `phases/phase-05-notifications/implementation.md`.
+> **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Current phase:** Phase 6 — Scale & Security Hardening (next).
 
 ---
@@ -31,6 +32,8 @@
 | Vendor Settings & Profile | ✅ **Complete** — settings screen, admin-controlled commission model, secure Storage photo upload |
 | Vendor Profile | ✅ **Complete** — profile management plus gallery photo upload to Firebase Storage |
 | Notifications & Polish | ✅ **Complete** — tap-through routing, in-app banners, offline banners, store-toggle semantics |
+| App Polish & First Impressions | ✅ **Complete** — landing page, guest/consumer split, catalogue & service fixes, restyled screens, audience-aware ads |
+| Vendor Catalogue Consistency | ✅ **Complete** — merged inventory view; consumers see everything vendors manage |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -65,6 +68,11 @@
 | 24 | In-app banners | Foreground order notifications show a MaterialBanner with a View action |
 | 25 | Offline visibility | `OfflineBanner` on consumer home, vendor dashboard, and admin shell via `connectivity_plus` |
 | 26 | Accessibility | Semantics on the vendor OPEN/CLOSED toggle; tooltips on admin and vendor app bar actions |
+| 27 | Catalogue fix | `CatalogService` merged view; brand editor doc ids fixed + legacy cleanup; dashboard stock reads top-level |
+| 28 | Service-count fix | `normalizeOfferedServices` maps legacy entries; badge Tier 1 rows computed from real data |
+| 29 | Guest separation | `SessionGate.requireConsumer` gates all order CTAs; guest home shows sign-in banner instead of tracker/gauges |
+| 30 | Landing page | Hero, value props, how-it-works, districts, ads, login/register/guest entry |
+| 31 | Ad framework | Audience-aware `AdSlot`, `AdvertiseScreen` request form, admin review queue |
 
 ### Hardcoded Login (Seed Credential)
 
@@ -114,6 +122,16 @@
 | Phase 5 tests | 4 new tests: payload parsing, role routing, offline banner show/hide, dark mode |
 | Tap-through | Handled via FCM APIs; live-device QA recommended before pilot |
 
+### Phase 5B Verification
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | 0 errors, 0 warnings, 49 pre-existing info lints |
+| `flutter test` | 75/75 passing |
+| Phase 5B tests | 12 new: catalog merge, service normalizer, session gate, landing, ad slot |
+| Logic safety | `cylinder_fifo.dart`, `OrderService`, and `AuthService` flows untouched |
+| Guest gating | All order CTAs route through `SessionGate` |
+
 ---
 
 ## 🔍 Key Code Locations
@@ -143,6 +161,11 @@
 | Storage rules | storage.rules | Public reads; authenticated, size/type-limited writes |
 | Notification routing | lib/core/notification_routing.dart | Role-aware order tap destinations |
 | Offline banner | lib/widgets/offline_banner.dart | Injectable connectivity stream |
+| Design kit | lib/widgets/app_ui.dart | Cards, section headers, pills, empty states, skeletons |
+| Landing page | lib/screens/auth/landing_screen.dart | Visitor first impression |
+| Session gate | lib/core/session_gate.dart | Guest vs consumer enforcement |
+| Catalogue service | lib/services/catalog_service.dart | Merged vendor catalogue |
+| Ad framework | lib/widgets/ad_slot.dart, lib/services/ad_service.dart | Audience-aware slots + requests |
 | Admin models | lib/models/admin_models.dart | Audit log, consumer/product/cylinder/settings/dashboard projections |
 | Analytics service | lib/services/analytics_service.dart | KPI definitions, trends, demand mix, CSV export |
 | Analytics models | lib/models/analytics.dart | Reporting value objects and fixed timezone/currency |
@@ -154,6 +177,7 @@
 | Vendor settings tests | test/vendor_settings_test.dart | Commission model, order stamping, image validation, billing card |
 | Notification routing tests | test/notification_routing_test.dart | Payload parsing and role mapping |
 | Offline banner tests | test/offline_banner_test.dart | Show/hide with injected connectivity |
+| Phase 5B tests | test/catalog_service_test.dart, test/service_normalizer_test.dart, test/session_gate_test.dart, test/landing_screen_test.dart, test/ad_slot_test.dart | Fixes, guest gate, landing, ads |
 | Roadmap | ROADMAP.md | Project roadmap and later phases |
 
 ---
@@ -188,6 +212,13 @@
 - Record: `phases/phase-05-notifications/implementation.md`.
 - Follow-ups: deep links, server-side notification preferences, full
   screen-reader audit.
+
+### ✅ Phase 5B — App Polish & First Impressions (complete)
+- Shipped and verified: catalogue/service/guest fixes, landing page, design
+  kit, screen restyles, audience-aware ads with request + review flow.
+- Record: `phases/phase-05b-app-polish/implementation.md`.
+- Follow-ups: admin campaign creation form, ad image banners, legacy
+  subcollection cleanup reminder for vendors.
 
 ### ⚠️ Phase 6 — Scale & Security Hardening
 - Firestore security rules and Cloud Functions for server-side admin checks.
