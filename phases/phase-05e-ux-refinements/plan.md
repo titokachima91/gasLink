@@ -1,7 +1,7 @@
 # Phase 05E — UX Refinements & Selectable Language
 
-> **Status:** 🚧 Approved for implementation — docs refined 12 Nov 2026.
-> **Default-language decision pending before D1.** No code written yet.
+> **Status:** 🚧 Approved for implementation — docs finalized 12 Nov 2026.
+> No code written yet.
 > **Branch:** `harden-source-of-truth`
 > **Baseline:** `a9ee48f` (Phase 5D verified, Phase 6 parked)
 > **Rule:** no business logic removed or changed — layout, navigation,
@@ -363,8 +363,5 @@ Resolved 12 Nov 2026:
 4. **Marketing consent:** registration-only, explicit opt-in, default off; it
    covers push notifications/messages/tips/offers, not in-app ad slots.
 5. **Guest dead-end page:** remove it; route guests straight to login/register.
-
-Still open:
-
-6. **Default language:** system locale with Swahili fallback (recommended), or
-   always Swahili on first launch?
+6. **Default language:** use the system locale when it is `sw` or `en`;
+   otherwise start in **Kiswahili**. The user can change it any time.

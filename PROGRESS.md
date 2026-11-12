@@ -13,7 +13,7 @@
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
 > **Vendor growth:** Phase 5D complete — see `phases/phase-05d-vendor-growth/implementation.md`.
-> **Current phase:** Phase 5E **approved** — UX refinements & selectable language (default-language decision pending; no code yet). Phase 6 is parked — the Firebase project is on the free Spark plan; 6A needs Blaze.
+> **Current phase:** Phase 5E **approved** — UX refinements & selectable language (implementation starting). Phase 6 is parked — the Firebase project is on the free Spark plan; 6A needs Blaze.
 
 ---
 
@@ -266,7 +266,7 @@
 - Commits: `1fd5630`, `dd2f629`, `ec45524`, `f09d678`, plus the FlutterFire
   compatibility pin.
 
-### 🚧 Phase 5E — UX Refinements & Selectable Language (approved; default language pending)
+### 🚧 Phase 5E — UX Refinements & Selectable Language (approved)
 - Plan: `phases/phase-05e-ux-refinements/plan.md` — **plan only, no code.**
 - **A. Home hierarchy:** move the referral card before “Unataka kufanya nini?”
   so the service grid and stock list stay adjacent. Stock list shows 10 items
@@ -284,8 +284,8 @@
   selectable locale (Kiswahili / English, more later), persisted and applied
   app-wide in four migration batches.
 - Resolved: stock list +10, vendor referral below orders, Terms under About,
-  marketing opt-in default off, dead-end page removed.
-- Open: default language (system + Swahili fallback recommended).
+  marketing opt-in default off, dead-end page removed, default language =
+  system locale with Swahili fallback.
 
 ### ⏸️ Phase 6 — Scale & Security Hardening (parked)
 - Plan: `phases/phase-06-scale-security/plan.md`.

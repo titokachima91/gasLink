@@ -4,7 +4,7 @@
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
 > **Build runbook:** [`BUILD.md`](BUILD.md)
-> **Current focus:** Phase 5E approved — UX refinements & selectable language (default-language decision pending); Phase 6 parked (Firebase project is on Spark)
+> **Current focus:** Phase 5E approved — UX refinements & selectable language (implementation starting); Phase 6 parked (Firebase project is on Spark)
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
