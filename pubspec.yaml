@@ -52,6 +52,7 @@ dependencies:
   # v7.x requires Flutter >= 3.29 (flutter.compileSdkVersion); do not upgrade
   # without upgrading the whole Android toolchain.
   connectivity_plus: 6.1.2
+  share_plus: ^12.0.2
 
 dev_dependencies:
   flutter_test:

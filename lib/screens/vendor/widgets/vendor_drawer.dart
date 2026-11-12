@@ -19,6 +19,7 @@ class VendorDrawer extends StatelessWidget {
   final String? imageUrl;
   final int completionPercentage;
   final int currentTier;
+  final bool verified;
   final int selectedIndex;
   final Function(int) onSelectTab;
   final VoidCallback onLogout;
@@ -29,6 +30,7 @@ class VendorDrawer extends StatelessWidget {
     this.imageUrl,
     required this.completionPercentage,
     required this.currentTier,
+    this.verified = false,
     required this.selectedIndex,
     required this.onSelectTab,
     required this.onLogout,
@@ -77,32 +79,62 @@ class VendorDrawer extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            accountEmail: Row(
+            accountEmail: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(badgeIcon, size: 16, color: badgeColor),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    badgeLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                Row(
+                  children: [
+                    Icon(badgeIcon, size: 16, color: badgeColor),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        badgeLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ],
                 ),
+                if (verified) ...[
+                  const SizedBox(height: 5),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified, size: 12, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text(
+                          'Imethibitishwa / Verified',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
+              backgroundImage: (imageUrl != null && imageUrl!.isNotEmpty)
                   ? NetworkImage(imageUrl!)
-                  : null,
-              child: imageUrl == null || imageUrl!.isEmpty
-                  ? Icon(Icons.storefront,
-                      color: context.colors.primary, size: 36)
-                  : null,
+                  : const AssetImage('assets/gaslinklogo.png') as ImageProvider,
             ),
           ),
 
@@ -153,7 +185,7 @@ class VendorDrawer extends StatelessWidget {
               children: [
                 // 0: Dashboard
                 ListTile(
-                  leading: const Text('📊', style: TextStyle(fontSize: 20)),
+                  leading: _navIcon(context, Icons.dashboard_outlined),
                   title: const Text('Dashboard'),
                   subtitle: const Text(
                     'Muhtasari wa mauzo na oda',
@@ -171,8 +203,7 @@ class VendorDrawer extends StatelessWidget {
                 // 1: Badges & Gamified Progress Hub
                 // NEW CODE:
                 ListTile(
-                  leading: Icon(Icons.workspace_premium,
-                      color: context.colors.primary),
+                  leading: _navIcon(context, Icons.workspace_premium_outlined),
                   title: const Text('Tuzo na Uthibitisho'),
                   subtitle: const Text('Hatua za Badge & Badges Hub'),
                   onTap: () {
@@ -188,7 +219,7 @@ class VendorDrawer extends StatelessWidget {
                 ),
                 // 2: Inventory & Products
                 ListTile(
-                  leading: const Text('📦', style: TextStyle(fontSize: 20)),
+                  leading: _navIcon(context, Icons.inventory_2_outlined),
                   title: const Text('Stoki & Bidhaa'),
                   subtitle: const Text(
                     'Usimamizi wa bei na stoki',
@@ -205,7 +236,7 @@ class VendorDrawer extends StatelessWidget {
 
                 // 3: Order Management
                 ListTile(
-                  leading: const Text('🚚', style: TextStyle(fontSize: 20)),
+                  leading: _navIcon(context, Icons.local_shipping_outlined),
                   title: const Text('Usimamizi wa Oda'),
                   subtitle: const Text(
                     'Oda zinazoingia na kufikishwa',
@@ -222,7 +253,7 @@ class VendorDrawer extends StatelessWidget {
 
                 // 4: Store Profile
                 ListTile(
-                  leading: const Text('🏪', style: TextStyle(fontSize: 20)),
+                  leading: _navIcon(context, Icons.storefront_outlined),
                   title: const Text('Taarifa za Duka'),
                   subtitle: const Text(
                     'Leseni, Eneo & Mipangilio ya Duka',
@@ -244,8 +275,7 @@ class VendorDrawer extends StatelessWidget {
 
           // ── Footer Actions ───────────────────────────────────────────
           ListTile(
-            leading:
-                Icon(Icons.settings_outlined, color: context.colors.primary),
+            leading: _navIcon(context, Icons.settings_outlined),
             title: const Text('Mipangilio / Settings'),
             onTap: () {
               Navigator.pop(context); // Close drawer
@@ -258,7 +288,8 @@ class VendorDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Text('🚪', style: TextStyle(fontSize: 20)),
+            leading:
+                _navIcon(context, Icons.logout, color: context.colors.error),
             title:
                 Text('Logout', style: TextStyle(color: context.colors.error)),
             onTap: () {
@@ -269,6 +300,19 @@ class VendorDrawer extends StatelessWidget {
           const SizedBox(height: 12),
         ],
       ),
+    );
+  }
+
+  Widget _navIcon(BuildContext context, IconData icon, {Color? color}) {
+    final accent = color ?? context.colors.primary;
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: accent.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Icon(icon, size: 18, color: accent),
     );
   }
 

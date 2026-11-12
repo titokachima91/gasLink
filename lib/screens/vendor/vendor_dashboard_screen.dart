@@ -19,6 +19,7 @@ import '../../widgets/offline_banner.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/landing_screen.dart';
 import 'inventory_screen.dart';
+import 'vendor_badge_screen.dart';
 import 'vendor_order_screen.dart';
 import 'vendor_profile_screen.dart';
 import 'vendor_settings_screen.dart';
@@ -360,6 +361,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             1;
         final int completionPercentage =
             (vendorData['completionPercentage'] as num?)?.toInt() ?? 65;
+        final bool isVerified = vendorData['verified'] == true;
         final bool isOpen = vendorData['is_open'] as bool? ??
             vendorData['isOnline'] as bool? ??
             true;
@@ -371,6 +373,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             imageUrl: imageUrl,
             completionPercentage: completionPercentage,
             currentTier: currentTier,
+            verified: isVerified,
             selectedIndex: _selectedDrawerIndex,
             onSelectTab: _handleDrawerSelection,
             onLogout: () async {
@@ -574,6 +577,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       );
                     },
                   ),
+                  const SizedBox(height: 20),
+                  _buildVerificationCard(context, isVerified: isVerified),
                   const SizedBox(height: 20),
                   // ── SECTION 2: QUICK ACTIONS GRID ──────────────────
                   const AppSectionHeader(
@@ -1041,6 +1046,60 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildVerificationCard(
+    BuildContext context, {
+    required bool isVerified,
+  }) {
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isVerified
+                ? context.gasColors.success.withOpacity(0.12)
+                : context.colors.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            isVerified ? Icons.verified : Icons.workspace_premium_outlined,
+            color:
+                isVerified ? context.gasColors.success : context.colors.primary,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          isVerified ? 'Umethibitishwa / Verified' : 'Pata Badge ya Uhakiki',
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          isVerified
+              ? 'Wateja wanaona nembo yako ya uhakiki kwenye app.'
+              : 'Thibitisha duka lako kuongeza imani kwa wateja.',
+          style: TextStyle(
+            fontSize: 11.5,
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+        trailing: isVerified
+            ? AppStatusPill(
+                label: 'Verified',
+                icon: Icons.verified,
+                color: context.gasColors.success,
+              )
+            : const Icon(Icons.chevron_right, size: 18),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const VendorBadgeScreen()),
+          );
+        },
+      ),
     );
   }
 

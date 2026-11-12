@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/app_ui.dart';
 import 'vendor_profile_screen.dart';
 
 import '../../core/theme_ext.dart';
@@ -160,6 +161,14 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                                     fontSize: 18,
                                   ),
                                 ),
+                                if (data['verified'] == true) ...[
+                                  const SizedBox(height: 6),
+                                  const AppStatusPill(
+                                    label: 'Umethibitishwa / Verified',
+                                    icon: Icons.verified,
+                                    color: Colors.white,
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -206,9 +215,10 @@ class _VendorBadgeScreenState extends State<VendorBadgeScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Hatua za Vyeti na Badges',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const AppSectionHeader(
+                  title: 'Hatua za Vyeti na Badges',
+                  subtitle: 'Kamilisha vigezo kupanda tier.',
+                  icon: Icons.military_tech_outlined,
                 ),
                 const SizedBox(height: 12),
 

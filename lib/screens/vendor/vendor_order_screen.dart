@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/app_ui.dart';
 
 import '../../core/theme_ext.dart';
 
@@ -143,10 +144,10 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           return TabBarView(
             controller: _tabController,
             children: [
-              _buildOrderList(sortedDocs),
-              _buildOrderList(pendingOrders),
-              _buildOrderList(inTransitOrders),
-              _buildOrderList(completedOrders),
+              _buildOrderList(sortedDocs, 'Oda Zote'),
+              _buildOrderList(pendingOrders, 'Oda Mpya'),
+              _buildOrderList(inTransitOrders, 'Zinazoenda'),
+              _buildOrderList(completedOrders, 'Zilizokamilika'),
             ],
           );
         },
@@ -155,26 +156,32 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
   }
 
   Widget _buildOrderList(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+    String title,
+  ) {
     if (docs.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox_outlined, size: 48, color: context.colors.outline),
-            const SizedBox(height: 12),
-            Text('Hakuna oda katika orodha hii',
-                style: TextStyle(
-                    color: context.colors.onSurfaceVariant, fontSize: 13)),
-          ],
-        ),
+      return AppEmptyState(
+        icon: Icons.inbox_outlined,
+        title: 'Hakuna oda',
+        message: 'Oda za "$title" hazipo kwa sasa.',
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(12.0),
-      itemCount: docs.length,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+      itemCount: docs.length + 1,
       itemBuilder: (context, index) {
-        final doc = docs[index];
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AppSectionHeader(
+              title: title,
+              subtitle: '${docs.length} oda kwenye orodha hii.',
+              icon: Icons.receipt_long_outlined,
+            ),
+          );
+        }
+
+        final doc = docs[index - 1];
         final data = doc.data();
         final String status =
             (data['status'] ?? 'pending').toString().toLowerCase().trim();
@@ -573,14 +580,6 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
       color = context.colors.error;
       text = 'Imeghairiwa';
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(6)),
-      child: Text(text,
-          style: TextStyle(
-              color: color, fontWeight: FontWeight.bold, fontSize: 10)),
-    );
+    return AppStatusPill(label: text, color: color);
   }
 }

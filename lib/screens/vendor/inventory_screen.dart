@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../services/catalog_service.dart';
+import '../../widgets/app_ui.dart';
 import 'add_product_dialog.dart';
 
 import '../../core/theme_ext.dart';
@@ -212,107 +213,109 @@ class _InventoryScreenState extends State<InventoryScreen> {
       );
     }
     if (_products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inventory_2_outlined,
-                size: 64, color: context.colors.outline),
-            const SizedBox(height: 12),
-            Text(
-              'Bado huna bidhaa zozote / No products added',
-              style: TextStyle(
-                  color: context.colors.onSurfaceVariant, fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _showAddProductModal,
-              icon: Icon(Icons.add, color: context.colors.onPrimary),
-              label: Text(
-                'Ongeza Bidhaa',
-                style: TextStyle(color: context.colors.onPrimary),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.colors.primary,
-              ),
-            ),
-          ],
-        ),
+      return AppEmptyState(
+        icon: Icons.inventory_2_outlined,
+        title: 'Bado huna bidhaa zozote',
+        message: 'Ongeza bidhaa zako ili wateja wazione kwenye app.',
+        actionLabel: 'Ongeza Bidhaa',
+        onAction: _showAddProductModal,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: _products.length,
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+        itemCount: _products.length + 1,
         itemBuilder: (context, index) {
-          final product = _products[index];
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: AppSectionHeader(
+                title: 'Bidhaa Zangu / My Products',
+                subtitle: '${_products.length} bidhaa kwenye katalogi.',
+                icon: Icons.inventory_2_outlined,
+              ),
+            );
+          }
 
-          return Card(
-            elevation: 0,
-            margin: const EdgeInsets.only(bottom: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: context.colors.outlineVariant),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Icon(Icons.local_fire_department,
-                      color: context.colors.primary, size: 32),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _showEditProductDialog(product),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            product.label,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
+          final product = _products[index - 1];
+
+          return AppCard(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.propane_tank_outlined,
+                    color: context.colors.primary,
+                    size: 23,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _showEditProductDialog(product),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.label,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13.5,
                           ),
-                          Text(
-                            'TZS ${product.price}',
-                            style: TextStyle(
-                                color: context.colors.onSurfaceVariant,
-                                fontSize: 12),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            AppStatusPill(
+                              label: 'TZS ${product.price}',
+                              icon: Icons.sell_outlined,
+                            ),
+                            AppStatusPill(
+                              label: product.inStock ? 'Ipo Stoki' : 'Hakuna',
+                              icon: product.inStock
+                                  ? Icons.check_circle_outline
+                                  : Icons.remove_circle_outline,
+                              color: product.inStock
+                                  ? context.gasColors.success
+                                  : context.colors.error,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        product.inStock ? 'Ipo' : 'Hakuna',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: product.inStock
-                              ? context.gasColors.success
-                              : context.colors.error,
-                          fontWeight: FontWeight.bold,
-                        ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Switch(
+                      value: product.inStock,
+                      activeColor: context.colors.primary,
+                      onChanged: (_) => _toggleStock(product),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: context.colors.onSurfaceVariant,
+                        size: 20,
                       ),
-                      Switch(
-                        value: product.inStock,
-                        activeColor: context.colors.primary,
-                        onChanged: (_) => _toggleStock(product),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete_outline,
-                          color: context.colors.onSurfaceVariant,
-                          size: 20,
-                        ),
-                        onPressed: () => _deleteProduct(product),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      onPressed: () => _deleteProduct(product),
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         },

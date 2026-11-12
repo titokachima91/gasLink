@@ -18,6 +18,7 @@ import '../../services/auth_service.dart';
 import '../../services/vendor_image_service.dart';
 import '../../utils/service_normalizer.dart';
 import '../../core/constants.dart';
+import '../../widgets/app_ui.dart';
 
 import '../../core/theme_ext.dart';
 
@@ -278,7 +279,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Chagua angalau huduma 2 za nyongeza kwa mteja katika Section E.'),
+              'Chagua angalau huduma 2 za nyongeza kwa mteja katika Huduma za Ziada.'),
           backgroundColor: context.colors.primary,
         ),
       );
@@ -391,7 +392,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
           children: [
             // ── SECTION A: BUSINESS ESSENTIALS ────────────────────────
             _buildSectionHeader(
-                'Section A: Taarifa Kuu / Business Essentials', Icons.store),
+                'Taarifa Kuu / Business Essentials', Icons.store),
             const SizedBox(height: 8),
             Card(
               elevation: 0,
@@ -450,8 +451,8 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             const SizedBox(height: 16),
 
             // ── SECTION B: LOCATION & DELIVERY ───────────────────────
-            _buildSectionHeader('Section B: Eneo & Maeneo ya Huduma / Location',
-                Icons.location_on),
+            _buildSectionHeader(
+                'Eneo & Maeneo ya Huduma / Location', Icons.location_on),
             const SizedBox(height: 8),
             Card(
               elevation: 0,
@@ -536,7 +537,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
 
             // ── SECTION C: OPERATIONS & PAYMENTS ────────────────────
             _buildSectionHeader(
-                'Section C: Mipangilio & Malipo / Operations', Icons.payment),
+                'Mipangilio & Malipo / Operations', Icons.payment),
             const SizedBox(height: 8),
             Card(
               elevation: 0,
@@ -627,8 +628,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
 
             // ── SECTION D: SAFETY & DOCUMENTS ────────────────────────
             _buildSectionHeader(
-                'Section D: Usalama & Nyaraka / Safety & Documents',
-                Icons.verified_user),
+                'Usalama & Nyaraka / Safety & Documents', Icons.verified_user),
             const SizedBox(height: 8),
             Card(
               elevation: 0,
@@ -707,7 +707,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             const SizedBox(height: 16),
 
             // ── SECTION E: EXTRA SERVICES ────────────────────────────
-            _buildSectionHeader('Section E: Huduma za ziada / Extra Services',
+            _buildSectionHeader('Huduma za Ziada / Extra Services',
                 Icons.room_service_outlined),
             const SizedBox(height: 8),
 
@@ -831,20 +831,6 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   }
 
   Widget _buildSectionHeader(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: context.colors.primary, size: 20),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: context.colors.onSurface),
-          ),
-        ),
-      ],
-    );
+    return AppSectionHeader(title: title, icon: icon);
   }
 }
