@@ -3,7 +3,8 @@
 > **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 6 — scale & security hardening
+> **Build runbook:** [`BUILD.md`](BUILD.md)
+> **Current focus:** pilot testing — Phase 6 parked (Firebase project is on Spark)
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
@@ -179,12 +180,16 @@ the unchanged Flutter 3.24.5 / AGP 8.3 / Kotlin 1.9.22 toolchain.
 
 ## 🔜 Later Phases
 
-### Phase 6 — Scale & Security Hardening
+### ⏸️ Phase 6 — Scale & Security Hardening (parked)
 
 Plan: [`phases/phase-06-scale-security/plan.md`](phases/phase-06-scale-security/plan.md)
 
+**Parked 12 Nov 2026** — the Firebase project is on the free Spark plan.
+The prerequisite identity bridge needs Cloud Functions and custom tokens
+(Blaze).
+
 - **6A identity bridge:** phone+PIN login exchanged for a Firebase custom token
-  so rules can identify the caller (requires Blaze).
+  so rules can identify the caller.
 - Firestore security rules and Storage path ownership.
 - Cloud Functions for server-side admin checks and audit logs.
 - Pagination and daily analytics rollups.

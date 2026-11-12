@@ -21,6 +21,7 @@ This is a **documentation-first project**: plan before code, record after code.
 |------|------|----------------|
 | **`PROGRESS.md`** | **Master reference** — authoritative status, verified working items, gaps, next steps | Every 2 weeks or when major changes occur |
 | **`ROADMAP.md`** | Project-wide roadmap and phase status | When priorities or phase status change |
+| **`BUILD.md`** | Release-build command, fixed toolchain, dependency pins, and the troubleshooting matrix for this Mac | Whenever the build environment or pins change |
 | `phases/<phase-name>/plan.md` | Per-phase implementation plan — what the issue is, why it matters, how to fix | When starting a new phase |
 | `phases/<phase-name>/implementation.md` | Per-phase implementation record — what was done, steps taken, problems/pivots | **After** each phase is implemented |
 
@@ -67,7 +68,8 @@ This is a **documentation-first project**: plan before code, record after code.
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🟡 | Phase 6 — Scale/security hardening (plan proposed) | `phases/phase-06-scale-security/plan.md` — identity bridge first, then Firestore/Storage rules, admin functions, pagination, rollups, billing design |
+| ⏸️ | Phase 6 — Scale/security hardening (**parked**: Firebase project is on Spark; 6A needs Blaze) | `phases/phase-06-scale-security/plan.md` — identity bridge first, then Firestore/Storage rules, admin functions, pagination, rollups, billing design |
+| 🔴 | No Firestore rules yet — pilot is not safe for untrusted public use | Resolved by Phase 6A–6B once Blaze is available |
 
 ---
 

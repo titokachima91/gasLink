@@ -1,7 +1,8 @@
 # Phase 06 — Scale & Security Hardening
 
-> **Status:** 🚧 Proposed — no code written. Awaiting approval of the identity
-> bridge in 6A before implementation.
+> **Status:** ⏸️ **Parked** — the Firebase project is on the free **Spark**
+> plan. 6A requires Cloud Functions and custom tokens, which need **Blaze**.
+> Resume when the project is upgraded or a fallback is agreed.
 > **Branch:** `harden-source-of-truth`
 > **Rollback baseline:** `36cd5d5` (Phase 5D verified)
 > **Fixed toolchain:** Flutter 3.24.5 · AGP 8.3.2 · Kotlin 1.9.22 · JDK 17
@@ -167,8 +168,10 @@ Also:
 
 ## Decisions needed before coding
 
-1. **Blaze plan:** is the Firebase project on Blaze (required for custom-token
-   functions)? If not, do we upgrade or choose the fallback?
-2. **Admin account:** which phone number becomes the first real admin account?
+1. ~~**Blaze plan:**~~ **Answered 12 Nov 2026 — the project is on Spark.**
+   Phase 6 is parked until the project is upgraded to Blaze or a fallback is
+   chosen. No auth or rules code will ship before that decision.
+2. **Admin account:** the owner’s number (`0767304776`) will become the first
+   real admin when Firebase Auth work resumes; confirm at that time.
 3. **Rules rollout:** deploy straight to production after emulator tests, or
    stage on a second Firebase project first?

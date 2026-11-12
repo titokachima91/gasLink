@@ -111,7 +111,8 @@ Do not bump either pin without upgrading the whole Android toolchain.
 > daemon cannot be reached after a restart, the Kotlin plugin falls back to
 > in-process compilation and the build still succeeds; stop stale Gradle/Kotlin
 > daemons before rebuilding if it hangs. These are environment workarounds, not
-> project changes.
+> project changes. Full runbook and troubleshooting matrix:
+> [`BUILD.md`](../../BUILD.md).
 
 ---
 

@@ -4,6 +4,7 @@
 > **Branch:** `harden-source-of-truth`
 > **Project state:** Working Flutter + Firebase application for LPG gas distribution in Dar es Salaam, Tanzania.
 > **Documentation:** [`ROADMAP.md`](ROADMAP.md) is the high-level project plan; `phases/<phase>/` holds per-phase plans and implementation records. This file is the authoritative status tracker.
+> **Build:** [`BUILD.md`](BUILD.md) is the release-build and troubleshooting runbook for this Mac.
 > **Theme:** Phase 1 complete — see `phases/phase-01-theme/implementation.md`.
 > **Admin console:** Phase 2 complete — see `phases/phase-02-admin-panel/implementation.md`.
 > **Vendor verification:** Phase 3 complete — see `phases/phase-03-vendor-verified/implementation.md`.
@@ -12,7 +13,7 @@
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
 > **Vendor growth:** Phase 5D complete — see `phases/phase-05d-vendor-growth/implementation.md`.
-> **Current phase:** Phase 6 — scale & security hardening (next; intentionally set aside until now).
+> **Current phase:** Phase 6 **parked** — the Firebase project is on the free Spark plan; 6A needs Blaze. Focus: pilot testing and launch prep.
 
 ---
 
@@ -265,13 +266,15 @@
 - Commits: `1fd5630`, `dd2f629`, `ec45524`, `f09d678`, plus the FlutterFire
   compatibility pin.
 
-### ⚠️ Phase 6 — Scale & Security Hardening
-- Plan proposed: `phases/phase-06-scale-security/plan.md`.
-- Prerequisite **6A identity bridge**: exchange phone+PIN login for a Firebase
-  custom token via a callable function, so Firestore rules have a trustworthy
-  `request.auth.uid`. Requires the Firebase project to be on Blaze.
-- Then Firestore rules, Storage ownership, server-side admin checks, pagination,
+### ⏸️ Phase 6 — Scale & Security Hardening (parked)
+- Plan: `phases/phase-06-scale-security/plan.md`.
+- **Parked 12 Nov 2026:** the Firebase project is on the free **Spark** plan.
+  The prerequisite **6A identity bridge** (phone+PIN exchanged for a Firebase
+  custom token via a callable function) requires **Blaze**.
+- When resumed: Firestore/Storage rules, server-side admin checks, pagination,
   daily analytics rollups, and billing design.
+- Known launch blocker: there is currently no `firestore.rules`; the pilot is
+  not safe for untrusted public use until 6A–6B ship.
 - Multi-country/multi-currency configuration, rider dispatch, payments,
   payouts, and settlement remain later work.
 
@@ -279,10 +282,13 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Phase 6 — scale and security hardening: Firestore rules (including
-   `ajira_interest` and `referrals`), server-side admin checks, analytics
-   rollups, pagination, and subscription billing.
-2. Replace the temporary hardcoded admin login with Firebase Auth + custom
-   claims.
-3. Production launch checklist: legal review of Terms/Privacy, support
-   channels, and store listings.
+1. **Pilot testing:** install the 5D release APK and exercise consumer,
+   vendor, and admin flows on real devices (see `BUILD.md` for the Wi-Fi
+   serving command).
+2. **Phase 6 is parked** until the Firebase project moves to Blaze: identity
+   bridge, Firestore/Storage rules, server-side admin checks, pagination,
+   analytics rollups, and billing design.
+3. Replace the temporary hardcoded admin login with Firebase Auth + custom
+   claims when Phase 6 resumes.
+4. Production launch checklist: release keystore, legal review of
+   Terms/Privacy, support channels, and store listings.
