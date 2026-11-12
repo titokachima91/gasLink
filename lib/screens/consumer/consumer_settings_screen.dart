@@ -15,6 +15,7 @@ import '../../services/auth_service.dart';
 import '../../widgets/app_ui.dart';
 import '../auth/landing_screen.dart';
 import '../legal/legal_screens.dart';
+import 'gas_plan_screen.dart';
 
 class ConsumerSettingsScreen extends ConsumerStatefulWidget {
   const ConsumerSettingsScreen({super.key});
@@ -321,6 +322,44 @@ class _ConsumerSettingsScreenState
                   onChanged: _setAdsConsent,
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── FEATURES ───────────────────────────────────────────────
+          const AppSectionHeader(
+            title: 'Vipengele / Features',
+            icon: Icons.extension_outlined,
+          ),
+          const SizedBox(height: 10),
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: ListTile(
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.work_outline,
+                  color: context.colors.primary,
+                  size: 21,
+                ),
+              ),
+              title: const Text('GasPlan kwa Waajiriwa'),
+              subtitle: const Text(
+                'Gesi kwa mwezi, malipo kupitia payslip.',
+              ),
+              trailing: const AppStatusPill(
+                label: 'Inakuja',
+                icon: Icons.schedule,
+              ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GasPlanScreen()),
+              ),
             ),
           ),
           const SizedBox(height: 20),
