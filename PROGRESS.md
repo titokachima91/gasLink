@@ -13,7 +13,7 @@
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
 > **Vendor growth:** Phase 5D complete — see `phases/phase-05d-vendor-growth/implementation.md`.
-> **Current phase:** Phase 6 **parked** — the Firebase project is on the free Spark plan; 6A needs Blaze. Focus: pilot testing and launch prep.
+> **Current phase:** Phase 5E **proposed** — UX refinements & selectable language (plan only, awaiting approval). Phase 6 is parked — the Firebase project is on the free Spark plan; 6A needs Blaze.
 
 ---
 
@@ -266,6 +266,20 @@
 - Commits: `1fd5630`, `dd2f629`, `ec45524`, `f09d678`, plus the FlutterFire
   compatibility pin.
 
+### 🚧 Phase 5E — UX Refinements & Selectable Language (proposed)
+- Plan: `phases/phase-05e-ux-refinements/plan.md` — **plan only, no code.**
+- **A. Home hierarchy:** move the referral card before “Unataka kufanya nini?”
+  and contain the stock list so nearby vendors stay reachable.
+- **B. Guest routing:** Profile/Settings as a guest opens the login/register
+  sheet instead of a dead-end page.
+- **C. Consents:** Terms and ads consent stay at registration only; remove the
+  Ads switch and Terms row from consumer settings.
+- **D. Language:** replace the bilingual `“Swahili / English”` UI with a real
+  selectable locale (Kiswahili / English, more later), persisted and applied
+  app-wide in four migration batches.
+- Decisions needed: default language, ads opt-in default, Terms placement,
+  stock-list pattern, vendor-dashboard alignment.
+
 ### ⏸️ Phase 6 — Scale & Security Hardening (parked)
 - Plan: `phases/phase-06-scale-security/plan.md`.
 - **Parked 12 Nov 2026:** the Firebase project is on the free **Spark** plan.
@@ -285,10 +299,12 @@
 1. **Pilot testing:** install the 5D release APK and exercise consumer,
    vendor, and admin flows on real devices (see `BUILD.md` for the Wi-Fi
    serving command).
-2. **Phase 6 is parked** until the Firebase project moves to Blaze: identity
+2. **Approve Phase 5E** and implement in order: home hierarchy → guest routing
+   → registration-only consents → localization batches D1–D4.
+3. **Phase 6 is parked** until the Firebase project moves to Blaze: identity
    bridge, Firestore/Storage rules, server-side admin checks, pagination,
    analytics rollups, and billing design.
-3. Replace the temporary hardcoded admin login with Firebase Auth + custom
+4. Replace the temporary hardcoded admin login with Firebase Auth + custom
    claims when Phase 6 resumes.
-4. Production launch checklist: release keystore, legal review of
+5. Production launch checklist: release keystore, legal review of
    Terms/Privacy, support channels, and store listings.

@@ -63,11 +63,13 @@ This is a **documentation-first project**: plan before code, record after code.
 
 - Phase 5C: ✅ complete — `phases/phase-05c-consumer-completeness/implementation.md`
 - Phase 5D: ✅ complete — `phases/phase-05d-vendor-growth/implementation.md`
+- Phase 5E: 🚧 proposed — `phases/phase-05e-ux-refinements/plan.md` (plan only)
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
+| 🟡 | Phase 5E — UX refinements & selectable language (**proposed**, awaiting approval) | `phases/phase-05e-ux-refinements/plan.md` — referral placement, contained stock list, guest routing, registration-only consents, real locale switching |
 | ⏸️ | Phase 6 — Scale/security hardening (**parked**: Firebase project is on Spark; 6A needs Blaze) | `phases/phase-06-scale-security/plan.md` — identity bridge first, then Firestore/Storage rules, admin functions, pagination, rollups, billing design |
 | 🔴 | No Firestore rules yet — pilot is not safe for untrusted public use | Resolved by Phase 6A–6B once Blaze is available |
 

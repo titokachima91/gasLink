@@ -4,7 +4,7 @@
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
 > **Build runbook:** [`BUILD.md`](BUILD.md)
-> **Current focus:** pilot testing — Phase 6 parked (Firebase project is on Spark)
+> **Current focus:** Phase 5E proposed — UX refinements & selectable language; Phase 6 parked (Firebase project is on Spark)
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
@@ -175,6 +175,15 @@ deterministic codes and the `referrals` collection. Rewards are explicitly
 "coming soon". Analyzer 0 errors / 0 warnings, 85/85 tests passing, release APK
 built with `share_plus 10.1.4` and the Feb 2025 FlutterFire set (BoM 33.8.0) on
 the unchanged Flutter 3.24.5 / AGP 8.3 / Kotlin 1.9.22 toolchain.
+
+## 🚧 Phase 5E — UX Refinements & Selectable Language (PROPOSED)
+
+Plan: [`phases/phase-05e-ux-refinements/plan.md`](phases/phase-05e-ux-refinements/plan.md)
+
+Plan only — no code written. Covers the referral-card position before
+“Unataka kufanya nini?”, a contained stock list, guest Profile/Settings routing
+to login/register, registration-only Terms/ads consent, and the migration from
+bilingual labels to a real selectable locale (Kiswahili / English).
 
 ---
 
