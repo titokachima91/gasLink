@@ -162,6 +162,18 @@ class AuthService {
     }
   }
 
+  /// Updates only the advertising consent flag (used from Settings).
+  Future<void> saveAdsConsent(String uid, bool adsConsent) async {
+    if (uid.isEmpty || uid == 'admin_local') return;
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'adsConsent': adsConsent,
+      });
+    } catch (e) {
+      debugPrint('Ads consent update warning: $e');
+    }
+  }
+
   Future<void> register(String phone, String pin,
       {bool adsConsent = true}) async {
     final cleanPhone = Utils.normalizePhone(phone);

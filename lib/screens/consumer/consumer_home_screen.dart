@@ -13,6 +13,8 @@ import '../auth/landing_screen.dart';
 import '../auth/register_screen.dart';
 import 'consumer_cylinder_screen.dart';
 import 'consumer_order_screen.dart';
+import 'consumer_profile_screen.dart';
+import 'consumer_settings_screen.dart';
 import 'vendor_detail_screen.dart';
 import '../../models/order.dart' as models;
 import '../../widgets/ad_slot.dart';
@@ -1172,6 +1174,30 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.person_outline, color: Colors.white),
+              tooltip: 'Wasifu / Profile',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ConsumerProfileScreen(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              tooltip: 'Mipangilio / Settings',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ConsumerSettingsScreen(),
+                  ),
+                );
+              },
+            ),
             const ThemeModeButton(),
             IconButton(
               icon: const Icon(Icons.logout, color: Colors.white),

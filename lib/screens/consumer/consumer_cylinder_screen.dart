@@ -16,7 +16,7 @@ class ConsumerCylinderScreen extends StatefulWidget {
 
   const ConsumerCylinderScreen({
     super.key,
-    required this.initialCylinders,
+    this.initialCylinders = const [],
     this.lastCompletedOrder,
   });
 
@@ -306,8 +306,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text('Ondoa / Delete',
-                style:
-                    TextStyle(color: context.colors.error, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: context.colors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -520,7 +520,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
+        style:
+            ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
         onPressed: isSavingNode
             ? null
             : () async {
@@ -564,7 +565,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     color: context.colors.onPrimary, strokeWidth: 2))
             : Text(isEditing ? 'Hifadhi Mabadiliko' : 'Hifadhi Mtungi',
                 style: TextStyle(
-                    color: context.colors.onPrimary, fontWeight: FontWeight.bold)),
+                    color: context.colors.onPrimary,
+                    fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -599,7 +601,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                         color: context.colors.onSurfaceVariant)),
                 TextButton.icon(
                   onPressed: () => _showCylinderFormModal(),
-                  icon: Icon(Icons.add, size: 16, color: context.colors.primary),
+                  icon:
+                      Icon(Icons.add, size: 16, color: context.colors.primary),
                   label: Text('Ongeza Mpya',
                       style: TextStyle(
                           color: context.colors.primary,
@@ -613,7 +616,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
               Center(
                   child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(color: context.colors.primary)))
+                      child: CircularProgressIndicator(
+                          color: context.colors.primary)))
             else
               ..._allUserCylinders.asMap().entries.map((entry) {
                 final idx = entry.key;
@@ -667,8 +671,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
           // ===== HEADER (always visible) =====
           ListTile(
             onTap: () => setState(() => _expandedIndex = isExpanded ? -1 : idx),
-            leading:
-                Icon(Icons.propane_tank, color: context.colors.primary, size: 28),
+            leading: Icon(Icons.propane_tank,
+                color: context.colors.primary, size: 28),
             title: Text(
               '$brand ($weight)',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -706,7 +710,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           : 'Zimebaki ~${collective.days} Siku (${collective.percentage.toStringAsFixed(1)}%)'),
                   style: TextStyle(
                     fontSize: 11,
-                    color: isCritical ? context.colors.error : context.colors.onSurfaceVariant,
+                    color: isCritical
+                        ? context.colors.error
+                        : context.colors.onSurfaceVariant,
                     fontWeight:
                         isCritical ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -767,7 +773,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           padding: EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             'Hakuna historia ya oda kwa mtungi huu bado.',
-                            style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: context.colors.onSurfaceVariant),
                           ),
                         );
                       }
@@ -782,7 +790,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                               Text(
                                 'Jumla / Collective Level:',
                                 style: TextStyle(
-                                    fontSize: 12, color: context.colors.onSurfaceVariant),
+                                    fontSize: 12,
+                                    color: context.colors.onSurfaceVariant),
                               ),
                               Text(
                                 isCollectiveEmpty
@@ -803,7 +812,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: collectiveRatio,
-                              backgroundColor: context.colors.surfaceContainerLow,
+                              backgroundColor:
+                                  context.colors.surfaceContainerLow,
                               color: isCollectiveCritical
                                   ? context.colors.error
                                   : context.colors.primary,
@@ -840,7 +850,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                               decoration: BoxDecoration(
                                 color: context.colors.surfaceContainerLowest,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: context.colors.outlineVariant),
+                                border: Border.all(
+                                    color: context.colors.outlineVariant),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -863,7 +874,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                       Text('Kiwango:',
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: context.colors.onSurfaceVariant)),
+                                              color: context
+                                                  .colors.onSurfaceVariant)),
                                       Text(
                                         unitEmpty
                                             ? 'Imeisha (0%)'
@@ -883,7 +895,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: unitRatio,
-                                      backgroundColor: context.colors.outlineVariant,
+                                      backgroundColor:
+                                          context.colors.outlineVariant,
                                       color: unitEmpty
                                           ? context.colors.error
                                           : context.colors.primary,
@@ -914,7 +927,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                           );
                                         },
                                         icon: Icon(Icons.edit_outlined,
-                                            size: 16, color: context.gasColors.info),
+                                            size: 16,
+                                            color: context.gasColors.info),
                                         label: Text('Edit',
                                             style: TextStyle(
                                                 fontSize: 11,
@@ -930,8 +944,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                                     'Mark Empty – coming next')),
                                           );
                                         },
-                                        icon: Icon(
-                                            Icons.inventory_2_outlined,
+                                        icon: Icon(Icons.inventory_2_outlined,
                                             size: 16,
                                             color: context.colors.error),
                                         label: Text('Mark Empty',
@@ -977,10 +990,14 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
   Widget _buildFactLine(String label, String value) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
+      Text(label,
+          style:
+              TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
       Text(value,
           style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.bold, color: context.colors.onSurface))
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: context.colors.onSurface))
     ]);
   }
 
@@ -994,7 +1011,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       child: ListTile(
         title: Text(title,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        trailing: Icon(Icons.chevron_right, size: 18, color: context.colors.onSurfaceVariant),
+        trailing: Icon(Icons.chevron_right,
+            size: 18, color: context.colors.onSurfaceVariant),
         onTap: () => _navigateToEmptyScreen(screenKey),
       ),
     );
