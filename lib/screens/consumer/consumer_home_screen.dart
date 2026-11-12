@@ -610,6 +610,88 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     ).then((_) => _fetchUserCylinders());
   }
 
+  /// Compact overview of the consumer's registered cylinders. Tapping through
+  /// opens the Smart Hub (or the setup sheet when nothing is registered yet).
+  Widget _buildMyCylindersOverview() {
+    final hasCylinders = _myCylinders.isNotEmpty;
+    final labels = <String>{};
+    for (final cylinder in _myCylinders) {
+      final brand = (cylinder['brand'] ?? 'Gesi').toString();
+      final weight =
+          (cylinder['weight'] ?? cylinder['size'] ?? '').toString().trim();
+      labels.add(weight.isEmpty ? brand : '$brand $weight');
+    }
+
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: context.colors.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.propane_tank_outlined,
+              size: 24,
+              color: context.colors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasCylinders
+                      ? 'Mitungi ${_myCylinders.length} imesajiliwa'
+                      : 'Hujasajili mtungi bado',
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  hasCylinders
+                      ? labels.join(' · ')
+                      : 'Sajili mtungi kupata makadirio ya gesi.',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () {
+              if (hasCylinders) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ConsumerCylinderScreen(
+                      initialCylinders: _myCylinders,
+                      lastCompletedOrder: _lastCompletedOrder,
+                    ),
+                  ),
+                ).then((_) => _fetchUserCylinders());
+              } else {
+                _showGasSetupSheet();
+              }
+            },
+            child: Text(hasCylinders ? 'Simamia' : 'Weka'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGasEstimatorCard() {
     final hasCylinders = _myCylinders.isNotEmpty;
 
@@ -635,7 +717,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'My Gas Cylinder',
+            'Makadirio ya Gesi / Gas Estimate',
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -1233,8 +1315,16 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 _buildPersistentOdaZanguBanner(),
                 const SizedBox(height: 16),
                 const AppSectionHeader(
+                  title: 'Mitungi Yangu / My Cylinders',
+                  subtitle: 'Mitungi uliyosajili na hali yake.',
+                  icon: Icons.propane_tank_outlined,
+                ),
+                const SizedBox(height: 10),
+                _buildMyCylindersOverview(),
+                const SizedBox(height: 16),
+                const AppSectionHeader(
                   title: 'Kikadirio cha Gesi / Gas Estimator',
-                  subtitle: 'Mitungi yako na kiasi kilichobaki.',
+                  subtitle: 'Makadirio ya siku za gesi zilizobaki.',
                   icon: Icons.speed_outlined,
                 ),
                 const SizedBox(height: 10),
