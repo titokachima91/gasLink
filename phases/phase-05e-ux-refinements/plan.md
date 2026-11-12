@@ -1,6 +1,7 @@
 # Phase 05E — UX Refinements & Selectable Language
 
-> **Status:** 🚧 Proposed — **plan only, no code written.**
+> **Status:** 🚧 Approved for implementation — docs refined 12 Nov 2026.
+> **Default-language decision pending before D1.** No code written yet.
 > **Branch:** `harden-source-of-truth`
 > **Baseline:** `a9ee48f` (Phase 5D verified, Phase 6 parked)
 > **Rule:** no business logic removed or changed — layout, navigation,
@@ -10,19 +11,20 @@
 
 ## Scope
 
-Five issues reported after the 5D APK review:
+Six issues reported after the 5D APK review:
 
 | # | Issue | Workstream |
 |---|-------|------------|
 | 1 | Referral card sits between the quick actions and the stock list; it should be **before “Unataka kufanya nini?”** so the service grid and stock list stay adjacent | A |
-| 2 | The stock list can grow without bound and push **“Wauza Gesi Walio Karibu Nawe”** out of reach; contain it | A |
-| 3 | Guest taps **Profile** or **Settings** and lands on a dead-end page; route guests to **login/register** | B |
-| 4 | **Terms** and **ads consent** are shown to already-registered customers; they belong only to registration | C |
-| 5 | The UI is bilingual (`“Swahili / English”`); replace with **one selectable language** (Swahili, English, more later) | D |
+| 2 | The stock list can grow without bound and push **“Wauza Gesi Walio Karibu Nawe”** out of reach; add progressive **“View more” (+10)** | A |
+| 3 | Guest taps **Profile** or **Settings** and lands on a dead-end page; remove it and route guests to **login/register** | B |
+| 4 | **Terms** and **marketing consent** are shown to already-registered customers; they belong only to registration | C |
+| 5 | Back on login (and some root screens) exits the app instead of navigating back | B |
+| 6 | The UI is bilingual (`“Swahili / English”`); replace with **one selectable language** (Swahili, English, more later) | D |
 
 ---
 
-## A. Consumer home hierarchy & contained stock list
+## A. Consumer home hierarchy & progressive stock list
 
 ### Current order (`lib/screens/consumer/consumer_home_screen.dart`)
 
@@ -41,27 +43,29 @@ the stock list is rendered directly into the page `ListView` with no bound.
 
 1. Greeting
 2. Guest banner **or** My Orders → My Cylinders → Gas Estimator
-3. **Referral card** (before the service chooser)
+3. **Referral card** (signed-in consumers only, as today; before the service
+   chooser)
 4. **“Unataka kufanya nini?”** + 2×2 category grid
-5. **Stock list — contained**
+5. **Stock list — progressive (10 items + View more)**
 6. Ad slot (moved below the stock list)
 7. Nearby vendors
 
-### Stock list containment
+Guests keep the current behaviour: no referral card; the chooser follows the
+guest banner directly.
 
-Recommended pattern — **“first 4 + View all”**:
+### Stock list containment — progressive “View more”
 
-- Show the first 4 items for the selected intent.
-- Add a count + **“Ona zote / View all”** button.
-- The button opens a full-height modal bottom sheet with the complete list.
-- Selecting an item closes the sheet and keeps the current flow.
+Use **progressive disclosure**, not a sheet:
 
-Why: no nested scrolling, the home page stays short, nearby vendors remain
-reachable, and the pattern scales if the catalogue grows to dozens of brands.
+- Show the first **10** items for the selected intent.
+- Add a count + **“Ona zaidi / View more”** button below the list.
+- Each tap appends the next **10** items.
+- Hide the button when all items are visible.
+- Keep the list inline in the page; no nested scroll area.
 
-Fallback pattern if a sheet is not wanted: a `ConstrainedBox(maxHeight: 360)`
-with an inner `ListView` and a subtle scroll affordance. Nested scrolling must
-be tested on small screens.
+Why: the page only grows when the user asks for more, so “Wauza Gesi Walio
+Karibu Nawe” stays reachable even if the catalogue grows to dozens of brands.
+No nested-scrolling conflicts.
 
 ### Vendor dashboard consistency
 
@@ -69,16 +73,19 @@ be tested on small screens.
 
 Today KPIs → Quick Actions → Ad slot → Referral card → Incoming Orders.
 
-Move the referral card **above Quick Actions** (which include **Stoki**) and
-move the ad slot below the incoming-orders section. This mirrors the consumer
-hierarchy and keeps the referral out of the action flow.
+Move the referral card **below Incoming Orders**, then the ad slot last:
+
+Today KPIs → Quick Actions → Incoming Orders → **Referral card** → Ad slot.
 
 ### Acceptance
 
 - Referral card appears before the service chooser on consumer home.
 - The service grid is immediately followed by the stock list.
+- The stock list shows 10 items; each “View more” tap adds 10; the button
+  disappears when exhausted.
 - With 30+ simulated stock items, “Wauza Gesi Walio Karibu Nawe” is still
   reachable without an endless scroll.
+- Vendor dashboard referral sits below Incoming Orders.
 - Light and dark mode both checked.
 
 ---
@@ -95,63 +102,119 @@ hierarchy and keeps the referral out of the action flow.
 
 ### Target behaviour
 
-- Tapping **Profile** or **Settings** as a guest opens the existing
+- **Remove the dead-end guard page.** Tapping **Profile** or **Settings** as a
+  guest does not push the page at all; it opens the existing
   `SessionGate.requireConsumer` bottom sheet:
   - **Ingia / Log in** → `LandingScreen`
   - **Unda Akaunti / Create account** → `RegisterScreen`
-- The profile/settings guard remains as a defensive fallback, but gets
-  `actionLabel` + `onAction` (and a secondary register action) so it is never a
-  dead end.
+- The profile/settings screens keep a defensive redirect, not an empty page:
+  if the session is not a registered consumer, replace the route with the
+  login/register flow. There is no screen left to get stuck on.
 - For guests, replace the logout icon with an **“Ingia”** action. Registered
   users keep logout.
 - Guests can still change **theme** and **language** from the guest banner or a
   small preferences sheet, so those choices are not locked behind login.
+
+### Back navigation audit (all roles)
+
+Current problems:
+
+- `login_screen.dart` has `PopScope(canPop: false)` and calls
+  `SystemNavigator.pop()` on back — pressing back on the login screen exits the
+  app instead of returning to the landing page.
+- Guest consumer home shows the “exit app?” dialog; back should return to the
+  landing page instead.
+- Vendor dashboard and admin shell are root routes with no back handling, so
+  back can drop the user out of the app without a prompt.
+
+Target rules:
+
+| Screen | Back behaviour |
+|--------|----------------|
+| Landing | Exit confirmation (or system default) |
+| Login / Register | Return to landing |
+| Guest consumer home | Return to landing (leave guest mode) |
+| Registered consumer home | Exit confirmation at root; pop when a nested route is open |
+| Vendor dashboard | Exit confirmation at root; pop nested screens |
+| Admin shell | Exit confirmation at root; pop nested screens |
+| Any pushed detail/sheet | Pop exactly one route |
+
+Implementation notes:
+
+- Remove the `SystemNavigator.pop()` path from login.
+- Add a small shared root-back helper/widget for the three home shells so the
+  behaviour is consistent.
+- Audit `pushAndRemoveUntil` and `pushReplacement`: only login, logout, and
+  role switches should clear the stack. Normal navigation uses `push`.
+- Add widget tests for login back, guest home back, and the three root shells.
 
 ### Acceptance
 
 - Guest → Profile → login/register sheet appears; both buttons navigate.
 - Guest → Settings → same.
 - No guest path opens a page that cannot be exited or actioned.
+- Back on login returns to landing; back on guest home returns to landing.
+- Back on vendor/admin root shows an exit confirmation, not an abrupt exit.
+- Back on every pushed screen pops exactly one route.
 - Registered consumer behaviour is unchanged.
 
 ---
 
-## C. Registration-only Terms & ads consent
+## C. Registration-only Terms & marketing consent
+
+### What “marketing consent” means here (stored as `adsConsent`)
+
+The consent is for **push marketing messages** — notifications, messages, tips,
+and offers sent to the user. It is **not** about the in-app `AdSlot` placements
+shown inside some screens; those remain part of the normal app experience and
+are unaffected.
 
 ### Current behaviour
 
-- `RegisterScreen` shows `AuthConsents` (required Terms checkbox + optional ads
-  consent). `AuthService.register` already stores `termsAcceptedAt` and
-  `adsConsent`.
+- `RegisterScreen` shows `AuthConsents` (required Terms checkbox + optional
+  marketing consent). `AuthService.register` already stores `termsAcceptedAt`
+  and `adsConsent`.
 - `ConsumerSettingsScreen` also shows an **Ads** switch and a **Terms** row,
   plus reads/writes `adsConsent` from Firestore.
 
 ### Target behaviour
 
-- **Keep** Terms acceptance and ads consent at registration only.
+- **Keep** Terms acceptance and marketing consent at registration only.
+- Update the registration copy so it is explicit: “Nakubali kupokea taarifa,
+  ujumbe, vidokezo na ofa kupitia push / I agree to receive notifications,
+  messages, tips and offers by push.” The stored field remains `adsConsent` for
+  compatibility; no schema change.
 - **Remove from consumer settings:**
   - the “Matangazo / Ads” switch,
-  - the “Vigezo na Masharti” row,
+  - the “Vigezo na Masharti” row from the main legal section,
   - the now-unused `_adsConsent` state, Firestore read, and
     `_setAdsConsent` write.
-- **Keep** “Sera ya Faragha / Privacy” in settings as a read-only reference.
+- **Add an “About GasLink” screen** in settings containing:
+  - app version,
+  - **Terms & Conditions** (full copy, readable any time),
+  - **Privacy Policy**,
+  - support contact.
+  This keeps Terms available for users who did not read them at registration.
 - Keep Terms/Privacy links on the landing page, login screen, and registration
   screen.
 - Store `termsAcceptedAt` and `adsConsent` exactly as today; no schema change.
 
-### Recommendation for approval
+### Decision
 
-- Change ads consent at registration to **explicit opt-in, default off**
+- Change marketing consent at registration to **explicit opt-in, default off**
   (currently default on). This is safer for consent compliance and matches
   “only for registering customer”.
-- If a registered user later wants to withdraw ads consent, expose that through
-  the Privacy screen or support, not a settings toggle.
+- If a registered user later wants to withdraw marketing consent, expose that
+  through the Privacy section of About or support, not a settings toggle.
 
 ### Acceptance
 
-- Registered consumer settings has no Ads switch and no Terms row.
-- Registration still blocks without Terms acceptance and still saves the ads
-  choice.
+- Registered consumer settings has no Ads switch and no Terms row in the main
+  legal section.
+- About contains readable Terms and Privacy copies.
+- Registration still blocks without Terms acceptance and still saves the
+  marketing choice.
+- In-app ad slots are unchanged.
 - No Firestore field is renamed or removed.
 
 ---
@@ -250,7 +313,7 @@ Each batch is a separate commit. The app must stay green after every batch.
 
 ## Sequencing
 
-1. **A** home hierarchy + contained stock list (small, visual)
+1. **A** home hierarchy + progressive stock list (small, visual)
 2. **B** guest routing (small, navigation)
 3. **C** registration-only consents (small, settings cleanup)
 4. **D1** localization infrastructure + auth/landing/legal
@@ -269,8 +332,10 @@ batches. Do not mix D with A–C in the same commit.
 - `flutter test` — all existing tests plus the new l10n tests.
 - Release APK built with the fixed toolchain (see `BUILD.md`) and served over
   Wi-Fi for a device pass.
-- Manual checks: guest profile/settings, referral position, long stock list,
-  language switch + restart, registration consents, registered settings.
+- Manual checks: guest profile/settings, referral position, “View more” with
+  30+ items, back navigation on login/guest home/vendor/admin and nested
+  screens, language switch + restart, registration consents, registered
+  settings, About → Terms/Privacy.
 - No changes to FIFO, order transitions, auth/session logic, or Firestore
   schema.
 
@@ -282,19 +347,24 @@ batches. Do not mix D with A–C in the same commit.
 - D1–D4 are separate commits; reverting D4 leaves a working app in the previous
   batch’s locale coverage.
 - No data migration, so rollback is code-only.
-- Rollback baseline: `a9ee48f`.
+- Rollback baseline: the docs commit that precedes the first 5E implementation
+  commit.
 
 ---
 
-## Decisions needed before coding
+## Decisions
 
-1. **Default language:** system locale with Swahili fallback (recommended), or
+Resolved 12 Nov 2026:
+
+1. **Stock list:** progressive **“View more” +10**, not a “View all” sheet.
+2. **Vendor dashboard:** referral card **below Incoming Orders**, ad slot last.
+3. **Terms:** keep a readable copy under **About**, not in the main settings
+   legal section.
+4. **Marketing consent:** registration-only, explicit opt-in, default off; it
+   covers push notifications/messages/tips/offers, not in-app ad slots.
+5. **Guest dead-end page:** remove it; route guests straight to login/register.
+
+Still open:
+
+6. **Default language:** system locale with Swahili fallback (recommended), or
    always Swahili on first launch?
-2. **Ads consent default:** explicit opt-in / default off (recommended), or
-   keep default on?
-3. **Terms in settings:** remove entirely (recommended; Terms stays on
-   registration/landing), or keep a read-only link under “About”?
-4. **Stock list pattern:** first 4 + “View all” sheet (recommended), or a
-   bounded inner scroll area?
-5. **Vendor dashboard:** align the referral card above Quick Actions as well
-   (recommended), or leave the vendor dashboard as is?

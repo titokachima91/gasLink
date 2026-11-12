@@ -13,7 +13,7 @@
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
 > **Vendor growth:** Phase 5D complete — see `phases/phase-05d-vendor-growth/implementation.md`.
-> **Current phase:** Phase 5E **proposed** — UX refinements & selectable language (plan only, awaiting approval). Phase 6 is parked — the Firebase project is on the free Spark plan; 6A needs Blaze.
+> **Current phase:** Phase 5E **approved** — UX refinements & selectable language (default-language decision pending; no code yet). Phase 6 is parked — the Firebase project is on the free Spark plan; 6A needs Blaze.
 
 ---
 
@@ -266,19 +266,26 @@
 - Commits: `1fd5630`, `dd2f629`, `ec45524`, `f09d678`, plus the FlutterFire
   compatibility pin.
 
-### 🚧 Phase 5E — UX Refinements & Selectable Language (proposed)
+### 🚧 Phase 5E — UX Refinements & Selectable Language (approved; default language pending)
 - Plan: `phases/phase-05e-ux-refinements/plan.md` — **plan only, no code.**
 - **A. Home hierarchy:** move the referral card before “Unataka kufanya nini?”
-  and contain the stock list so nearby vendors stay reachable.
-- **B. Guest routing:** Profile/Settings as a guest opens the login/register
-  sheet instead of a dead-end page.
-- **C. Consents:** Terms and ads consent stay at registration only; remove the
-  Ads switch and Terms row from consumer settings.
+  so the service grid and stock list stay adjacent. Stock list shows 10 items
+  and adds 10 per **“View more”** tap. On the vendor dashboard, the referral
+  card moves below Incoming Orders.
+- **B. Guest routing & back:** remove the dead-end Profile/Settings guard page;
+  guests go straight to login/register. Audit back navigation so login returns
+  to landing, guest home returns to landing, and vendor/admin roots prompt
+  before exiting.
+- **C. Consents & About:** Terms and **marketing consent** stay at registration
+  only. Marketing consent covers push notifications, messages, tips and offers
+  — not in-app ad slots. Remove the Ads switch and main Terms row from consumer
+  settings; add an **About** screen with readable Terms and Privacy copies.
 - **D. Language:** replace the bilingual `“Swahili / English”` UI with a real
   selectable locale (Kiswahili / English, more later), persisted and applied
   app-wide in four migration batches.
-- Decisions needed: default language, ads opt-in default, Terms placement,
-  stock-list pattern, vendor-dashboard alignment.
+- Resolved: stock list +10, vendor referral below orders, Terms under About,
+  marketing opt-in default off, dead-end page removed.
+- Open: default language (system + Swahili fallback recommended).
 
 ### ⏸️ Phase 6 — Scale & Security Hardening (parked)
 - Plan: `phases/phase-06-scale-security/plan.md`.
@@ -299,7 +306,7 @@
 1. **Pilot testing:** install the 5D release APK and exercise consumer,
    vendor, and admin flows on real devices (see `BUILD.md` for the Wi-Fi
    serving command).
-2. **Approve Phase 5E** and implement in order: home hierarchy → guest routing
+2. **Implement Phase 5E** in order: home hierarchy → guest routing
    → registration-only consents → localization batches D1–D4.
 3. **Phase 6 is parked** until the Firebase project moves to Blaze: identity
    bridge, Firestore/Storage rules, server-side admin checks, pagination,
