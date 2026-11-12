@@ -1,6 +1,6 @@
 # GasLink — Project Guide
 
-> **Last updated:** 2026-11-11
+> **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Primary reference:** `PROGRESS.md` is the authoritative master file for this project.
 
@@ -52,18 +52,19 @@ This is a **documentation-first project**: plan before code, record after code.
 | 16 | Landing, Design Kit & Ads | `lib/screens/auth/landing_screen.dart`, `lib/widgets/app_ui.dart`, `lib/widgets/ad_slot.dart` |
 | 17 | Guest vs Consumer | `lib/core/session_gate.dart`, `lib/services/auth_service.dart` |
 | 18 | Vendor Catalogue | `lib/services/catalog_service.dart`, `lib/utils/service_normalizer.dart` |
+| 19 | Auth Flow & Consent | `lib/screens/auth/login_screen.dart`, `register_screen.dart`, `widgets/auth_widgets.dart`, `lib/screens/legal/legal_screens.dart` |
+| 20 | Consumer Settings & Profile | `lib/screens/consumer/consumer_settings_screen.dart`, `consumer_profile_screen.dart` |
 
-### Planned (awaiting owner approval — **not started, zero code written**)
+### Planned / In Progress
 
-- Phase 5C: `phases/phase-05c-consumer-completeness/plan.md`
-- Phase 5D: `phases/phase-05d-vendor-growth/plan.md`
+- Phase 5C: ✅ complete — `phases/phase-05c-consumer-completeness/implementation.md`
+- Phase 5D: 🛠️ in progress — `phases/phase-05d-vendor-growth/plan.md`
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🛑 | Phase 5C — Auth flow & consumer completeness (not started) | `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval) |
-| 🛑 | Phase 5D — Vendor polish & growth hooks (not started) | `phases/phase-05d-vendor-growth/plan.md` (awaiting approval) |
+| 🛠️ | Phase 5D — Vendor polish & growth hooks (in progress) | `phases/phase-05d-vendor-growth/plan.md` |
 | 🟡 | Phase 6 — Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing |
 
 ---
@@ -140,5 +141,10 @@ Record phase rollback points here after each push.
 | Phase 5B docs | `5e30bb5` | `origin/harden-source-of-truth` | Implementation record and status updates (pushed) |
 | Phase 5B push point | `aa48414` | `origin/harden-source-of-truth` | Pre-auth-flow-fix rollback point |
 | Auth flow + layout fixes | `31654dc` | `origin/harden-source-of-truth` | Blended login, order header, dashboard KPIs (pushed) |
-| Launcher + rearrange | `cbae13e` | `origin/harden-source-of-truth` | Logo icons, landing rebalance, home/dashboard restructure (pushed) — **current head** |
+| Launcher + rearrange | `cbae13e` | `origin/harden-source-of-truth` | Logo icons, landing rebalance, home/dashboard restructure (pushed) |
+| Phase 5C auth flow | `0e1f469` | `origin/harden-source-of-truth` | Dedicated login/register, consent, terms/privacy (pushed) |
+| Phase 5C consumer screens | `4123e28` | `origin/harden-source-of-truth` | Consumer settings/profile, home app-bar links (pushed) |
+| Phase 5C home reorder | `5e5a374` | `origin/harden-source-of-truth` | My Cylinders above Gas Estimator (pushed) |
+| Phase 5C history/settings | `64def5b` | `origin/harden-source-of-truth` | Polished history, persisted ads consent, support email (pushed) |
+| Phase 5C Smart Hub | `f536788` | `origin/harden-source-of-truth` | Shared headers and empty state in cylinder hub (pushed) — **current head** |
 ---

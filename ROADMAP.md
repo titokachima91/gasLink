@@ -1,15 +1,16 @@
 # GasLink — Project Roadmap
 
-> **Last updated:** 2026-11-11
+> **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 5C & 5D — planned, awaiting approval (Phase 6 set aside)
+> **Current focus:** Phase 5D — vendor polish & growth hooks (Phase 6 set aside)
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
 > **Phase 4:** ✅ Vendor settings & profile complete
 > **Phase 5:** ✅ Notifications & polish complete
 > **Phase 5B:** ✅ App polish & first impressions complete
+> **Phase 5C:** ✅ Auth flow & consumer completeness complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -32,8 +33,8 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Vendor settings & commission | ✅ Complete — Phase 4 |
 | Notifications & polish | ✅ Complete — Phase 5 |
 | App polish & first impressions | ✅ Complete — Phase 5B |
-| Auth flow & consumer completeness | 🛑 Planned — not started — Phase 5C |
-| Vendor polish & growth hooks | 🛑 Planned — not started — Phase 5D |
+| Auth flow & consumer completeness | ✅ Complete — Phase 5C |
+| Vendor polish & growth hooks | 🛠️ In progress — Phase 5D |
 
 ---
 
@@ -152,20 +153,22 @@ cylinder hub, FIFO measurement, and order flows are untouched.
 
 ---
 
-## 🛑 Phase 5C — Auth Flow Polish & Consumer Completeness (PLANNED — NOT STARTED)
+## ✅ Phase 5C — Auth Flow Polish & Consumer Completeness (COMPLETE)
 
-Plan: [`phases/phase-05c-consumer-completeness/plan.md`](phases/phase-05c-consumer-completeness/plan.md)
+Record: [`phases/phase-05c-consumer-completeness/implementation.md`](phases/phase-05c-consumer-completeness/implementation.md)
 
-Zero code written. Planned: dedicated branded login/register with Terms +
-ads-consent checkboxes, consumer Settings/Profile screens, home reorder,
-logout → landing.
+Dedicated branded login/register with required Terms acceptance and optional
+ads consent, consumer Settings/Profile screens, polished history and cylinder
+hub, and the planned home reorder. Analyzer 0 errors / 0 warnings, 79/79 tests
+passing. No business logic changed.
 
-## 🛑 Phase 5D — Vendor Polish & Growth Hooks (PLANNED — NOT STARTED)
+## 🛠️ Phase 5D — Vendor Polish & Growth Hooks (IN PROGRESS)
 
 Plan: [`phases/phase-05d-vendor-growth/plan.md`](phases/phase-05d-vendor-growth/plan.md)
 
-Zero code written. Planned: vendor polish, referral foundation, GasPlan kwa
-Waajiriwa teaser (Settings → Features only).
+Vendor drawer/inventory/orders/profile/badge/dashboard polish, referral
+foundation (rewards coming soon), and the GasPlan kwa Waajiriwa teaser inside
+Consumer Settings → Features only.
 
 ---
 

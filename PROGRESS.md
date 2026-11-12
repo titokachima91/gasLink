@@ -1,6 +1,6 @@
 # GasLink — Master Progress Report
 
-> **Last updated:** 2026-11-11
+> **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Project state:** Working Flutter + Firebase application for LPG gas distribution in Dar es Salaam, Tanzania.
 > **Documentation:** [`ROADMAP.md`](ROADMAP.md) is the high-level project plan; `phases/<phase>/` holds per-phase plans and implementation records. This file is the authoritative status tracker.
@@ -10,7 +10,8 @@
 > **Vendor settings:** Phase 4 complete — see `phases/phase-04-vendor-settings/implementation.md`.
 > **Notifications & polish:** Phase 5 complete — see `phases/phase-05-notifications/implementation.md`.
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
-> **Current phase:** Phase 5C & 5D — planned, awaiting owner approval (Phase 6 set aside).
+> **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
+> **Current phase:** Phase 5D — vendor polish & growth hooks (building; Phase 6 set aside).
 
 ---
 
@@ -34,8 +35,8 @@
 | Notifications & Polish | ✅ **Complete** — tap-through routing, in-app banners, offline banners, store-toggle semantics |
 | App Polish & First Impressions | ✅ **Complete** — landing page, guest/consumer split, catalogue & service fixes, restyled screens, audience-aware ads |
 | Vendor Catalogue Consistency | ✅ **Complete** — merged inventory view; consumers see everything vendors manage |
-| Auth Flow & Consumer Completeness | 🛑 **Planned — not started (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder |
-| Vendor Polish & Growth Hooks | 🛑 **Planned — not started (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
+| Auth Flow & Consumer Completeness | ✅ **Complete (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder, polished history/cylinders |
+| Vendor Polish & Growth Hooks | 🛠️ **In progress (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -236,11 +237,17 @@
 - Follow-ups: admin campaign creation form, ad image banners, legacy
   subcollection cleanup reminder for vendors.
 
-### 🛑 Phase 5C — Auth Flow Polish & Consumer Completeness (planned — not started)
-- Zero code written. Dedicated branded login/register with Terms + ads-consent
-  checkboxes, consumer Settings and Profile screens, polished
-  history/cylinders/tracker, home reorder (cylinders above estimator).
-- Plan: `phases/phase-05c-consumer-completeness/plan.md` (awaiting approval).
+### ✅ Phase 5C — Auth Flow Polish & Consumer Completeness (complete)
+- Dedicated branded Login/Register with required Terms acceptance and optional
+  ads consent (persisted per user), plus static Terms/Privacy pages.
+- Consumer Settings (account, theme, notifications, ads, language, legal,
+  support, sign out) and Profile (identity, member-since, quick links).
+- Home order: Oda Zangu → Mitungi Yangu → Kikadirio cha Gesi → services → ad →
+  items → vendors.
+- Polished order history and cylinder Smart Hub headers/empty states.
+- Record: `phases/phase-05c-consumer-completeness/implementation.md`.
+- Verification: analyzer 0 errors / 0 warnings, 79/79 tests passing.
+- Commits: `0e1f469`, `4123e28`, `5e5a374`, `64def5b`, `f536788`.
 
 ### 🛑 Phase 5D — Vendor Polish & Growth Hooks (planned — not started)
 - Zero code written. Vendor drawer/inventory/orders/profile/badge/dashboard
@@ -259,8 +266,8 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Owner reviews `phase-05c-consumer-completeness/plan.md` and
-   `phase-05d-vendor-growth/plan.md`.
-2. Build Phase 5C, then Phase 5D (one commit per slice).
+1. Build Phase 5D — vendor polish, GasPlan kwa Waajiriwa teaser, and the
+   referral foundation (one commit per slice).
+2. Update the Phase 5D implementation record and status docs.
 3. Phase 6 — scale and security hardening (rules, server-side checks,
    analytics rollups, pagination, subscription billing).
