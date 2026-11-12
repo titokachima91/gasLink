@@ -266,11 +266,14 @@
   compatibility pin.
 
 ### ⚠️ Phase 6 — Scale & Security Hardening
-- Firestore security rules and Cloud Functions for server-side admin checks.
-- Daily analytics rollups and scheduled exports.
-- Multi-country/multi-currency configuration.
-- Rider dispatch, payments, payouts, and settlement.
-- Subscription billing and invoicing.
+- Plan proposed: `phases/phase-06-scale-security/plan.md`.
+- Prerequisite **6A identity bridge**: exchange phone+PIN login for a Firebase
+  custom token via a callable function, so Firestore rules have a trustworthy
+  `request.auth.uid`. Requires the Firebase project to be on Blaze.
+- Then Firestore rules, Storage ownership, server-side admin checks, pagination,
+  daily analytics rollups, and billing design.
+- Multi-country/multi-currency configuration, rider dispatch, payments,
+  payouts, and settlement remain later work.
 
 ---
 

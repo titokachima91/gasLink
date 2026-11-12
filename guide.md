@@ -67,7 +67,7 @@ This is a **documentation-first project**: plan before code, record after code.
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🟡 | Phase 6 — Scale/security hardening | Firestore rules (including `ajira_interest`, `referrals`), server-side admin checks, analytics rollups, pagination, subscription billing |
+| 🟡 | Phase 6 — Scale/security hardening (plan proposed) | `phases/phase-06-scale-security/plan.md` — identity bridge first, then Firestore/Storage rules, admin functions, pagination, rollups, billing design |
 
 ---
 

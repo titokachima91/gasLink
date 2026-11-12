@@ -181,10 +181,15 @@ the unchanged Flutter 3.24.5 / AGP 8.3 / Kotlin 1.9.22 toolchain.
 
 ### Phase 6 — Scale & Security Hardening
 
-- Firestore security rules and Cloud Functions for server-side admin checks.
-- Daily analytics rollups and scheduled exports.
-- Multi-country/multi-currency configuration.
-- Rider dispatch, payments, payouts, and settlement.
+Plan: [`phases/phase-06-scale-security/plan.md`](phases/phase-06-scale-security/plan.md)
+
+- **6A identity bridge:** phone+PIN login exchanged for a Firebase custom token
+  so rules can identify the caller (requires Blaze).
+- Firestore security rules and Storage path ownership.
+- Cloud Functions for server-side admin checks and audit logs.
+- Pagination and daily analytics rollups.
+- Billing design; multi-country/multi-currency, rider dispatch, payments,
+  payouts, and settlement remain later work.
 
 ---
 
