@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme_controller.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/referral_card.dart';
 import '../auth/landing_screen.dart';
 import 'vendor_profile_screen.dart';
 import 'widgets/vendor_commission_card.dart';
@@ -260,6 +261,19 @@ class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
               },
             ),
           ),
+          const SizedBox(height: 20),
+
+          // ── SECTION 4B: REFERRALS ────────────────────────────────────────
+          Text(
+            'Alika Wauzaji / Referrals',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ReferralCard(uid: _uid, role: 'vendor'),
           const SizedBox(height: 20),
 
           // ── SECTION 5: ABOUT ─────────────────────────────────────────────

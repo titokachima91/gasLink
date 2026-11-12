@@ -20,6 +20,7 @@ import '../../models/order.dart' as models;
 import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
+import '../../widgets/referral_card.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../../widgets/verified_badge.dart';
 import 'item_vendors_screen.dart';
@@ -1383,6 +1384,14 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               const AdSlot(placementId: 'consumer_home'),
 
               const SizedBox(height: 20),
+              if (!guestMode) ...[
+                ReferralCard(
+                  uid: AuthService.instance.currentUserId ?? '',
+                  role: 'consumer',
+                  showVendorInvite: true,
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // ===== VERTICAL LIST TITLE =====
               AppSectionHeader(

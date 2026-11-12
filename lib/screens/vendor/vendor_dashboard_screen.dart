@@ -16,6 +16,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
+import '../../widgets/referral_card.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/landing_screen.dart';
 import 'inventory_screen.dart';
@@ -652,6 +653,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   ),
                   const SizedBox(height: 14),
                   const AdSlot(placementId: 'vendor_dashboard'),
+                  const SizedBox(height: 20),
+                  ReferralCard(uid: _vendorUid, role: 'vendor'),
                   const SizedBox(height: 24),
                   // ── SECTION 3: REAL-TIME INCOMING ORDER ALERTS ───────
                   AppSectionHeader(
