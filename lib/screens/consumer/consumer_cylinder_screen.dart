@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants.dart';
 import '../../services/auth_service.dart';
 import '../../utils/cylinder_fifo.dart';
+import '../../widgets/app_ui.dart';
 
 import '../../core/theme_ext.dart';
 
@@ -579,7 +580,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Cylinder Smart Hub',
+        title: const Text('Mitungi Yangu / Smart Hub',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -591,33 +592,38 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('MITUNGI YANGU / MY TANK ASSETS',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: context.colors.onSurfaceVariant)),
-                TextButton.icon(
-                  onPressed: () => _showCylinderFormModal(),
-                  icon:
-                      Icon(Icons.add, size: 16, color: context.colors.primary),
-                  label: Text('Ongeza Mpya',
-                      style: TextStyle(
-                          color: context.colors.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold)),
+            AppSectionHeader(
+              title: 'Mitungi Yangu / My Cylinders',
+              subtitle: 'Hali ya kila mtungi kwa FIFO.',
+              icon: Icons.propane_tank_outlined,
+              trailing: TextButton.icon(
+                onPressed: () => _showCylinderFormModal(),
+                icon: Icon(Icons.add, size: 16, color: context.colors.primary),
+                label: Text(
+                  'Ongeza',
+                  style: TextStyle(
+                    color: context.colors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             if (_isLoading)
               Center(
                   child: Padding(
                       padding: EdgeInsets.all(16.0),
                       child: CircularProgressIndicator(
                           color: context.colors.primary)))
+            else if (_allUserCylinders.isEmpty)
+              AppEmptyState(
+                icon: Icons.propane_tank_outlined,
+                title: 'Hujasajili mtungi bado',
+                message: 'Ongeza mtungi wako kuanza kufuatilia gesi kwa FIFO.',
+                actionLabel: 'Weka Mtungi',
+                onAction: _showCylinderFormModal,
+              )
             else
               ..._allUserCylinders.asMap().entries.map((entry) {
                 final idx = entry.key;
@@ -626,12 +632,11 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 return _buildDynamicAssetCard(idx, cylinder, isExpanded);
               }),
             const SizedBox(height: 24),
-            Text('MIFUMO YA NDANI / SMART FEATURES',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.onSurfaceVariant,
-                    letterSpacing: 0.5)),
+            const AppSectionHeader(
+              title: 'Mifumo ya Ndani / Smart Features',
+              subtitle: 'Zana za ziada za usalama na matumizi.',
+              icon: Icons.auto_awesome_outlined,
+            ),
             const SizedBox(height: 10),
             _buildMenuCard(
                 '🍲 Daily Dish Consumption Logger', 'Daily Dish Logger'),
