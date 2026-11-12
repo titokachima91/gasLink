@@ -152,5 +152,9 @@ Record phase rollback points here after each push.
 | Phase 5D vendor polish | `1fd5630` | `origin/harden-source-of-truth` | Drawer, dashboard, badge, inventory, orders, profile restyles (pushed) |
 | Phase 5D GasPlan teaser | `dd2f629` | `origin/harden-source-of-truth` | GasPlan screen + `ajira_interest` form (pushed) |
 | Phase 5D referrals | `ec45524` | `origin/harden-source-of-truth` | Codes, `referrals`, shared card, vendor invite (pushed) |
-| Phase 5D share pin | `f09d678` | `origin/harden-source-of-truth` | `share_plus 10.1.4` for AGP 8.3 compatibility (pushed) — **current head** |
+| Phase 5D share pin | `f09d678` | `origin/harden-source-of-truth` | `share_plus 10.1.4` for AGP 8.3 compatibility (pushed) |
+| Phase 5D completion | `06d5858` | `origin/harden-source-of-truth` | FlutterFire Kotlin 1.9-compatible pin, 5D record, verified release APK (this push) |
+
+> The table records rollback points; for the moving head run
+> `git log -1 --oneline`.
 ---
