@@ -79,9 +79,19 @@ class _ReferralCardState extends State<ReferralCard> {
         : 'Jiunge na GasLink — gesi mkononi, uthibitisho kabla ya ununuzi. '
             'Tumia msimbo wangu $code unapofungua akaunti. Zawadi zinakuja '
             'hivi karibuni.';
-    await SharePlus.instance.share(
-      ShareParams(title: 'GasLink', subject: 'GasLink referral', text: text),
+    await Share.share(
+      text,
+      subject: 'GasLink referral',
+      sharePositionOrigin: _shareOrigin(context),
     );
+  }
+
+  Rect? _shareOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is RenderBox && box.hasSize) {
+      return box.localToGlobal(Offset.zero) & box.size;
+    }
+    return null;
   }
 
   Future<void> _openVendorInvite() async {

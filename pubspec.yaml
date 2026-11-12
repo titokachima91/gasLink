@@ -52,7 +52,10 @@ dependencies:
   # v7.x requires Flutter >= 3.29 (flutter.compileSdkVersion); do not upgrade
   # without upgrading the whole Android toolchain.
   connectivity_plus: 6.1.2
-  share_plus: ^12.0.2
+  # Pinned for Flutter 3.24.5 / AGP 8.3 compatibility.
+  # v12.x uses `compileSdk = flutter.compileSdkVersion`, which resolves to null
+  # under this toolchain; do not upgrade without upgrading Android Gradle.
+  share_plus: 10.1.4
 
 dev_dependencies:
   flutter_test:

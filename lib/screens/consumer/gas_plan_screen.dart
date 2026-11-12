@@ -24,13 +24,19 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
       '0767304776 kupanga mpango wa wafanyakazi wenu.';
 
   Future<void> _shareWithHr() async {
-    await SharePlus.instance.share(
-      ShareParams(
-        title: 'GasPlan kwa Waajiriwa',
-        subject: 'GasPlan kwa Waajiriwa — GasLink',
-        text: _shareText,
-      ),
+    await Share.share(
+      _shareText,
+      subject: 'GasPlan kwa Waajiriwa — GasLink',
+      sharePositionOrigin: _shareOrigin(context),
     );
+  }
+
+  Rect? _shareOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is RenderBox && box.hasSize) {
+      return box.localToGlobal(Offset.zero) & box.size;
+    }
+    return null;
   }
 
   Future<void> _openInterestForm() async {
