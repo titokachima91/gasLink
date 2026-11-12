@@ -1655,80 +1655,70 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Historia ya Oda Zangu / Orders History',
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
+        title: const Text(
+          'Historia ya Oda Zangu / Orders History',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: OrderService.instance.consumerOrders(consumerUid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-                child:
-                    CircularProgressIndicator(color: context.colors.primary));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 64, color: context.colors.outline),
-                  const SizedBox(height: 12),
-                  Text('Huna historia ya oda bado',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.onSurface)),
-                  const SizedBox(height: 4),
-                  Text('Oda zote utakazofanya zitaonekana hapa.',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: context.colors.onSurfaceVariant)),
-                ],
-              ),
+              child: CircularProgressIndicator(color: context.colors.primary),
             );
           }
 
-          final docs = snapshot.data!.docs;
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return const AppEmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'Huna historia ya oda bado',
+              message: 'Oda zote utakazofanya zitaonekana hapa.',
+            );
+          }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: docs.length,
+            itemCount: docs.length + 1,
             itemBuilder: (context, index) {
-              final doc = docs[index];
+              if (index == 0) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppSectionHeader(
+                      title: 'Oda Zote / All Orders',
+                      subtitle: '${docs.length} oda zimepatikana.',
+                      icon: Icons.receipt_long_outlined,
+                      trailing: AppStatusPill(
+                        label: '${docs.length}',
+                        icon: Icons.list_alt,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              }
+
+              final doc = docs[index - 1];
               final data = doc.data() as Map<String, dynamic>? ?? {};
               final orderId = doc.id;
-              final brand = data['brand'] ?? 'Gesi';
-              final size = data['size'] ?? data['weight'] ?? '15kg';
-              final total =
-                  (data['total'] ?? data['total_price'] ?? 0).toDouble();
+              final brand = (data['brand'] ?? 'Gesi').toString();
+              final size =
+                  (data['size'] ?? data['weight'] ?? '15kg').toString();
+              final total = ((data['total'] ?? data['total_price'] ?? 0) as num)
+                  .toDouble();
               final status =
                   (data['status'] ?? 'placed').toString().toLowerCase().trim();
-              final intent = data['order_intent'] ?? 'new_asset';
+              final intent = (data['order_intent'] ?? 'new_asset').toString();
               final createdAt = (data['created_at'] as Timestamp?)?.toDate() ??
                   DateTime.now();
 
-              Color badgeColor = context.colors.primary;
-              String statusLabel = 'Inasubiri';
-              if (status == 'delivered' || status == 'completed') {
-                badgeColor = context.gasColors.success;
-                statusLabel = 'Imekamilika';
-              } else if (status == 'on_the_way' || status == 'in_transit') {
-                badgeColor = context.colors.tertiary;
-                statusLabel = 'Ipo Njiani';
-              } else if (status == 'confirmed' ||
-                  status == 'accepted' ||
-                  status == 'preparing') {
-                badgeColor = context.colors.secondary;
-                statusLabel = 'Inaandaliwa';
-              } else if (status == 'cancelled' || status == 'rejected') {
-                badgeColor = context.colors.error;
-                statusLabel = 'Imekataliwa/Imeghairiwa';
-              }
+              final statusStyle = _statusStyle(context, status);
 
               return Card(
                 elevation: 0,
@@ -1745,36 +1735,54 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => ConsumerOrderScreen(
                           orderId: orderId,
-                          vendorId: data['vendor_id'] ?? '',
-                          vendorName: data['vendor_name'] ?? 'Gas Vendor',
+                          vendorId:
+                              (data['vendor_id'] ?? data['vendorId'] ?? '')
+                                  .toString(),
+                          vendorName: (data['vendor_name'] ??
+                                  data['vendorName'] ??
+                                  'Gas Vendor')
+                              .toString(),
                           brandName: brand,
                           cylinderSize: size,
-                          unitPrice: (data['unit_price'] ?? 0).toDouble(),
+                          unitPrice:
+                              (data['unit_price'] as num?)?.toDouble() ?? 0.0,
                           totalPrice: total,
-                          deliveryAddress: data['delivery_address'] ?? '',
-                          contactPhone: data['contact_phone'] ?? '',
-                          paymentMethod: data['payment_method'] ?? 'cash',
-                          quantity: (data['quantity'] ?? 1).toInt(),
-                          specialRequests: data['special_requests'] ?? '',
-                          receiverPhone: data['receiver_phone'] ?? '',
+                          deliveryAddress: (data['delivery_address'] ??
+                                  data['deliveryAddress'] ??
+                                  '')
+                              .toString(),
+                          contactPhone: (data['contact_phone'] ??
+                                  data['consumerPhone'] ??
+                                  '')
+                              .toString(),
+                          paymentMethod:
+                              (data['payment_method'] ?? 'cash').toString(),
+                          quantity: (data['quantity'] as num?)?.toInt() ?? 1,
+                          specialRequests:
+                              (data['special_requests'] ?? '').toString(),
+                          receiverPhone:
+                              (data['receiver_phone'] ?? '').toString(),
                           orderIntent: intent,
                         ),
                       ),
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.all(14.0),
+                    padding: const EdgeInsets.all(14),
                     child: Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 46,
+                          height: 46,
                           decoration: BoxDecoration(
                             color: context.colors.primaryContainer,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(Icons.propane_tank,
-                              color: context.colors.primary, size: 22),
+                          child: Icon(
+                            Icons.propane_tank_outlined,
+                            color: context.colors.primary,
+                            size: 23,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -1782,49 +1790,52 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('$brand ($size)',
+                                  Expanded(
+                                    child: Text(
+                                      '$brand ($size)',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                          color: context.colors.onSurface)),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: badgeColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(6),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13.5,
+                                        color: context.colors.onSurface,
+                                      ),
                                     ),
-                                    child: Text(statusLabel,
-                                        style: TextStyle(
-                                            color: badgeColor,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AppStatusPill(
+                                    label: statusStyle.$1,
+                                    icon: statusStyle.$2,
+                                    color: statusStyle.$3,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 5),
                               Text(
-                                  'TZS ${total.toStringAsFixed(0)} • ${intent == 'add_stock' ? 'Ongeza Akiba' : 'Mtungi Mpya'}',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: context.colors.onSurfaceVariant)),
-                              const SizedBox(height: 2),
+                                'TZS ${_formatMoney(total)} · ${intent == 'add_stock' ? 'Ongeza Akiba' : 'Mtungi Mpya'}',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: context.colors.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
                               Text(
-                                  'Tarehe: ${createdAt.toLocal()}'
-                                      .split('.')
-                                      .first,
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      color: context.colors.onSurfaceVariant)),
+                                _formatOrderDate(createdAt),
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: context.colors.outline,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.chevron_right,
-                            color: context.colors.onSurfaceVariant, size: 18),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.chevron_right,
+                          color: context.colors.onSurfaceVariant,
+                          size: 18,
+                        ),
                       ],
                     ),
                   ),
@@ -1835,5 +1846,67 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  static (String, IconData, Color) _statusStyle(
+    BuildContext context,
+    String status,
+  ) {
+    if (status == 'delivered' || status == 'completed') {
+      return (
+        'Imekamilika',
+        Icons.check_circle_outline,
+        context.gasColors.success,
+      );
+    }
+    if (status == 'on_the_way' || status == 'in_transit') {
+      return (
+        'Ipo Njiani',
+        Icons.local_shipping_outlined,
+        context.colors.tertiary,
+      );
+    }
+    if (status == 'confirmed' ||
+        status == 'accepted' ||
+        status == 'preparing' ||
+        status == 'seen') {
+      return ('Inaandaliwa', Icons.hourglass_top, context.colors.secondary);
+    }
+    if (status == 'cancelled' || status == 'rejected' || status == 'refused') {
+      return ('Imeghairiwa', Icons.cancel_outlined, context.colors.error);
+    }
+    return ('Inasubiri', Icons.schedule, context.colors.primary);
+  }
+
+  static String _formatOrderDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mac',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    final local = date.toLocal();
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '${local.day} ${months[local.month - 1]} ${local.year} · $hour:$minute';
+  }
+
+  static String _formatMoney(double value) {
+    final whole = value.toStringAsFixed(0);
+    final buffer = StringBuffer();
+    for (var i = 0; i < whole.length; i++) {
+      final remaining = whole.length - i;
+      buffer.write(whole[i]);
+      if (remaining > 1 && remaining % 3 == 1) buffer.write(',');
+    }
+    return buffer.toString();
   }
 }

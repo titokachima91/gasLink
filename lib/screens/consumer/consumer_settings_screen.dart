@@ -27,6 +27,7 @@ class ConsumerSettingsScreen extends ConsumerStatefulWidget {
 class _ConsumerSettingsScreenState
     extends ConsumerState<ConsumerSettingsScreen> {
   static const _supportPhone = '+255767304776';
+  static const _supportEmail = 'support@gaslink.co.tz';
   static const _notificationsPref = 'consumer_notifications_enabled';
 
   bool _notificationsEnabled = true;
@@ -42,9 +43,23 @@ class _ConsumerSettingsScreenState
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    bool? adsConsent;
+    if (_uid.isNotEmpty) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_uid)
+            .get();
+        final stored = doc.data()?['adsConsent'];
+        if (stored is bool) adsConsent = stored;
+      } catch (e) {
+        debugPrint('Ads consent load warning: $e');
+      }
+    }
     if (!mounted) return;
     setState(() {
       _notificationsEnabled = prefs.getBool(_notificationsPref) ?? true;
+      _adsConsent = adsConsent;
     });
   }
 
@@ -102,6 +117,10 @@ class _ConsumerSettingsScreenState
 
   Future<void> _callSupport() async {
     await launchUrl(Uri.parse('tel:$_supportPhone'));
+  }
+
+  Future<void> _emailSupport() async {
+    await launchUrl(Uri(scheme: 'mailto', path: _supportEmail));
   }
 
   Future<void> _logout() async {
@@ -277,6 +296,19 @@ class _ConsumerSettingsScreenState
                   onChanged: _setNotifications,
                 ),
                 const Divider(height: 1),
+                ListTile(
+                  leading: Icon(
+                    Icons.translate_outlined,
+                    color: context.colors.primary,
+                  ),
+                  title: const Text('Lugha / Language'),
+                  subtitle: const Text('Kiswahili'),
+                  trailing: const AppStatusPill(
+                    label: 'Kiswahili',
+                    icon: Icons.check,
+                  ),
+                ),
+                const Divider(height: 1),
                 SwitchListTile(
                   secondary: Icon(
                     Icons.campaign_outlined,
@@ -347,12 +379,28 @@ class _ConsumerSettingsScreenState
           const SizedBox(height: 10),
           AppCard(
             padding: EdgeInsets.zero,
-            child: ListTile(
-              leading: Icon(Icons.call_outlined, color: context.colors.primary),
-              title: const Text('Piga simu / Call us'),
-              subtitle: const Text(_supportPhone),
-              trailing: const Icon(Icons.chevron_right, size: 18),
-              onTap: _callSupport,
+            child: Column(
+              children: [
+                ListTile(
+                  leading:
+                      Icon(Icons.call_outlined, color: context.colors.primary),
+                  title: const Text('Piga simu / Call us'),
+                  subtitle: const Text(_supportPhone),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: _callSupport,
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(
+                    Icons.mail_outline,
+                    color: context.colors.primary,
+                  ),
+                  title: const Text('Barua pepe / Email us'),
+                  subtitle: const Text(_supportEmail),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: _emailSupport,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
