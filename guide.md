@@ -54,18 +54,20 @@ This is a **documentation-first project**: plan before code, record after code.
 | 18 | Vendor Catalogue | `lib/services/catalog_service.dart`, `lib/utils/service_normalizer.dart` |
 | 19 | Auth Flow & Consent | `lib/screens/auth/login_screen.dart`, `register_screen.dart`, `widgets/auth_widgets.dart`, `lib/screens/legal/legal_screens.dart` |
 | 20 | Consumer Settings & Profile | `lib/screens/consumer/consumer_settings_screen.dart`, `consumer_profile_screen.dart` |
+| 21 | GasPlan Teaser | `lib/screens/consumer/gas_plan_screen.dart` (`ajira_interest`) |
+| 22 | Referral Foundation | `lib/services/referral_service.dart`, `lib/widgets/referral_card.dart` (`referrals`) |
+| 23 | Vendor Polish | `lib/screens/vendor/` (drawer, dashboard, badge, inventory, orders, profile) |
 
-### Planned / In Progress
+### Phase Records
 
 - Phase 5C: ✅ complete — `phases/phase-05c-consumer-completeness/implementation.md`
-- Phase 5D: 🛠️ in progress — `phases/phase-05d-vendor-growth/plan.md`
+- Phase 5D: ✅ complete — `phases/phase-05d-vendor-growth/implementation.md`
 
 ### Current Gaps (priority order)
 
 | Priority | Item | Reference |
 |----------|------|-----------|
-| 🛠️ | Phase 5D — Vendor polish & growth hooks (in progress) | `phases/phase-05d-vendor-growth/plan.md` |
-| 🟡 | Phase 6 — Scale/security hardening | Firestore rules, server-side admin checks, analytics rollups, pagination, subscription billing |
+| 🟡 | Phase 6 — Scale/security hardening | Firestore rules (including `ajira_interest`, `referrals`), server-side admin checks, analytics rollups, pagination, subscription billing |
 
 ---
 
@@ -146,5 +148,9 @@ Record phase rollback points here after each push.
 | Phase 5C consumer screens | `4123e28` | `origin/harden-source-of-truth` | Consumer settings/profile, home app-bar links (pushed) |
 | Phase 5C home reorder | `5e5a374` | `origin/harden-source-of-truth` | My Cylinders above Gas Estimator (pushed) |
 | Phase 5C history/settings | `64def5b` | `origin/harden-source-of-truth` | Polished history, persisted ads consent, support email (pushed) |
-| Phase 5C Smart Hub | `f536788` | `origin/harden-source-of-truth` | Shared headers and empty state in cylinder hub (pushed) — **current head** |
+| Phase 5C Smart Hub | `f536788` | `origin/harden-source-of-truth` | Shared headers and empty state in cylinder hub (pushed) |
+| Phase 5D vendor polish | `1fd5630` | `origin/harden-source-of-truth` | Drawer, dashboard, badge, inventory, orders, profile restyles (pushed) |
+| Phase 5D GasPlan teaser | `dd2f629` | `origin/harden-source-of-truth` | GasPlan screen + `ajira_interest` form (pushed) |
+| Phase 5D referrals | `ec45524` | `origin/harden-source-of-truth` | Codes, `referrals`, shared card, vendor invite (pushed) |
+| Phase 5D share pin | `f09d678` | `origin/harden-source-of-truth` | `share_plus 10.1.4` for AGP 8.3 compatibility (pushed) — **current head** |
 ---

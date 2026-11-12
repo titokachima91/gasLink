@@ -11,7 +11,8 @@
 > **Notifications & polish:** Phase 5 complete — see `phases/phase-05-notifications/implementation.md`.
 > **App polish:** Phase 5B complete — see `phases/phase-05b-app-polish/implementation.md`.
 > **Consumer completeness:** Phase 5C complete — see `phases/phase-05c-consumer-completeness/implementation.md`.
-> **Current phase:** Phase 5D — vendor polish & growth hooks (building; Phase 6 set aside).
+> **Vendor growth:** Phase 5D complete — see `phases/phase-05d-vendor-growth/implementation.md`.
+> **Current phase:** Phase 6 — scale & security hardening (next; intentionally set aside until now).
 
 ---
 
@@ -36,7 +37,7 @@
 | App Polish & First Impressions | ✅ **Complete** — landing page, guest/consumer split, catalogue & service fixes, restyled screens, audience-aware ads |
 | Vendor Catalogue Consistency | ✅ **Complete** — merged inventory view; consumers see everything vendors manage |
 | Auth Flow & Consumer Completeness | ✅ **Complete (5C)** — dedicated login/register with consent, consumer settings/profile, home reorder, polished history/cylinders |
-| Vendor Polish & Growth Hooks | 🛠️ **In progress (5D)** — vendor restyles, referral foundation, GasPlan kwa Waajiriwa teaser |
+| Vendor Polish & Growth Hooks | ✅ **Complete (5D)** — vendor restyles, GasPlan kwa Waajiriwa teaser, referral foundation |
 | Stock Visibility | ✅ **Complete** — vendor stock writes normalized; admin inventory aggregation and out-of-stock view shipped |
 
 ---
@@ -142,7 +143,7 @@
 
 | Change | Evidence |
 |---|---|
-| Blended login moved out of landing | Landing keeps small text links; login form is a compact bottom section (removed in the 5C plan) |
+| Blended login moved out of landing | Landing now has only small entry links; login/register are dedicated screens (Phase 5C) |
 | Order manager header fix | Bounded phone button + ellipsis on ODA header |
 | Dashboard KPI fix | Metric cards no longer misuse `Expanded` inside the grid |
 | Launcher icons | Logo applied to Android/iOS/web/macOS icons |
@@ -249,11 +250,20 @@
 - Verification: analyzer 0 errors / 0 warnings, 79/79 tests passing.
 - Commits: `0e1f469`, `4123e28`, `5e5a374`, `64def5b`, `f536788`.
 
-### 🛑 Phase 5D — Vendor Polish & Growth Hooks (planned — not started)
-- Zero code written. Vendor drawer/inventory/orders/profile/badge/dashboard
-  polish, referral foundation (rewards coming soon), and the GasPlan kwa
-  Waajiriwa teaser inside Consumer Settings → Features only.
-- Plan: `phases/phase-05d-vendor-growth/plan.md` (awaiting approval).
+### ✅ Phase 5D — Vendor Polish & Growth Hooks (complete)
+- Vendor drawer, dashboard, badge hub, inventory, order manager and profile
+  restyled with the shared design kit; verification status card added.
+- GasPlan kwa Waajiriwa teaser lives only in Consumer Settings → Vipengele;
+  interest form writes to `ajira_interest`; share-with-HR via `share_plus`.
+- Referral foundation: deterministic codes on users/vendors, `referrals`
+  collection, shared card on consumer home, vendor dashboard and settings;
+  consumer → vendor invite form; rewards marked coming soon.
+- Record: `phases/phase-05d-vendor-growth/implementation.md`.
+- Verification: analyzer 0 errors / 0 warnings, 85/85 tests passing, release
+  APK built with `share_plus 10.1.4` and the Feb 2025 FlutterFire set
+  (BoM 33.8.0; Kotlin 1.9 compatible, Flutter/AGP unchanged).
+- Commits: `1fd5630`, `dd2f629`, `ec45524`, `f09d678`, plus the FlutterFire
+  compatibility pin.
 
 ### ⚠️ Phase 6 — Scale & Security Hardening
 - Firestore security rules and Cloud Functions for server-side admin checks.
@@ -266,8 +276,10 @@
 
 ## 🔜 Immediate Next Steps
 
-1. Build Phase 5D — vendor polish, GasPlan kwa Waajiriwa teaser, and the
-   referral foundation (one commit per slice).
-2. Update the Phase 5D implementation record and status docs.
-3. Phase 6 — scale and security hardening (rules, server-side checks,
-   analytics rollups, pagination, subscription billing).
+1. Phase 6 — scale and security hardening: Firestore rules (including
+   `ajira_interest` and `referrals`), server-side admin checks, analytics
+   rollups, pagination, and subscription billing.
+2. Replace the temporary hardcoded admin login with Firebase Auth + custom
+   claims.
+3. Production launch checklist: legal review of Terms/Privacy, support
+   channels, and store listings.

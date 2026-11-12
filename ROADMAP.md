@@ -3,7 +3,7 @@
 > **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
-> **Current focus:** Phase 5D — vendor polish & growth hooks (Phase 6 set aside)
+> **Current focus:** Phase 6 — scale & security hardening
 > **Phase 1:** ✅ Theme overhaul complete
 > **Phase 2:** ✅ Admin & Operations Console complete
 > **Phase 3:** ✅ Vendor verified role complete
@@ -11,6 +11,7 @@
 > **Phase 5:** ✅ Notifications & polish complete
 > **Phase 5B:** ✅ App polish & first impressions complete
 > **Phase 5C:** ✅ Auth flow & consumer completeness complete
+> **Phase 5D:** ✅ Vendor polish & growth hooks complete
 
 This roadmap is the high-level project plan. Detailed implementation records live in
 `phases/<phase>/plan.md` and `phases/<phase>/implementation.md`.
@@ -34,7 +35,7 @@ This roadmap is the high-level project plan. Detailed implementation records liv
 | Notifications & polish | ✅ Complete — Phase 5 |
 | App polish & first impressions | ✅ Complete — Phase 5B |
 | Auth flow & consumer completeness | ✅ Complete — Phase 5C |
-| Vendor polish & growth hooks | 🛠️ In progress — Phase 5D |
+| Vendor polish & growth hooks | ✅ Complete — Phase 5D |
 
 ---
 
@@ -162,13 +163,17 @@ ads consent, consumer Settings/Profile screens, polished history and cylinder
 hub, and the planned home reorder. Analyzer 0 errors / 0 warnings, 79/79 tests
 passing. No business logic changed.
 
-## 🛠️ Phase 5D — Vendor Polish & Growth Hooks (IN PROGRESS)
+## ✅ Phase 5D — Vendor Polish & Growth Hooks (COMPLETE)
 
-Plan: [`phases/phase-05d-vendor-growth/plan.md`](phases/phase-05d-vendor-growth/plan.md)
+Record: [`phases/phase-05d-vendor-growth/implementation.md`](phases/phase-05d-vendor-growth/implementation.md)
 
-Vendor drawer/inventory/orders/profile/badge/dashboard polish, referral
-foundation (rewards coming soon), and the GasPlan kwa Waajiriwa teaser inside
-Consumer Settings → Features only.
+Vendor drawer/dashboard/badge/inventory/orders/profile restyles, verification
+status card, GasPlan kwa Waajiriwa teaser (Settings → Features only, writes
+`ajira_interest`), and the consumer/vendor referral foundation with
+deterministic codes and the `referrals` collection. Rewards are explicitly
+"coming soon". Analyzer 0 errors / 0 warnings, 85/85 tests passing, release APK
+built with `share_plus 10.1.4` and the Feb 2025 FlutterFire set (BoM 33.8.0) on
+the unchanged Flutter 3.24.5 / AGP 8.3 / Kotlin 1.9.22 toolchain.
 
 ---
 
