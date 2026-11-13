@@ -101,3 +101,37 @@ class SessionGate {
     );
   }
 }
+
+/// Defensive redirect for consumer-only screens.
+///
+/// Normal navigation checks [SessionGate.requireConsumer] before pushing, so
+/// this only runs when a stale guest session or a direct route reaches a
+/// consumer screen. It replaces the route with the landing/login flow instead
+/// of showing a dead-end page.
+class SessionRedirect extends StatefulWidget {
+  const SessionRedirect({super.key});
+
+  @override
+  State<SessionRedirect> createState() => _SessionRedirectState();
+}
+
+class _SessionRedirectState extends State<SessionRedirect> {
+  bool _redirected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _redirected) return;
+      _redirected = true;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LandingScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: SizedBox.shrink());
+  }
+}

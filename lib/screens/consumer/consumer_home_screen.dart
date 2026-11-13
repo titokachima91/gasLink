@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
+import '../../core/session_gate.dart';
 import '../../services/auth_service.dart';
 import '../../services/order_service.dart';
 import '../../utils/cylinder_fifo.dart';
@@ -21,6 +22,7 @@ import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/referral_card.dart';
+import '../../widgets/root_back_guard.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../../widgets/verified_badge.dart';
 import 'item_vendors_screen.dart';
@@ -1217,6 +1219,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     );
   }
 
+  Future<void> _leaveGuestMode() async {
+    await AuthService.instance.signOut();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LandingScreen()),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final guestMode = AuthService.instance.isGuest;
@@ -1237,29 +1248,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       }
       return true;
     }).toList();
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        final shouldExit = await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Funga App / Exit App'),
-            content: const Text('Unataka kufunga app?'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Hapana')),
-              TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Ndiyo')),
-            ],
-          ),
-        );
-        if (shouldExit == true && context.mounted) {
-          Navigator.of(context).pop();
-        }
-      },
+    return RootBackGuard(
+      onBack: guestMode ? _leaveGuestMode : null,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
@@ -1273,33 +1263,48 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             IconButton(
               icon: const Icon(Icons.person_outline, color: Colors.white),
               tooltip: 'Wasifu / Profile',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ConsumerProfileScreen(),
-                  ),
-                );
+              onPressed: () async {
+                if (await SessionGate.requireConsumer(context)) {
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConsumerProfileScreen(),
+                    ),
+                  );
+                }
               },
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
               tooltip: 'Mipangilio / Settings',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ConsumerSettingsScreen(),
-                  ),
-                );
+              onPressed: () async {
+                if (await SessionGate.requireConsumer(context)) {
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConsumerSettingsScreen(),
+                    ),
+                  );
+                }
               },
             ),
             const ThemeModeButton(),
-            IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              tooltip: 'Ondoka / Logout',
-              onPressed: _handleLogout,
-            ),
+            if (guestMode)
+              IconButton(
+                icon: const Icon(Icons.login, color: Colors.white),
+                tooltip: 'Ingia / Log in',
+                onPressed: () async {
+                  await SessionGate.requireConsumer(context);
+                },
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                tooltip: 'Ondoka / Logout',
+                onPressed: _handleLogout,
+              ),
           ],
         ),
         body: RefreshIndicator(

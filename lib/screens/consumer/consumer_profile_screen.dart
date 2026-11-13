@@ -18,14 +18,7 @@ class ConsumerProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!SessionGate.isConsumer) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Wasifu / Profile')),
-        body: const AppEmptyState(
-          icon: Icons.account_circle_outlined,
-          title: 'Ingia kwanza / Sign in first',
-          message: 'Wasifu unapatikana kwa wateja waliojiandikisha.',
-        ),
-      );
+      return const SessionRedirect();
     }
 
     final uid = AuthService.instance.currentUserId ?? '';

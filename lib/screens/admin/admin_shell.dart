@@ -4,6 +4,7 @@ import '../../core/admin_guard.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/offline_banner.dart';
+import '../../widgets/root_back_guard.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/landing_screen.dart';
 import 'admin_analytics_screen.dart';
@@ -129,154 +130,157 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     if (!AdminGuard.isAdmin) return const AdminAccessDenied();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_title),
-        actions: [
-          IconButton(
-            tooltip: 'Audit trail',
-            icon: const Icon(Icons.history),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const AdminAuditLogScreen(),
+    return RootBackGuard(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_title),
+          actions: [
+            IconButton(
+              tooltip: 'Audit trail',
+              icon: const Icon(Icons.history),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AdminAuditLogScreen(),
+                ),
               ),
             ),
-          ),
-          const ThemeModeButton(),
-          PopupMenuButton<String>(
-            tooltip: 'Admin menu',
-            onSelected: (value) {
-              if (value == 'settings') {
-                setState(() => _selected = 6);
-              } else if (value == 'audit') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AdminAuditLogScreen(),
+            const ThemeModeButton(),
+            PopupMenuButton<String>(
+              tooltip: 'Admin menu',
+              onSelected: (value) {
+                if (value == 'settings') {
+                  setState(() => _selected = 6);
+                } else if (value == 'audit') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AdminAuditLogScreen(),
+                    ),
+                  );
+                } else if (value == 'signout') {
+                  _signOut();
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: 'settings',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.settings_outlined),
+                    title: Text('Settings'),
                   ),
-                );
-              } else if (value == 'signout') {
-                _signOut();
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.settings_outlined),
-                  title: Text('Settings'),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'audit',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.history),
-                  title: Text('Audit trail'),
+                PopupMenuItem(
+                  value: 'audit',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.history),
+                    title: Text('Audit trail'),
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'signout',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.logout),
-                  title: Text('Sign out'),
+                PopupMenuItem(
+                  value: 'signout',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.logout),
+                    title: Text('Sign out'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              const OfflineBanner(),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final wide = constraints.maxWidth >= 900;
+                    if (!wide) {
+                      return _CompactBody(
+                        selected: _selected,
+                        page: _page(),
+                        onDestinationSelected: (index) {
+                          setState(() => _selected = index == 4 ? 7 : index);
+                        },
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.colors.surface,
+                            border: Border(
+                              right: BorderSide(
+                                  color: context.colors.outlineVariant),
+                            ),
+                          ),
+                          child: NavigationRail(
+                            extended: constraints.maxWidth >= 1180,
+                            minWidth: 78,
+                            labelType: constraints.maxWidth >= 1180
+                                ? NavigationRailLabelType.none
+                                : NavigationRailLabelType.all,
+                            groupAlignment: -0.92,
+                            selectedIndex: _selected <= 6 ? _selected : 0,
+                            onDestinationSelected: (index) =>
+                                setState(() => _selected = index),
+                            leading: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: context.colors.primary,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      Icons.local_fire_department,
+                                      color: context.colors.onPrimary,
+                                    ),
+                                  ),
+                                  if (constraints.maxWidth < 1180)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Text(
+                                        'OPS',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 1.2,
+                                          color:
+                                              context.colors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            destinations: [
+                              for (final destination in _destinations)
+                                NavigationRailDestination(
+                                  icon: Icon(destination.icon),
+                                  selectedIcon: Icon(destination.selectedIcon),
+                                  label: Text(destination.label),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Expanded(child: _page()),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
           ),
-        ],
-      ),
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            const OfflineBanner(),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 900;
-                  if (!wide) {
-                    return _CompactBody(
-                      selected: _selected,
-                      page: _page(),
-                      onDestinationSelected: (index) {
-                        setState(() => _selected = index == 4 ? 7 : index);
-                      },
-                    );
-                  }
-                  return Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: context.colors.surface,
-                          border: Border(
-                            right: BorderSide(
-                                color: context.colors.outlineVariant),
-                          ),
-                        ),
-                        child: NavigationRail(
-                          extended: constraints.maxWidth >= 1180,
-                          minWidth: 78,
-                          labelType: constraints.maxWidth >= 1180
-                              ? NavigationRailLabelType.none
-                              : NavigationRailLabelType.all,
-                          groupAlignment: -0.92,
-                          selectedIndex: _selected <= 6 ? _selected : 0,
-                          onDestinationSelected: (index) =>
-                              setState(() => _selected = index),
-                          leading: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 44,
-                                  height: 44,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: context.colors.primary,
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Icon(
-                                    Icons.local_fire_department,
-                                    color: context.colors.onPrimary,
-                                  ),
-                                ),
-                                if (constraints.maxWidth < 1180)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 6),
-                                    child: Text(
-                                      'OPS',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.2,
-                                        color: context.colors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          destinations: [
-                            for (final destination in _destinations)
-                              NavigationRailDestination(
-                                icon: Icon(destination.icon),
-                                selectedIcon: Icon(destination.selectedIcon),
-                                label: Text(destination.label),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Expanded(child: _page()),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
         ),
       ),
     );

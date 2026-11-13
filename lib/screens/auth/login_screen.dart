@@ -104,31 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-
-        final shouldExit = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Toka / Exit App'),
-            content: const Text(
-                'Unahakika unataka kutoka kwenye programu? / Are you sure you want to exit?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Hapana / Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Ndio / Exit'),
-              ),
-            ],
-          ),
-        );
-
-        if (shouldExit == true && context.mounted) {
-          SystemNavigator.pop();
-        }
+        _backToLanding();
       },
       child: Scaffold(
         appBar: AppBar(

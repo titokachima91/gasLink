@@ -136,14 +136,7 @@ class _ConsumerSettingsScreenState
   @override
   Widget build(BuildContext context) {
     if (!SessionGate.isConsumer) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Mipangilio / Settings')),
-        body: const AppEmptyState(
-          icon: Icons.account_circle_outlined,
-          title: 'Ingia kwanza / Sign in first',
-          message: 'Mipangilio inapatikana kwa wateja waliojiandikisha.',
-        ),
-      );
+      return const SessionRedirect();
     }
 
     final phone = AuthService.instance.currentPhone ?? '';
