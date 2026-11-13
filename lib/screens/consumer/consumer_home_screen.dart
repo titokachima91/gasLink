@@ -40,6 +40,17 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   List<Map<String, dynamic>> _myCylinders = [];
   List<Map<String, dynamic>> _deliveredOrders = [];
   Map<String, dynamic>? _lastCompletedOrder;
+
+  static const int _stockPageSize = 10;
+  int _visibleItemCount = _stockPageSize;
+
+  void _selectIntent(String intent) {
+    setState(() {
+      _selectedIntent = intent;
+      _visibleItemCount = _stockPageSize;
+    });
+  }
+
   Widget _buildCategoryCard({
     required String title,
     required String subtitle,
@@ -889,9 +900,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           ),
                         );
                       } else {
-                        setState(() {
-                          _selectedIntent = 'Refill';
-                        });
+                        _selectIntent('Refill');
                       }
                     },
                     icon: const Icon(Icons.bolt, size: 16),
@@ -1211,6 +1220,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final guestMode = AuthService.instance.isGuest;
+    final allItems = _getListItems();
+    final visibleItemCount = _visibleItemCount < allItems.length
+        ? _visibleItemCount
+        : allItems.length;
     final liveOffers = SessionData.instance.offers.where((offer) {
       final lowercaseIntent = _selectedIntent.toLowerCase();
       if (lowercaseIntent.contains('refill')) {
@@ -1333,6 +1346,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 const SizedBox(height: 12),
               ],
 
+              if (!guestMode) ...[
+                ReferralCard(
+                  uid: AuthService.instance.currentUserId ?? '',
+                  role: 'consumer',
+                  showVendorInvite: true,
+                ),
+                const SizedBox(height: 20),
+              ],
+
               const AppSectionHeader(
                 title: 'Unataka kufanya nini? / Choose Service',
                 icon: Icons.grid_view_outlined,
@@ -1353,45 +1375,33 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     subtitle: 'Kujaza',
                     icon: Icons.sync,
                     isSelected: _selectedIntent == 'Refill',
-                    onTap: () => setState(() => _selectedIntent = 'Refill'),
+                    onTap: () => _selectIntent('Refill'),
                   ),
                   _buildCategoryCard(
                     title: 'Full Set',
                     subtitle: 'Mtungi + Gesi',
                     icon: Icons.inventory_2_outlined,
                     isSelected: _selectedIntent == 'Full Set',
-                    onTap: () => setState(() => _selectedIntent = 'Full Set'),
+                    onTap: () => _selectIntent('Full Set'),
                   ),
                   _buildCategoryCard(
                     title: 'Accessories',
                     subtitle: 'Vifaa',
                     icon: Icons.build_circle_outlined,
                     isSelected: _selectedIntent == 'Accessories',
-                    onTap: () =>
-                        setState(() => _selectedIntent = 'Accessories'),
+                    onTap: () => _selectIntent('Accessories'),
                   ),
                   _buildCategoryCard(
                     title: 'Services',
                     subtitle: 'Matengenezo',
                     icon: Icons.handyman_outlined,
                     isSelected: _selectedIntent == 'Services',
-                    onTap: () => setState(() => _selectedIntent = 'Services'),
+                    onTap: () => _selectIntent('Services'),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 14),
-              const AdSlot(placementId: 'consumer_home'),
-
               const SizedBox(height: 20),
-              if (!guestMode) ...[
-                ReferralCard(
-                  uid: AuthService.instance.currentUserId ?? '',
-                  role: 'consumer',
-                  showVendorInvite: true,
-                ),
-                const SizedBox(height: 20),
-              ],
 
               // ===== VERTICAL LIST TITLE =====
               AppSectionHeader(
@@ -1400,9 +1410,35 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               ),
               const SizedBox(height: 10),
 
-              // ===== VERTICAL LIST ITEMS =====
-              ..._getListItems().map((item) => _buildVerticalItemCard(item)),
+              // ===== VERTICAL LIST ITEMS (10 at a time) =====
+              ...allItems
+                  .take(visibleItemCount)
+                  .map((item) => _buildVerticalItemCard(item)),
 
+              if (visibleItemCount < allItems.length) ...[
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Unaona $visibleItemCount kati ya ${allItems.length}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Center(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        setState(() => _visibleItemCount += _stockPageSize),
+                    icon: const Icon(Icons.expand_more),
+                    label: const Text('Ona zaidi / View more'),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 20),
+              const AdSlot(placementId: 'consumer_home'),
               const SizedBox(height: 24),
 
               // ===== NEARBY VENDORS =====

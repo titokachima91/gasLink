@@ -651,11 +651,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  const AdSlot(placementId: 'vendor_dashboard'),
                   const SizedBox(height: 20),
-                  ReferralCard(uid: _vendorUid, role: 'vendor'),
-                  const SizedBox(height: 24),
                   // ── SECTION 3: REAL-TIME INCOMING ORDER ALERTS ───────
                   AppSectionHeader(
                     title: 'Oda Mpya Zinazoingia / Incoming Orders',
@@ -1043,6 +1039,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                         ),
                       );
                     }),
+                  const SizedBox(height: 24),
+                  ReferralCard(uid: _vendorUid, role: 'vendor'),
+                  const SizedBox(height: 20),
+                  const AdSlot(placementId: 'vendor_dashboard'),
                 ],
               );
             },
