@@ -150,26 +150,29 @@ Reference: `gateway/MOUNTED.md`.
 
 ---
 
-## Current state at 22:35 EAT, 13 Nov 2026
+## Current state at 01:17 EAT, 14 Nov 2026
 
 - **Power:** AC connected.
 - **LAN IP:** `192.168.1.11`.
-- **Servers:** all down after the laptop restart. Restart them.
-- **Last successful APK:** 20:27, SHA
-  `402c5b11f729ba3627138ce67afd23f9b9dabac84d215003f1819b0ad9cf2867`.
-  It embeds `192.168.1.104:8080`, so it is **stale** after the IP change.
-- **Last commit:** `eeccbb3` — order CTA / non-blocking notifications.
-- **Uncommitted at handoff:** the empty-shop fallback in
-  `lib/screens/consumer/item_vendors_screen.dart`:
-  - force `SessionData.reload()`
-  - fall back from an empty category to live refill stock
-  - add a `Sasisha` retry button
-- **Next build must include:** that uncommitted fallback, the current `.11`
-  gateway URL and the network-security host.
-- **Shop bug:** the live catalogue is refill-only. Selecting **Full Set** with
-  the old APK shows an empty shop. The new fallback fixes this. Until the new
-  APK is installed, the workaround is: force-stop, reopen, pull-to-refresh on
-  Home, select **Refill**, then Oryx Gas.
+- **Servers:** APK download server on `8090` is running for UI inspection.
+  Gateway `8080` and FCM are intentionally **off**; UI browsing still reads
+  Firestore, but SMS/push will not fire until they are started.
+- **Last successful APK:** 14 Nov 01:16, SHA
+  `237ee61283d83aa3c92cc337ee1d40950c92886e99864e5a9848436cd0776eea`
+  (59,310,141 bytes), embeds `192.168.1.11:8080`.
+  Download: `http://192.168.1.11:8090/gaslink-latest.apk`
+- **Build:** clean (`flutter clean` → `pub get` → `gen-l10n` → `analyze` →
+  release). Log: `build_logs/clean_build.log`.
+- **Last commits:** `7295ff0` brand-header constraint, `8122297` product/vendor
+  card text sweep, `c4ae9eb` shop fallback.
+- **Working tree:** clean.
+- **Install:** uninstall the old GasLink app first, then install the new APK.
+  The previous 00:41 download had a connection reset; a stale install is the
+  likely reason the old mangled layout kept appearing.
+- **Shop fix:** Shop Details product rows are full-width vertical rows
+  (name/weight, price, full-width `Oda Sasa`). Brand headers are constrained.
+  The same sweep covered vendor cards, brand shop, order summary, cylinder
+  facts, vendor search, inventory, and vendor order cards.
 
 ### Known issues / non-blockers
 
