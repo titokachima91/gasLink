@@ -71,7 +71,7 @@ See `gateway/README.md` for env vars, curls and the standalone runner.
 
 `lib/core/gateway_config.dart` centralizes:
 
-- `SMS_GATEWAY_BASE_URL` (default `http://192.168.1.12:3000`)
+- `SMS_GATEWAY_BASE_URL` (default `http://192.168.1.12:8080`)
 - `SMS_GATEWAY_API_KEY` (`x-api-key`)
 - `ENABLE_OTP_LOGIN` (default `false`)
 
@@ -98,9 +98,8 @@ only for the pilot LAN hosts; public tunnel URLs must use HTTPS.
   bridge created a `placed` 26,000 TZS Oryx 6kg order with `source: sms_ai`;
   the order and its notification ledger entry were deleted and the opt-in flag
   restored immediately after the check.
-- The gateway currently runs on `192.168.1.11:3000`; `env.local.json` points
-  there for the pilot APK. The code default remains `192.168.1.12:3000` as
-  specified.
+- The gateway runs on `192.168.1.11:8080`; `env.local.json` points there for
+  the pilot APK. The code default remains `192.168.1.12:8080` as specified.
 
 ## 7. Out of scope / next
 

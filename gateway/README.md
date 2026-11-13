@@ -11,10 +11,21 @@ x-api-key: gl-...
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/v1/bridge/subscriber?phone=+2557...` | Existence + AI opt-in check |
+| `GET/POST` | `/v1/bridge/subscriber` | Existence + AI opt-in check (`phone` query or `{phone}` body) |
 | `GET` | `/v1/bridge/catalog` | Live products, colours, sizes, prices, vendor stock |
 | `POST` | `/v1/bridge/orders` | Create a PENDING (`placed`) SMS order |
 | `GET` | `/v1/bridge/health` | Liveness |
+
+The subscriber response includes both naming conventions expected by the
+gateway's subscriber gate:
+
+```json
+{ "exists": true, "registered": true, "found": true,
+  "aiAssistantEnabled": true, "aiEnabled": true }
+```
+
+Set `GASLINK_SUBSCRIBER_CHECK_URL=http://127.0.0.1:8080/v1/bridge/subscriber`
+when the bridge is mounted in the gateway.
 
 Only users with `ai_assistant_enabled: true` can create SMS orders. The bridge
 never returns PIN hashes or other credentials.

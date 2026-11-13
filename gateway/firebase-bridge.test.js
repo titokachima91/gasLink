@@ -4,6 +4,7 @@ const {
   normalizePhone,
   isValidTzPhone,
   brandColor,
+  subscriberResponse,
 } = require('./firebase-bridge');
 
 test('normalizes every Tanzanian phone format used by the app', () => {
@@ -34,4 +35,34 @@ test('maps brand colours and Swahili aliases', () => {
   assert.equal(brandColor('Taifa Gas').color, 'Blue');
   assert.equal(brandColor('O-Lake Gas').color, 'Green');
   assert.equal(brandColor('Unknown Gas').color, null);
+});
+
+test('subscriber response satisfies the gateway subscriber gate', () => {
+  assert.deepEqual(subscriberResponse(null), {
+    exists: false,
+    registered: false,
+    found: false,
+    aiAssistantEnabled: false,
+    aiEnabled: false,
+  });
+
+  const disabled = subscriberResponse({
+    uid: 'u1',
+    name: 'Amina',
+    aiAssistantEnabled: false,
+    channel: 'both',
+  });
+  assert.equal(disabled.registered, true);
+  assert.equal(disabled.aiEnabled, false);
+  assert.equal(disabled.uid, undefined);
+
+  const enabled = subscriberResponse({
+    uid: 'u1',
+    name: 'Amina',
+    aiAssistantEnabled: true,
+    channel: 'both',
+  });
+  assert.equal(enabled.registered, true);
+  assert.equal(enabled.aiEnabled, true);
+  assert.equal(enabled.uid, 'u1');
 });

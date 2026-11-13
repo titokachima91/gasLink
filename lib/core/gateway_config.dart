@@ -7,7 +7,7 @@
 //
 // env.local.json (gitignored):
 //   {
-//     "SMS_GATEWAY_BASE_URL": "http://192.168.1.12:3000",
+//     "SMS_GATEWAY_BASE_URL": "http://192.168.1.12:8080",
 //     "SMS_GATEWAY_API_KEY": "gl-...",
 //     "ENABLE_OTP_LOGIN": "false"
 //   }
@@ -18,7 +18,7 @@ class GatewayConfig {
   /// Local Wi-Fi default. Override with SMS_GATEWAY_BASE_URL to use a tunnel.
   static const String baseUrl = String.fromEnvironment(
     'SMS_GATEWAY_BASE_URL',
-    defaultValue: 'http://192.168.1.12:3000',
+    defaultValue: 'http://192.168.1.12:8080',
   );
 
   /// Tenant key sent as the `x-api-key` header. Empty disables SMS safely.

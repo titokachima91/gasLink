@@ -82,6 +82,28 @@ function ensureFirebaseApp() {
   });
 }
 
+function subscriberResponse(subscriber) {
+  if (!subscriber) {
+    return {
+      exists: false,
+      registered: false,
+      found: false,
+      aiAssistantEnabled: false,
+      aiEnabled: false,
+    };
+  }
+  return {
+    exists: true,
+    registered: true,
+    found: true,
+    aiAssistantEnabled: subscriber.aiAssistantEnabled,
+    aiEnabled: subscriber.aiAssistantEnabled,
+    uid: subscriber.aiAssistantEnabled ? subscriber.uid : undefined,
+    name: subscriber.aiAssistantEnabled ? subscriber.name : undefined,
+    channel: subscriber.channel,
+  };
+}
+
 function createFirebaseBridgeRouter(options = {}) {
   const apiKey = options.apiKey || process.env.API_KEY_GASLINK;
   const router = express.Router();
@@ -205,9 +227,9 @@ function createFirebaseBridgeRouter(options = {}) {
     });
   });
 
-  router.get('/subscriber', async (req, res) => {
+  async function handleSubscriber(req, res) {
     try {
-      const phone = normalizePhone(req.query.phone);
+      const phone = normalizePhone(req.query.phone || req.body?.phone);
       if (!isValidTzPhone(phone)) {
         return res.status(400).json({
           error: 'Bad Request',
@@ -215,20 +237,14 @@ function createFirebaseBridgeRouter(options = {}) {
         });
       }
       const subscriber = await findSubscriber(phone);
-      if (!subscriber) {
-        return res.json({ exists: false, aiAssistantEnabled: false });
-      }
-      return res.json({
-        exists: true,
-        aiAssistantEnabled: subscriber.aiAssistantEnabled,
-        uid: subscriber.aiAssistantEnabled ? subscriber.uid : undefined,
-        name: subscriber.aiAssistantEnabled ? subscriber.name : undefined,
-        channel: subscriber.channel,
-      });
+      return res.json(subscriberResponse(subscriber));
     } catch (error) {
       return res.status(500).json({ error: 'Bridge error', message: error.message });
     }
-  });
+  }
+
+  router.get('/subscriber', handleSubscriber);
+  router.post('/subscriber', handleSubscriber);
 
   router.get('/catalog', async (req, res) => {
     try {
@@ -545,4 +561,5 @@ module.exports = {
   normalizePhone,
   isValidTzPhone,
   brandColor,
+  subscriberResponse,
 };
