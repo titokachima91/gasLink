@@ -800,27 +800,36 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                         children: [
                           // Collective header (from real units only)
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                l10n.collectiveLevel,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: context.colors.onSurfaceVariant),
+                              Expanded(
+                                child: Text(
+                                  l10n.collectiveLevel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: context.colors.onSurfaceVariant),
+                                ),
                               ),
-                              Text(
-                                isCollectiveEmpty
-                                    ? l10n.emptyPercent
-                                    : l10n.daysLeft(
-                                        collectiveDays,
-                                        collectivePercentage
-                                            .toStringAsFixed(1)),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: isCollectiveCritical
-                                      ? context.colors.error
-                                      : context.colors.primary,
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  isCollectiveEmpty
+                                      ? l10n.emptyPercent
+                                      : l10n.daysLeft(
+                                          collectiveDays,
+                                          collectivePercentage
+                                              .toStringAsFixed(1)),
+                                  textAlign: TextAlign.end,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isCollectiveCritical
+                                        ? context.colors.error
+                                        : context.colors.primary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -892,25 +901,33 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(l10n.levelLabel,
+                                      Expanded(
+                                        child: Text(l10n.levelLabel,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: context
+                                                    .colors.onSurfaceVariant)),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          unitEmpty
+                                              ? l10n.emptyPercent
+                                              : l10n.daysLeft(unitDays,
+                                                  unitPct.toStringAsFixed(1)),
+                                          textAlign: TextAlign.end,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                              fontSize: 11,
-                                              color: context
-                                                  .colors.onSurfaceVariant)),
-                                      Text(
-                                        unitEmpty
-                                            ? l10n.emptyPercent
-                                            : l10n.daysLeft(unitDays,
-                                                unitPct.toStringAsFixed(1)),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: unitEmpty
-                                              ? context.colors.error
-                                              : context.colors.primary,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: unitEmpty
+                                                ? context.colors.error
+                                                : context.colors.primary,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1014,15 +1031,25 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
   }
 
   Widget _buildFactLine(String label, String value) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label,
-          style:
-              TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
-      Text(value,
-          style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: context.colors.onSurface))
+    return Row(children: [
+      Expanded(
+        child: Text(label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style:
+                TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
+      ),
+      const SizedBox(width: 8),
+      Flexible(
+        child: Text(value,
+            textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: context.colors.onSurface)),
+      ),
     ]);
   }
 

@@ -288,6 +288,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                                 vendor.businessName.isEmpty
                                                     ? 'Duka la Gesi'
                                                     : vendor.businessName,
+                                                maxLines: 1,
                                                 style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 15,
@@ -304,6 +305,8 @@ class _VendorSearchScreenState extends State<VendorSearchScreen> {
                                           vendor.area.isNotEmpty
                                               ? vendor.area
                                               : 'Eneo halijatajwa',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: context.colors.onSurfaceVariant,

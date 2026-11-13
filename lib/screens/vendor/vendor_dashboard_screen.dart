@@ -812,6 +812,8 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                       ),
                                       child: Text(
                                         '⚡ ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: context.colors.primary,
                                           fontWeight: FontWeight.bold,
@@ -819,13 +821,18 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                         ),
                                       ),
                                     ),
-                                    Text(
-                                      phone,
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              context.colors.onSurfaceVariant),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        phone,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: context
+                                                .colors.onSurfaceVariant),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1017,10 +1024,15 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('Njiani 🚚',
-                                          style: TextStyle(
-                                              color: context.colors.tertiary,
-                                              fontWeight: FontWeight.bold)),
+                                      Expanded(
+                                        child: Text('Njiani 🚚',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: context.colors.tertiary,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                      const SizedBox(width: 8),
                                       ElevatedButton(
                                         onPressed: () async {
                                           // Update state to pending approval to flag the 4s undo clock ticker
@@ -1047,11 +1059,16 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('Inasubiri Mteja...',
-                                          style: TextStyle(
-                                              color: context
-                                                  .colors.onSurfaceVariant,
-                                              fontStyle: FontStyle.italic)),
+                                      Expanded(
+                                        child: Text('Inasubiri Mteja...',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: context
+                                                    .colors.onSurfaceVariant,
+                                                fontStyle: FontStyle.italic)),
+                                      ),
+                                      const SizedBox(width: 8),
                                       TextButton(
                                         onPressed: () async {
                                           // Rollback state back to on_the_way instantly to resolve mis-clicks smoothly

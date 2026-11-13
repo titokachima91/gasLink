@@ -476,15 +476,21 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                           children: [
                             Text(
                                 '${widget.brandName} (${widget.cylinderWeight})',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                             Text(l10n.vendorPrefix(widget.vendorName),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: context.colors.onSurface)),
                             Text(
                                 l10n.priceEach(
                                     widget.price.toStringAsFixed(0)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: context.colors.onSurfaceVariant)),
@@ -642,6 +648,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                               fontSize: 11,
                               color: context.colors.onSurfaceVariant)),
                       Text('TZS ${totalPrice.toStringAsFixed(0)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

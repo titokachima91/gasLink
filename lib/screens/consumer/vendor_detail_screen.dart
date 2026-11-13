@@ -671,82 +671,94 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     final price = (item['price'] as num?)?.toDouble() ?? 0.0;
     final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
 
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Text(
-                '$weight · Refill',
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  weight.isEmpty ? 'Cylinder' : '$weight · Refill',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                'TZS ${_formatPrice(price)}',
-                style: TextStyle(
-                  color: context.gasColors.success,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
+              const SizedBox(width: 8),
+              AppStatusPill(
+                label: inStock ? 'Ipo' : 'Imeisha',
+                icon: inStock
+                    ? Icons.check_circle_outline
+                    : Icons.remove_circle_outline,
+                color: inStock
+                    ? context.gasColors.success
+                    : context.colors.error,
               ),
             ],
           ),
-        ),
-        AppStatusPill(
-          label: inStock ? 'Ipo' : 'Imeisha',
-          icon: inStock
-              ? Icons.check_circle_outline
-              : Icons.remove_circle_outline,
-          color: inStock ? context.gasColors.success : context.colors.error,
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: inStock
-                  ? context.colors.primary
-                  : context.colors.outlineVariant,
-              foregroundColor:
-                  inStock ? context.colors.onPrimary : context.colors.onSurface,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+          const SizedBox(height: 4),
+          Text(
+            'TZS ${_formatPrice(price)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.gasColors.success,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
             ),
-            onPressed: inStock
-                ? () async {
-                    if (!await SessionGate.requireConsumer(context)) {
-                      return;
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 36,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: inStock
+                    ? context.colors.primary
+                    : context.colors.outlineVariant,
+                foregroundColor: inStock
+                    ? context.colors.onPrimary
+                    : context.colors.onSurface,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: inStock
+                  ? () async {
+                      if (!await SessionGate.requireConsumer(context)) {
+                        return;
+                      }
+                      if (!mounted) return;
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) => ConsumerOrderDialog(
+                          vendorId: widget.vendorId,
+                          brandName: brandName,
+                          cylinderWeight: weight,
+                          vendorName: widget.businessName,
+                          price: price,
+                        ),
+                      );
                     }
-                    if (!mounted) return;
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) => ConsumerOrderDialog(
-                        vendorId: widget.vendorId,
-                        brandName: brandName,
-                        cylinderWeight: weight,
-                        vendorName: widget.businessName,
-                        price: price,
-                      ),
-                    );
-                  }
-                : null,
-            child: Text(
-              inStock ? 'Oda Sasa' : 'Imeisha',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                  : null,
+              child: Text(
+                inStock ? 'Oda Sasa' : 'Imeisha',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

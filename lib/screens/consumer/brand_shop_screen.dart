@@ -313,21 +313,25 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           if (vendor.verified)
                             const VerifiedBadge(
                               label: 'Verified Vendor',
                               compact: true,
                             ),
-                          if (vendor.phone.isNotEmpty) ...[
-                            const SizedBox(width: 8),
+                          if (vendor.phone.isNotEmpty)
                             Text(
                               '• ${vendor.phone}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                  fontSize: 11, color: context.colors.onSurfaceVariant),
+                                  fontSize: 11,
+                                  color:
+                                      context.colors.onSurfaceVariant),
                             ),
-                          ],
                         ],
                       ),
                     ],
@@ -336,66 +340,64 @@ class _BrandShopScreenState extends State<BrandShopScreen> {
               ],
             ),
             const Divider(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'TZS ${price.toStringAsFixed(0)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.colors.primary,
-                      ),
+            Text(
+              'TZS ${price.toStringAsFixed(0)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.colors.primary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '🟢 Ipo Akiba / In Stock',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: context.gasColors.success,
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (!await SessionGate.requireConsumer(context)) return;
+                  if (!mounted) return;
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
                     ),
-                    Text(
-                      '🟢 Ipo Akiba / In Stock',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.gasColors.success,
-                      ),
+                    builder: (context) => ConsumerOrderDialog(
+                      vendorId: vendor.id,
+                      brandName: widget.brandName,
+                      cylinderSize: _selectedWeight,
+                      vendorName: vendor.businessName,
+                      price: price,
                     ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (!await SessionGate.requireConsumer(context)) return;
-                    if (!mounted) return;
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(16)),
-                      ),
-                      builder: (context) => ConsumerOrderDialog(
-                        vendorId:
-                            vendor.id, // ← Pass the required vendorId here
-                        brandName: widget.brandName,
-                        cylinderSize: _selectedWeight,
-                        vendorName: vendor.businessName,
-                        price: price,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colors.primary,
-                    foregroundColor: context.colors.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Chagua & Weka Oda',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
                 ),
-              ],
+                child: const Text(
+                  'Chagua & Weka Oda',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ],
         ),

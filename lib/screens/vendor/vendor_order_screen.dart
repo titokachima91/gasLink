@@ -289,11 +289,15 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                     }
                   },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('$brand $weight (x$quantity)',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14)),
+                      Expanded(
+                        child: Text('$brand $weight (x$quantity)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                      ),
+                      const SizedBox(width: 8),
                       _buildStatusChip(status),
                     ],
                   ),
@@ -334,11 +338,15 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                           Icon(Icons.info_outline,
                               size: 14, color: context.gasColors.info),
                           SizedBox(width: 4),
-                          Text('ℹ️ Maelezo ya Ziada:',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.gasColors.info))
+                          Expanded(
+                            child: Text('ℹ️ Maelezo ya Ziada:',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.gasColors.info)),
+                          )
                         ]),
                         if (specialRequests.isNotEmpty)
                           Text('📝 Ombi: $specialRequests',
@@ -501,13 +509,17 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         status == 'in_transit' ||
         status == 'delivering') {
       return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Njiani 🚚',
-              style: TextStyle(
-                  color: context.colors.tertiary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13)),
+          Expanded(
+            child: Text('Njiani 🚚',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: context.colors.tertiary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13)),
+          ),
+          const SizedBox(width: 8),
           ElevatedButton.icon(
             onPressed: () => doc.reference.update({
               'status': 'delivered_pending',
@@ -540,12 +552,16 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
             Row(children: [
               Icon(Icons.hourglass_top,
                   size: 16, color: context.gasColors.info),
-              SizedBox(width: 6),
-              Text('Inasubiri Ithibitishwe na Mteja',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.onSurface))
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text('Inasubiri Ithibitishwe na Mteja',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: context.colors.onSurface)),
+              )
             ]),
             SizedBox(height: 4),
             Text(

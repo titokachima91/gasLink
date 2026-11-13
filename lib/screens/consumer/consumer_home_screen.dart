@@ -791,26 +791,35 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '$brandName $weight',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: context.colors.onSurface),
+                        Expanded(
+                          child: Text(
+                            '$brandName $weight',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: context.colors.onSurface),
+                          ),
                         ),
-                        Text(
-                          isTankEmptyState
-                              ? l10n.emptyPercent
-                              : l10n.daysLeft(estimatedDaysLeft,
-                                  remainingPercentage),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isCriticalLow
-                                ? context.colors.error
-                                : context.colors.primary,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            isTankEmptyState
+                                ? l10n.emptyPercent
+                                : l10n.daysLeft(estimatedDaysLeft,
+                                    remainingPercentage),
+                            textAlign: TextAlign.end,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isCriticalLow
+                                  ? context.colors.error
+                                  : context.colors.primary,
+                            ),
                           ),
                         ),
                       ],
@@ -1637,22 +1646,22 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                           fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 6),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         if (vendor.verified)
                           VerifiedBadge(
                             label: l10n.verifiedShop,
                             compact: true,
                           ),
-                        if (minPrice > 0) ...[
-                          const SizedBox(width: 8),
+                        if (minPrice > 0)
                           AppStatusPill(
                             label: l10n
                                 .fromPrice(minPrice.toStringAsFixed(0)),
                             icon: Icons.local_offer_outlined,
                             color: context.colors.primary,
                           ),
-                        ],
                       ],
                     ),
                     if (offer.vendorBrands.isNotEmpty) ...[

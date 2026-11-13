@@ -183,6 +183,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     '$brand ($size)',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,

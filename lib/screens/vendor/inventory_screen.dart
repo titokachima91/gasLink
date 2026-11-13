@@ -268,6 +268,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       children: [
                         Text(
                           product.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13.5,
