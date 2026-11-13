@@ -100,3 +100,6 @@ app (`consumer_uid` + `consumerUid`, `total_price` + `totalPrice`, etc.) and
 - Expose it through the same private network or HTTPS tunnel as the SMS gateway.
 - Rate-limit `/orders` at the gateway/proxy layer before public exposure.
 - The customer must exist and have `ai_assistant_enabled: true`.
+- The mobile app embeds the tenant `gl-...` key at build time. Like any mobile
+  secret it can be extracted from the APK; rotate it before public release and
+  keep gateway rate limits tight.
