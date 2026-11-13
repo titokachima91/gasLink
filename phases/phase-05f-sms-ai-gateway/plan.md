@@ -84,7 +84,21 @@ flutter build apk --release --dart-define-from-file=env.local.json
 `android/app/src/main/res/xml/network_security_config.xml` permits cleartext
 only for the pilot LAN hosts; public tunnel URLs must use HTTPS.
 
-## 6. Out of scope / next
+## 6. Verification (13 Nov 2026)
+
+- `flutter analyze`: 0 errors / 0 warnings.
+- `flutter test`: 116/116 passed, including dispatcher preference matrix, SMS
+  payload parsing, OTP gating, ARB parity, and D2 bilingual scans.
+- `gateway`: 3/3 Node tests passed.
+- Live gateway: `/health` OK; `POST /v1/send-sms` returned `success: true` to
+  the admin test number; bridge `/subscriber` returned the seeded vendor with
+  `aiAssistantEnabled: false`; `/catalog` returned 6 live products and the four
+  brand colours; `/orders` correctly rejected a non-opted-in subscriber (403).
+- The gateway currently runs on `192.168.1.11:3000`; `env.local.json` points
+  there for the pilot APK. The code default remains `192.168.1.12:3000` as
+  specified.
+
+## 7. Out of scope / next
 
 - Mount the bridge into the updated gateway (pending gateway rewrite).
 - Firestore security rules and the custom-token auth bridge (Phase 6A/6B).
