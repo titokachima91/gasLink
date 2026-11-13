@@ -15,6 +15,19 @@ const migratedFiles = <String>[
   'lib/widgets/root_back_guard.dart',
   'lib/widgets/theme_mode_button.dart',
   'lib/widgets/language_picker.dart',
+  // D2 consumer surfaces
+  'lib/widgets/referral_card.dart',
+  'lib/screens/consumer/consumer_home_screen.dart',
+  'lib/screens/consumer/consumer_profile_screen.dart',
+  'lib/screens/consumer/consumer_settings_screen.dart',
+  'lib/screens/consumer/consumer_order_screen.dart',
+  'lib/screens/consumer/consumer_order_dialog.dart',
+  'lib/screens/consumer/consumer_order_history_screen.dart',
+  'lib/screens/consumer/consumer_cylinder_screen.dart',
+  'lib/screens/consumer/gas_plan_screen.dart',
+  // Notification / OTP surfaces
+  'lib/widgets/notifications_ai_settings.dart',
+  'lib/screens/auth/otp_verification_screen.dart',
 ];
 
 void main() {

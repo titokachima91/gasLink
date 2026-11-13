@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/constants.dart';
 import '../../services/auth_service.dart';
 import '../../utils/cylinder_fifo.dart';
@@ -294,19 +295,19 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
     final uid = AuthService.instance.currentUserId;
     if (uid == null || uid.isEmpty || docId.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Futa Mtungi?'),
-        content: const Text(
-            'Je, una uhakika unataka kuondoa kabisa mtungi huu kwenye mfumo wako?'),
+        title: Text(l10n.deleteCylinderTitle),
+        content: Text(l10n.deleteCylinderBody),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Ghairi')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Ondoa / Delete',
+            child: Text(l10n.delete,
                 style: TextStyle(
                     color: context.colors.error, fontWeight: FontWeight.bold)),
           ),
@@ -325,7 +326,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
         await _fetchCompleteCylinderStack();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Mtungi umeondolewa kikamilifu.')));
+              SnackBar(content: Text(l10n.cylinderDeleted)));
         }
       } catch (e) {
         debugPrint('Delete error: $e');
@@ -372,6 +373,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
+        final l10n = AppLocalizations.of(context);
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -387,16 +389,16 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                   children: [
                     Text(
                         isEditing
-                            ? 'Hariri Taarifa za Mtungi'
-                            : 'Sajili Mtungi Mpya / Add Cylinder',
+                            ? l10n.editCylinderTitle
+                            : l10n.addCylinderTitle,
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: selectedBrand,
-                      decoration: const InputDecoration(
-                          labelText: 'Chapa / Brand',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.brandLabel,
+                          border: const OutlineInputBorder()),
                       items: AppConstants.gasBrands
                           .map(
                               (b) => DropdownMenuItem(value: b, child: Text(b)))
@@ -415,9 +417,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: selectedWeight,
-                      decoration: const InputDecoration(
-                          labelText: 'Uzito / Weight',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.weightLabel,
+                          border: const OutlineInputBorder()),
                       items: currentWeights
                           .map(
                               (w) => DropdownMenuItem(value: w, child: Text(w)))
@@ -430,9 +432,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: selectedCycle,
-                      decoration: const InputDecoration(
-                          labelText: 'Mzunguko / Refill Cycle',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.refillCycleLabel,
+                          border: const OutlineInputBorder()),
                       items: cycles
                           .map(
                               (c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -446,10 +448,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     // 🏷️ NEW: Supplier Name Text Field
                     TextField(
                       controller: supplierController,
-                      decoration: const InputDecoration(
-                        labelText: 'Muuzaji / Depot (Supplier Name)',
-                        hintText: 'Mf. Oryx Depot',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.supplierLabel,
+                        hintText: l10n.supplierHint,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -457,10 +459,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                     TextField(
                       controller: priceController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Gharama / Price (TZS)',
-                        hintText: 'Mf. 25000',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.priceLabel,
+                        hintText: l10n.priceHint,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -477,11 +479,12 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                           setModalState(() => selectedDate = picked);
                       },
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                            labelText: 'Tarehe ya mwisho ulipojaza',
-                            border: OutlineInputBorder()),
-                        child:
-                            Text('${selectedDate.toLocal()}'.split(' ').first),
+                        decoration: InputDecoration(
+                            labelText: l10n.lastRefillDateLabel,
+                            border: const OutlineInputBorder()),
+                        child: Text(
+                            MaterialLocalizations.of(context)
+                                .formatMediumDate(selectedDate.toLocal())),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -564,7 +567,10 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                     color: context.colors.onPrimary, strokeWidth: 2))
-            : Text(isEditing ? 'Hifadhi Mabadiliko' : 'Hifadhi Mtungi',
+            : Text(
+                isEditing
+                    ? AppLocalizations.of(context).saveChanges
+                    : AppLocalizations.of(context).saveCylinder,
                 style: TextStyle(
                     color: context.colors.onPrimary,
                     fontWeight: FontWeight.bold)),
@@ -576,12 +582,13 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
   Widget build(BuildContext context) {
     // We no longer rely on lastCompletedOrder for display.
 // Each cylinder now carries its own supplier_name and price.
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Mitungi Yangu / Smart Hub',
-            style: TextStyle(
+        title: Text(l10n.cylinderHubTitle,
+            style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Colors.white)),
@@ -593,14 +600,14 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppSectionHeader(
-              title: 'Mitungi Yangu / My Cylinders',
-              subtitle: 'Hali ya kila mtungi kwa FIFO.',
+              title: l10n.cylinderHubTitle,
+              subtitle: l10n.cylinderHubSubtitle,
               icon: Icons.propane_tank_outlined,
               trailing: TextButton.icon(
                 onPressed: () => _showCylinderFormModal(),
                 icon: Icon(Icons.add, size: 16, color: context.colors.primary),
                 label: Text(
-                  'Ongeza',
+                  l10n.addAction,
                   style: TextStyle(
                     color: context.colors.primary,
                     fontSize: 12,
@@ -619,9 +626,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
             else if (_allUserCylinders.isEmpty)
               AppEmptyState(
                 icon: Icons.propane_tank_outlined,
-                title: 'Hujasajili mtungi bado',
-                message: 'Ongeza mtungi wako kuanza kufuatilia gesi kwa FIFO.',
-                actionLabel: 'Weka Mtungi',
+                title: l10n.noCylindersTitle,
+                message: l10n.noCylindersBody,
+                actionLabel: l10n.addCylinderAction,
                 onAction: _showCylinderFormModal,
               )
             else
@@ -632,26 +639,26 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                 return _buildDynamicAssetCard(idx, cylinder, isExpanded);
               }),
             const SizedBox(height: 24),
-            const AppSectionHeader(
-              title: 'Mifumo ya Ndani / Smart Features',
-              subtitle: 'Zana za ziada za usalama na matumizi.',
+            AppSectionHeader(
+              title: l10n.smartFeaturesTitle,
+              subtitle: l10n.smartFeaturesSubtitle,
               icon: Icons.auto_awesome_outlined,
             ),
             const SizedBox(height: 10),
             _buildMenuCard(
-                '🍲 Daily Dish Consumption Logger', 'Daily Dish Logger'),
-            _buildMenuCard('⚡ LPG vs Charcoal vs Electricity Matrix',
-                'LPG vs Charcoal Matrix'),
-            _buildMenuCard('🔀 Brand Swap & Upgrade Financial Estimator',
-                'Brand Swap Estimator'),
+                l10n.featureDishLogger, l10n.featureDishLoggerShort),
             _buildMenuCard(
-                '💡 Trivia of Facts & Misconceptions', 'Trivia & Myths Engine'),
+                l10n.featureLpgMatrix, l10n.featureLpgMatrixShort),
             _buildMenuCard(
-                '🔍 Gross Weight Fraud Shield & Seal Check', 'Fraud Shield'),
-            _buildMenuCard('🫧 Bubble Leak Test & Regulator Safety Manual',
-                'Bubble Safety Test'),
-            _buildMenuCard('🏆 Carbon Credit Progress & Donor Prize Track',
-                'Carbon Credit Tracker'),
+                l10n.featureBrandSwap, l10n.featureBrandSwapShort),
+            _buildMenuCard(
+                l10n.featureTrivia, l10n.featureTriviaShort),
+            _buildMenuCard(
+                l10n.featureFraudShield, l10n.featureFraudShieldShort),
+            _buildMenuCard(
+                l10n.featureBubbleTest, l10n.featureBubbleTestShort),
+            _buildMenuCard(
+                l10n.featureCarbonTracker, l10n.featureCarbonTrackerShort),
           ],
         ),
       ),
@@ -660,6 +667,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
   Widget _buildDynamicAssetCard(
       int idx, Map<String, dynamic> cyl, bool isExpanded) {
+    final l10n = AppLocalizations.of(context);
     final String brand = (cyl['brand'] ?? 'Gesi').toString();
     final String weight = (cyl['weight'] ?? cyl['size'] ?? '').toString();
     final int cycleDays = parseCycleDays(cyl['refillCycle']);
@@ -709,10 +717,12 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
 
                 return Text(
                   isExpanded
-                      ? 'Bofya kufunga maelezo'
+                      ? l10n.tapToClose
                       : (isEmpty
-                          ? 'Imeisha / Empty (0%)'
-                          : 'Zimebaki ~${collective.days} Siku (${collective.percentage.toStringAsFixed(1)}%)'),
+                          ? l10n.emptyPercent
+                          : l10n.daysLeft(
+                              collective.days,
+                              collective.percentage.toStringAsFixed(1))),
                   style: TextStyle(
                     fontSize: 11,
                     color: isCritical
@@ -777,7 +787,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            'Hakuna historia ya oda kwa mtungi huu bado.',
+                            l10n.noCylinderHistory,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: context.colors.onSurfaceVariant),
@@ -793,15 +803,18 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Jumla / Collective Level:',
+                                l10n.collectiveLevel,
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: context.colors.onSurfaceVariant),
                               ),
                               Text(
                                 isCollectiveEmpty
-                                    ? 'Imeisha (0%)'
-                                    : '~$collectiveDays Siku (${collectivePercentage.toStringAsFixed(1)}%)',
+                                    ? l10n.emptyPercent
+                                    : l10n.daysLeft(
+                                        collectiveDays,
+                                        collectivePercentage
+                                            .toStringAsFixed(1)),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -838,11 +851,17 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                             final double unitRatio =
                                 (unitPct / 100.0).clamp(0.0, 1.0);
                             final bool unitEmpty = unitDays <= 0;
-                            final String unitDate =
+                            final String unitDateRaw =
                                 (unit['lastRefillDate'] ?? '')
                                     .toString()
                                     .split('T')
                                     .first;
+                            final DateTime? unitDateParsed =
+                                DateTime.tryParse(unitDateRaw);
+                            final String unitDate = unitDateParsed == null
+                                ? unitDateRaw
+                                : MaterialLocalizations.of(context)
+                                    .formatMediumDate(unitDateParsed);
                             final String unitSupplier =
                                 (unit['supplier_name'] ?? 'Muuzaji Rasmi')
                                     .toString();
@@ -863,8 +882,8 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                 children: [
                                   Text(
                                     unitIndex == 0
-                                        ? 'Unit ${unitIndex + 1} (Oldest – inatumika kwanza)'
-                                        : 'Unit ${unitIndex + 1}',
+                                        ? l10n.unitOldest(unitIndex + 1)
+                                        : l10n.unitLabel(unitIndex + 1),
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -876,15 +895,16 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('Kiwango:',
+                                      Text(l10n.levelLabel,
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: context
                                                   .colors.onSurfaceVariant)),
                                       Text(
                                         unitEmpty
-                                            ? 'Imeisha (0%)'
-                                            : '~$unitDays Siku (${unitPct.toStringAsFixed(1)}%)',
+                                            ? l10n.emptyPercent
+                                            : l10n.daysLeft(unitDays,
+                                                unitPct.toStringAsFixed(1)),
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
@@ -909,12 +929,12 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  _buildFactLine('Tarehe:', unitDate),
+                                  _buildFactLine(l10n.dateLabel, unitDate),
                                   const SizedBox(height: 2),
-                                  _buildFactLine('Muuzaji:', unitSupplier),
+                                  _buildFactLine(l10n.vendorLabel, unitSupplier),
                                   const SizedBox(height: 2),
                                   _buildFactLine(
-                                    'Gharama:',
+                                    l10n.costLabel,
                                     unitPrice > 0
                                         ? 'TZS ${unitPrice.toStringAsFixed(0)}'
                                         : '—',
@@ -926,15 +946,15 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                         onPressed: () {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                                 content: Text(
-                                                    'Edit unit – coming next')),
+                                                    l10n.editUnitComingSoon)),
                                           );
                                         },
                                         icon: Icon(Icons.edit_outlined,
                                             size: 16,
                                             color: context.gasColors.info),
-                                        label: Text('Edit',
+                                        label: Text(l10n.edit,
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: context.gasColors.info)),
@@ -944,15 +964,15 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                                         onPressed: () {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                                 content: Text(
-                                                    'Mark Empty – coming next')),
+                                                    l10n.markEmptyComingSoon)),
                                           );
                                         },
                                         icon: Icon(Icons.inventory_2_outlined,
                                             size: 16,
                                             color: context.colors.error),
-                                        label: Text('Mark Empty',
+                                        label: Text(l10n.markEmpty,
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: context.colors.error)),
@@ -979,9 +999,9 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                       ),
                       onPressed: () => _deleteCylinderNode(cyl['id'] ?? ''),
                       icon: const Icon(Icons.delete_outline, size: 16),
-                      label: const Text(
-                        'Futa Brand Hii Kabisa / Delete Entire Stack',
-                        style: TextStyle(fontSize: 12),
+                      label: Text(
+                        l10n.deleteEntireStack,
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                   ),
@@ -1046,7 +1066,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
                       size: 48, color: context.colors.outline),
                   const SizedBox(height: 12),
                   Text(
-                    '$featureTitle Is Empty For Now',
+                    AppLocalizations.of(context).featureEmpty(featureTitle),
                     style: TextStyle(
                         fontSize: 14,
                         color: context.colors.onSurfaceVariant,

@@ -11,8 +11,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../l10n/localized_messages.dart';
 import '../../services/auth_service.dart';
-import '../../services/notification_service.dart';
+import '../../services/notification_dispatcher.dart';
 import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
@@ -76,28 +77,36 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         'updated_at': FieldValue.serverTimestamp(),
       });
 
-      // Send push notification to consumer on order status update
+      // Notify the customer through their preferred channels.
       if (consumerUid.isNotEmpty) {
-        String title = 'Mabadiliko ya Oda / Order Status Update';
-        String body = 'Hali ya oda yako imebadilika kuwa: $newStatus';
+        final l10n = await loadLocalizedMessages();
+        final brandName =
+            (orderData['brand'] ?? orderData['brand_name'] ?? 'Gesi')
+                .toString();
+        String title = l10n.orderUpdatedTitle;
+        String body = l10n.orderUpdatedBody(brandName);
+        String smsMessage = l10n.smsOrderUpdated(brandName);
 
         if (newStatus == 'cancelled' || newStatus == 'rejected') {
-          title = 'Oda Imesitishwa / Order Cancelled';
-          body =
-              'Muuzaji amesitisha oda yako. Tafadhali jaribu muuzaji mwingine.';
+          title = l10n.orderCancelledTitle;
+          body = l10n.orderCancelledBody;
+          smsMessage = l10n.smsOrderCancelled(brandName);
         } else if (newStatus == 'on_the_way' || newStatus == 'dispatched') {
-          title = 'Oda Ipo Njiani! / Order On The Way!';
-          body = 'Dereva yuko njiani kuleta oda yako.';
+          title = l10n.orderStepDispatched;
+          body = l10n.orderStepDispatchedBody;
+          smsMessage = l10n.smsOrderOnTheWay(brandName);
         } else if (newStatus == 'delivered' || newStatus == 'completed') {
-          title = 'Oda Imewasili! / Order Delivered!';
-          body = 'Oda yako imekamilika kikamilifu. Asante kwa kutumia GasLink!';
+          title = l10n.orderStepDelivered;
+          body = l10n.orderStepDeliveredBody;
+          smsMessage = l10n.smsOrderDelivered(brandName);
         }
 
         try {
-          await NotificationService.instance.sendNotificationToUser(
+          await NotificationDispatcher.instance.dispatchToUser(
             userId: consumerUid,
             title: title,
             body: body,
+            smsMessage: smsMessage,
             data: {
               'orderId': orderId,
               'type': 'order_status',
@@ -105,7 +114,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             },
           );
         } catch (e) {
-          debugPrint('Failed to send consumer push notification: $e');
+          debugPrint('Failed to send consumer notification: $e');
         }
       }
 
@@ -274,15 +283,20 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             'eta_minutes': selectedEta,
                             'updated_at': FieldValue.serverTimestamp(),
                           });
-                          // Send push notification to consumer when vendor accepts order
+                          // Notify the consumer through their preferred channels.
                           if (consumerUid.isNotEmpty) {
                             try {
-                              await NotificationService.instance
-                                  .sendNotificationToUser(
+                              final l10n = await loadLocalizedMessages();
+                              final brandName = (orderData['brand'] ??
+                                      orderData['brand_name'] ??
+                                      'Gesi')
+                                  .toString();
+                              await NotificationDispatcher.instance
+                                  .dispatchToUser(
                                 userId: consumerUid,
-                                title: 'Oda Imethibitishwa! / Order Confirmed!',
-                                body:
-                                    'Muuzaji amethibitisha oda yako. Muda wa kuwasili ni takriban dakika $selectedEta.',
+                                title: l10n.orderStepConfirmed,
+                                body: l10n.orderStepConfirmedBody,
+                                smsMessage: l10n.smsOrderConfirmed(brandName),
                                 data: {
                                   'orderId': orderId,
                                   'type': 'order_status',

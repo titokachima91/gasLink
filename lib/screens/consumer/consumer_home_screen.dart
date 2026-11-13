@@ -4,6 +4,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
 import '../../core/session_gate.dart';
@@ -110,16 +111,16 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     );
   }
 
-  String _getListTitle() {
+  String _getListTitle(AppLocalizations l10n) {
     switch (_selectedIntent) {
       case 'Full Set':
-        return 'Chagua Chapa / Select Brand (Full Set)';
+        return l10n.selectBrandFullSet;
       case 'Accessories':
-        return 'Chagua Kifaa / Select Accessory';
+        return l10n.selectAccessory;
       case 'Services':
-        return 'Chagua Huduma / Select Service';
+        return l10n.selectService;
       default:
-        return 'Chagua Chapa / Select Brand (Refill)';
+        return l10n.selectBrandRefill;
     }
   }
 
@@ -275,19 +276,20 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   }
 
   Future<void> _handleLogout() async {
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ondoka / Logout'),
-        content: const Text('Unahakika unataka kuondoka?'),
+        title: Text(l10n.logoutTitle),
+        content: Text(l10n.logoutConfirm),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Ghairi')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child:
-                Text('Ondoka', style: TextStyle(color: context.colors.error)),
+                Text(l10n.logout, style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),
@@ -305,6 +307,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
   /// 🟢 PERSISTENT "ODA ZANGU" WORKSPACE TRACKER BANNER
   Widget _buildPersistentOdaZanguBanner() {
+    final l10n = AppLocalizations.of(context);
     final currentUid = AuthService.instance.currentUserId;
     if (currentUid == null || currentUid.isEmpty) {
       return const SizedBox.shrink();
@@ -349,32 +352,32 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         final weight = primaryOrder.size;
         final intent = primaryOrder.orderIntent;
 
-        String displayStatus = 'Oda Imetumwa • Inasubiri Muuzaji';
+        String displayStatus = l10n.orderPlacedSubtitle;
         Color statusTextColor = context.colors.primary;
         IconData statusIcon = Icons.access_time_rounded;
         int currentStepIndex = 0;
 
         if (rawStatus == 'seen') {
-          displayStatus = 'Muuzaji Anakagua Oda Yako...';
+          displayStatus = l10n.orderSeenChecking;
           statusTextColor = context.gasColors.info;
           statusIcon = Icons.visibility_outlined;
           currentStepIndex = 0;
         } else if (rawStatus == 'accepted' ||
             rawStatus == 'confirmed' ||
             rawStatus == 'preparing') {
-          displayStatus = 'Oda Imepokelewa • Inaandaliwa 📦';
+          displayStatus = l10n.orderAcceptedSubtitle;
           statusTextColor = context.colors.secondary;
           statusIcon = Icons.inventory_2_outlined;
           currentStepIndex = 1;
         } else if (rawStatus == 'on_the_way' ||
             rawStatus == 'dispatched' ||
             rawStatus == 'in_transit') {
-          displayStatus = 'Gesi Yako Ipo Njiani! 🛵';
+          displayStatus = l10n.orderOnTheWaySubtitle;
           statusTextColor = context.colors.tertiary;
           statusIcon = Icons.two_wheeler;
           currentStepIndex = 2;
         } else if (rawStatus == 'delivered_pending') {
-          displayStatus = 'Imefika • Tafadhali Thibitisha';
+          displayStatus = l10n.orderArrivedConfirm;
           statusTextColor = context.gasColors.success;
           statusIcon = Icons.handshake_outlined;
           currentStepIndex = 2;
@@ -413,7 +416,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                               color: context.colors.primary, size: 20),
                           const SizedBox(width: 6),
                           Text(
-                            'ODA ZANGU / ACTIVE TRACKER',
+                            l10n.activeTracker,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -476,8 +479,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     children: [
                       Text(
                         intent == 'add_stock'
-                            ? '🔄 Ongeza Akiba'
-                            : '📦 Mtungi Mpya',
+                            ? '🔄 ${l10n.orderAddStock}'
+                            : '📦 ${l10n.orderNewCylinder}',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -485,7 +488,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         ),
                       ),
                       Text(
-                        'Gusa Kufungua Maelezo Zaidi ➔',
+                        l10n.tapToOpenDetails,
                         style: TextStyle(
                           fontSize: 11,
                           color: context.colors.primary,
@@ -505,6 +508,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
   /// 📜 FALLBACK WORKSPACE INTERFACE TRAY: Renders if the user queue has no live dispatches running
   Widget _buildEmptyHistoryBannerLink(Map<String, dynamic>? lastOrder) {
+    final l10n = AppLocalizations.of(context);
     final uid = AuthService.instance.currentUserId ?? '';
     return Card(
       elevation: 0,
@@ -536,7 +540,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Oda Zangu / Order History Center',
+                        l10n.orderHistoryCenter,
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -544,7 +548,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        'Huna oda inayotembea kwa sasa.',
+                        l10n.noActiveOrder,
                         style: TextStyle(
                             fontSize: 11,
                             color: context.colors.onSurfaceVariant),
@@ -577,9 +581,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   }
                 },
                 icon: const Icon(Icons.receipt_long, size: 16),
-                label: const Text(
-                  'Fungua Historia Yote ya Oda (All Orders History)',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                label: Text(
+                  l10n.openAllOrdersHistory,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -603,7 +607,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           orderId: orderId,
           vendorId: data['vendor_id'] ?? '',
           vendorName:
-              (data['vendor_name'] ?? data['vendorName'] ?? 'Gas Vendor')
+              (data['vendor_name'] ?? data['vendorName'] ??
+                      AppLocalizations.of(context).vendorFallback)
                   .toString(),
           brandName: (data['brand'] ?? data['brand_name'] ?? 'LPG').toString(),
           cylinderSize: (data['size'] ?? data['weight'] ?? '15kg').toString(),
@@ -627,6 +632,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   /// Compact overview of the consumer's registered cylinders. Tapping through
   /// opens the Smart Hub (or the setup sheet when nothing is registered yet).
   Widget _buildMyCylindersOverview() {
+    final l10n = AppLocalizations.of(context);
     final hasCylinders = _myCylinders.isNotEmpty;
     final labels = <String>{};
     for (final cylinder in _myCylinders) {
@@ -660,8 +666,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
               children: [
                 Text(
                   hasCylinders
-                      ? 'Mitungi ${_myCylinders.length} imesajiliwa'
-                      : 'Hujasajili mtungi bado',
+                      ? l10n.cylindersRegistered(_myCylinders.length)
+                      : l10n.noCylinderRegistered,
                   style: const TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
@@ -671,7 +677,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 Text(
                   hasCylinders
                       ? labels.join(' · ')
-                      : 'Sajili mtungi kupata makadirio ya gesi.',
+                      : l10n.registerCylinderHint,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -699,7 +705,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 _showGasSetupSheet();
               }
             },
-            child: Text(hasCylinders ? 'Simamia' : 'Weka'),
+            child: Text(hasCylinders ? l10n.manage : l10n.setUp),
           ),
         ],
       ),
@@ -707,6 +713,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   }
 
   Widget _buildGasEstimatorCard() {
+    final l10n = AppLocalizations.of(context);
     final hasCylinders = _myCylinders.isNotEmpty;
 
     // Group cylinders by brand + weight so each row represents the
@@ -731,7 +738,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Makadirio ya Gesi / Gas Estimate',
+            l10n.gasEstimate,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -741,7 +748,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           const SizedBox(height: 16),
           if (!hasCylinders) ...[
             Text(
-              'Hujasajili Mtungi Bado / No Cylinder Registered',
+              l10n.noCylinderRegistered,
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -749,7 +756,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Weka taarifa kuanza kukadiria matumizi yako.',
+              l10n.registerCylinderToEstimate,
               style: TextStyle(
                   fontSize: 12, color: context.colors.onSurfaceVariant),
             ),
@@ -795,8 +802,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         ),
                         Text(
                           isTankEmptyState
-                              ? 'Imeisha / Empty (0%)'
-                              : 'Zimebaki ~$estimatedDaysLeft Siku ($remainingPercentage%)',
+                              ? l10n.emptyPercent
+                              : l10n.daysLeft(estimatedDaysLeft,
+                                  remainingPercentage),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -866,7 +874,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       size: 16,
                       color: context.colors.primary),
                   label: Text(
-                    hasCylinders ? 'Taarifa Zaidi' : 'Weka Sasa',
+                    hasCylinders ? l10n.moreInfo : l10n.setNow,
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -906,8 +914,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       }
                     },
                     icon: const Icon(Icons.bolt, size: 16),
-                    label: const Text('Agiza Tena',
-                        style: TextStyle(
+                    label: Text(l10n.reorder,
+                        style: const TextStyle(
                             fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
@@ -1027,6 +1035,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
+        final l10n = AppLocalizations.of(context);
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -1040,15 +1049,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Weka Mtungi & Makadirio ya Gesi',
-                        style: TextStyle(
+                    Text(l10n.addCylinderEstimateTitle,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: selectedBrand,
-                      decoration: const InputDecoration(
-                          labelText: 'Chapa / Brand',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.brandLabel,
+                          border: const OutlineInputBorder()),
                       items: AppConstants.gasBrands
                           .map((brand) => DropdownMenuItem<String>(
                               value: brand, child: Text(brand)))
@@ -1068,9 +1077,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: selectedWeight,
-                      decoration: const InputDecoration(
-                          labelText: 'Uzito / Weight',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.weightLabel,
+                          border: const OutlineInputBorder()),
                       items: currentBrandWeights
                           .map((w) => DropdownMenuItem<String>(
                               value: w.toString(), child: Text(w.toString())))
@@ -1084,9 +1093,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: selectedCycle,
-                      decoration: const InputDecoration(
-                          labelText: 'Mzunguko / Refill Cycle',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: l10n.refillCycleLabel,
+                          border: const OutlineInputBorder()),
                       items: cycles
                           .map((c) => DropdownMenuItem<String>(
                               value: c.toString(), child: Text(c.toString())))
@@ -1100,20 +1109,20 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: supplierController,
-                      decoration: const InputDecoration(
-                        labelText: 'Muuzaji / Depot (Supplier Name)',
-                        hintText: 'Mf. Taifa Gas Agent',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.supplierLabel,
+                        hintText: l10n.supplierHint,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: priceController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Gharama / Price (TZS)',
-                        hintText: 'Mf. 25000',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.priceLabel,
+                        hintText: l10n.priceHint,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -1131,11 +1140,12 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                         }
                       },
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                            labelText: 'Tarehe ya mwisho ulipojaza',
-                            border: OutlineInputBorder()),
-                        child:
-                            Text('${selectedDate.toLocal()}'.split(' ').first),
+                        decoration: InputDecoration(
+                            labelText: l10n.lastRefillDateLabel,
+                            border: const OutlineInputBorder()),
+                        child: Text(
+                            MaterialLocalizations.of(context)
+                                .formatMediumDate(selectedDate.toLocal())),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -1209,7 +1219,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     width: 20,
                     child: CircularProgressIndicator(
                         color: context.colors.onPrimary, strokeWidth: 2))
-                : Text('Hifadhi Mtungi',
+                : Text(AppLocalizations.of(context).saveCylinder,
                     style: TextStyle(
                         color: context.colors.onPrimary,
                         fontWeight: FontWeight.bold)),
@@ -1230,6 +1240,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final guestMode = AuthService.instance.isGuest;
     final allItems = _getListItems();
     final visibleItemCount = _visibleItemCount < allItems.length
@@ -1262,7 +1273,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.person_outline, color: Colors.white),
-              tooltip: 'Wasifu / Profile',
+              tooltip: l10n.profile,
               onPressed: () async {
                 if (await SessionGate.requireConsumer(context)) {
                   if (!context.mounted) return;
@@ -1277,7 +1288,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
-              tooltip: 'Mipangilio / Settings',
+              tooltip: l10n.settings,
               onPressed: () async {
                 if (await SessionGate.requireConsumer(context)) {
                   if (!context.mounted) return;
@@ -1294,7 +1305,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             if (guestMode)
               IconButton(
                 icon: const Icon(Icons.login, color: Colors.white),
-                tooltip: 'Ingia / Log in',
+                tooltip: l10n.login,
                 onPressed: () async {
                   await SessionGate.requireConsumer(context);
                 },
@@ -1302,7 +1313,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             else
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white),
-                tooltip: 'Ondoka / Logout',
+                tooltip: l10n.logout,
                 onPressed: _handleLogout,
               ),
           ],
@@ -1314,9 +1325,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               const OfflineBanner(),
-              const AppSectionHeader(
-                title: 'Habari! Karibu GasLink 👋',
-                subtitle: 'Gesi mkononi — uthibitisho kabla ya ununuzi.',
+              AppSectionHeader(
+                title: l10n.welcomeTitle,
+                subtitle: l10n.welcomeSubtitle,
                 icon: Icons.local_fire_department,
               ),
               const SizedBox(height: 12),
@@ -1324,26 +1335,26 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 _buildGuestBanner(),
                 const SizedBox(height: 12),
               ] else ...[
-                const AppSectionHeader(
-                  title: 'Oda Zangu / My Orders',
-                  subtitle: 'Fuatilia oda zinazoendelea.',
+                AppSectionHeader(
+                  title: l10n.myOrders,
+                  subtitle: l10n.myOrdersSubtitle,
                   icon: Icons.local_shipping_outlined,
                 ),
                 const SizedBox(height: 10),
                 // 🟢 DYNAMIC PERMANENT LIVE MULTI-ORDER INTERFACE CONTAINER BANNER TRACKER
                 _buildPersistentOdaZanguBanner(),
                 const SizedBox(height: 16),
-                const AppSectionHeader(
-                  title: 'Mitungi Yangu / My Cylinders',
-                  subtitle: 'Mitungi uliyosajili na hali yake.',
+                AppSectionHeader(
+                  title: l10n.myCylinders,
+                  subtitle: l10n.myCylindersSubtitleHome,
                   icon: Icons.propane_tank_outlined,
                 ),
                 const SizedBox(height: 10),
                 _buildMyCylindersOverview(),
                 const SizedBox(height: 16),
-                const AppSectionHeader(
-                  title: 'Kikadirio cha Gesi / Gas Estimator',
-                  subtitle: 'Makadirio ya siku za gesi zilizobaki.',
+                AppSectionHeader(
+                  title: l10n.gasEstimator,
+                  subtitle: l10n.gasEstimatorSubtitle,
                   icon: Icons.speed_outlined,
                 ),
                 const SizedBox(height: 10),
@@ -1360,8 +1371,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 const SizedBox(height: 20),
               ],
 
-              const AppSectionHeader(
-                title: 'Unataka kufanya nini? / Choose Service',
+              AppSectionHeader(
+                title: l10n.chooseService,
                 icon: Icons.grid_view_outlined,
               ),
               const SizedBox(height: 10),
@@ -1377,28 +1388,28 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 children: [
                   _buildCategoryCard(
                     title: 'Refill',
-                    subtitle: 'Kujaza',
+                    subtitle: l10n.refillSubtitle,
                     icon: Icons.sync,
                     isSelected: _selectedIntent == 'Refill',
                     onTap: () => _selectIntent('Refill'),
                   ),
                   _buildCategoryCard(
                     title: 'Full Set',
-                    subtitle: 'Mtungi + Gesi',
+                    subtitle: l10n.fullSetSubtitle,
                     icon: Icons.inventory_2_outlined,
                     isSelected: _selectedIntent == 'Full Set',
                     onTap: () => _selectIntent('Full Set'),
                   ),
                   _buildCategoryCard(
                     title: 'Accessories',
-                    subtitle: 'Vifaa',
+                    subtitle: l10n.accessoriesSubtitle,
                     icon: Icons.build_circle_outlined,
                     isSelected: _selectedIntent == 'Accessories',
                     onTap: () => _selectIntent('Accessories'),
                   ),
                   _buildCategoryCard(
                     title: 'Services',
-                    subtitle: 'Matengenezo',
+                    subtitle: l10n.servicesSubtitle,
                     icon: Icons.handyman_outlined,
                     isSelected: _selectedIntent == 'Services',
                     onTap: () => _selectIntent('Services'),
@@ -1410,7 +1421,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
               // ===== VERTICAL LIST TITLE =====
               AppSectionHeader(
-                title: _getListTitle(),
+                title: _getListTitle(l10n),
                 icon: Icons.category_outlined,
               ),
               const SizedBox(height: 10),
@@ -1424,7 +1435,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    'Unaona $visibleItemCount kati ya ${allItems.length}',
+                    l10n.showingItems(visibleItemCount, allItems.length),
                     style: TextStyle(
                       fontSize: 12,
                       color: context.colors.onSurfaceVariant,
@@ -1437,7 +1448,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     onPressed: () =>
                         setState(() => _visibleItemCount += _stockPageSize),
                     icon: const Icon(Icons.expand_more),
-                    label: const Text('Ona zaidi / View more'),
+                    label: Text(l10n.viewMore),
                   ),
                 ),
               ],
@@ -1448,11 +1459,11 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
 
               // ===== NEARBY VENDORS =====
               AppSectionHeader(
-                title: 'Wauza Gesi Walio Karibu Nawe',
-                subtitle: 'Linganisha bei, umbali na uhakiki.',
+                title: l10n.nearbyVendors,
+                subtitle: l10n.nearbyVendorsSubtitle,
                 icon: Icons.storefront_outlined,
                 trailing: AppStatusPill(
-                  label: '${liveOffers.length} Wauza Gesi',
+                  label: l10n.vendorsCount(liveOffers.length),
                   color: context.colors.primary,
                 ),
               ),
@@ -1480,6 +1491,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   /// Guest-only card: explains the visitor mode and pushes account creation.
   /// Replaces the order tracker and cylinder gauges for unregistered users.
   Widget _buildGuestBanner() {
+    final l10n = AppLocalizations.of(context);
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -1512,13 +1524,13 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Unaangalia kama mgeni / Browsing as guest',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        l10n.browsingAsGuest,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Ingia kuagiza, kufuatilia oda, na kusimamia mitungi yako.',
+                        l10n.browsingAsGuestBody,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.colors.onSurfaceVariant,
@@ -1541,7 +1553,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.login, size: 18),
-                    label: const Text('Ingia / Log in'),
+                    label: Text(l10n.login),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1554,7 +1566,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.person_add_alt, size: 18),
-                    label: const Text('Unda Akaunti'),
+                    label: Text(l10n.createAccount),
                   ),
                 ),
               ],
@@ -1566,6 +1578,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   }
 
   Widget _buildLiveVendorCard(VendorOffer offer) {
+    final l10n = AppLocalizations.of(context);
     final vendor = offer.vendor;
     final minPrice = offer.summary.minPrice;
     return Card(
@@ -1609,7 +1622,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     Text(
                       vendor.businessName.isNotEmpty
                           ? vendor.businessName
-                          : 'Muuzaji Gesi',
+                          : l10n.vendorFallback,
                       style: const TextStyle(
                           fontSize: 14, fontWeight: FontWeight.bold),
                       maxLines: 1,
@@ -1627,14 +1640,15 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
                     Row(
                       children: [
                         if (vendor.verified)
-                          const VerifiedBadge(
-                            label: 'Verified Shop',
+                          VerifiedBadge(
+                            label: l10n.verifiedShop,
                             compact: true,
                           ),
                         if (minPrice > 0) ...[
                           const SizedBox(width: 8),
                           AppStatusPill(
-                            label: 'Kuanzia TZS ${minPrice.toStringAsFixed(0)}',
+                            label: l10n
+                                .fromPrice(minPrice.toStringAsFixed(0)),
                             icon: Icons.local_offer_outlined,
                             color: context.colors.primary,
                           ),
@@ -1668,6 +1682,7 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   }
 
   Widget _buildEmptyVendorState() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -1680,11 +1695,11 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           Icon(Icons.store_mall_directory_outlined,
               size: 40, color: context.colors.outline),
           const SizedBox(height: 8),
-          const Text('Hakuna Muuzaji Karibu Nawe',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Text(l10n.noVendorsTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           const SizedBox(height: 4),
           Text(
-            'Hakuna muuzaji aliyesajiliwa katika eneo lako kwa sasa. Huduma inazidi kusambaa.',
+            l10n.noVendorsBody,
             textAlign: TextAlign.center,
             style:
                 TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
@@ -1702,12 +1717,13 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Historia ya Oda Zangu / Orders History',
-          style: TextStyle(
+        title: Text(
+          l10n.ordersHistoryTitle,
+          style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -1725,10 +1741,10 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
 
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return const AppEmptyState(
+            return AppEmptyState(
               icon: Icons.receipt_long_outlined,
-              title: 'Huna historia ya oda bado',
-              message: 'Oda zote utakazofanya zitaonekana hapa.',
+              title: l10n.noOrderHistory,
+              message: l10n.noOrderHistoryBody,
             );
           }
 
@@ -1741,8 +1757,8 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppSectionHeader(
-                      title: 'Oda Zote / All Orders',
-                      subtitle: '${docs.length} oda zimepatikana.',
+                      title: l10n.historyAllOrdersTitle,
+                      subtitle: l10n.historyOrdersFound(docs.length),
                       icon: Icons.receipt_long_outlined,
                       trailing: AppStatusPill(
                         label: '${docs.length}',
@@ -1768,7 +1784,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
               final createdAt = (data['created_at'] as Timestamp?)?.toDate() ??
                   DateTime.now();
 
-              final statusStyle = _statusStyle(context, status);
+              final statusStyle = _statusStyle(context, status, l10n);
 
               return Card(
                 elevation: 0,
@@ -1790,7 +1806,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                   .toString(),
                           vendorName: (data['vendor_name'] ??
                                   data['vendorName'] ??
-                                  'Gas Vendor')
+                                  l10n.vendorFallback)
                               .toString(),
                           brandName: brand,
                           cylinderSize: size,
@@ -1863,7 +1879,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'TZS ${_formatMoney(total)} · ${intent == 'add_stock' ? 'Ongeza Akiba' : 'Mtungi Mpya'}',
+                                'TZS ${_formatMoney(total)} · ${intent == 'add_stock' ? l10n.orderAddStock : l10n.orderNewCylinder}',
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   color: context.colors.onSurfaceVariant,
@@ -1871,7 +1887,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                _formatOrderDate(createdAt),
+                                _formatOrderDate(context, createdAt),
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   color: context.colors.outline,
@@ -1901,17 +1917,18 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
   static (String, IconData, Color) _statusStyle(
     BuildContext context,
     String status,
+    AppLocalizations l10n,
   ) {
     if (status == 'delivered' || status == 'completed') {
       return (
-        'Imekamilika',
+        l10n.orderStatusDelivered,
         Icons.check_circle_outline,
         context.gasColors.success,
       );
     }
     if (status == 'on_the_way' || status == 'in_transit') {
       return (
-        'Ipo Njiani',
+        l10n.orderStatusOnTheWay,
         Icons.local_shipping_outlined,
         context.colors.tertiary,
       );
@@ -1920,33 +1937,31 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
         status == 'accepted' ||
         status == 'preparing' ||
         status == 'seen') {
-      return ('Inaandaliwa', Icons.hourglass_top, context.colors.secondary);
+      return (
+        l10n.orderStatusPreparing,
+        Icons.hourglass_top,
+        context.colors.secondary,
+      );
     }
     if (status == 'cancelled' || status == 'rejected' || status == 'refused') {
-      return ('Imeghairiwa', Icons.cancel_outlined, context.colors.error);
+      return (
+        l10n.orderStatusCancelled,
+        Icons.cancel_outlined,
+        context.colors.error,
+      );
     }
-    return ('Inasubiri', Icons.schedule, context.colors.primary);
+    return (
+      l10n.orderStatusPending,
+      Icons.schedule,
+      context.colors.primary,
+    );
   }
 
-  static String _formatOrderDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mac',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
+  static String _formatOrderDate(BuildContext context, DateTime date) {
     final local = date.toLocal();
-    final hour = local.hour.toString().padLeft(2, '0');
-    final minute = local.minute.toString().padLeft(2, '0');
-    return '${local.day} ${months[local.month - 1]} ${local.year} · $hour:$minute';
+    final dateLabel = MaterialLocalizations.of(context).formatMediumDate(local);
+    final timeLabel = TimeOfDay.fromDateTime(local).format(context);
+    return '$dateLabel · $timeLabel';
   }
 
   static String _formatMoney(double value) {

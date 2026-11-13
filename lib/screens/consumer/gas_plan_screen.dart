@@ -5,6 +5,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/theme_ext.dart';
@@ -18,15 +19,11 @@ class GasPlanScreen extends StatefulWidget {
 }
 
 class _GasPlanScreenState extends State<GasPlanScreen> {
-  static const _shareText =
-      'GasPlan kwa Waajiriwa — gesi ya uhakika kila mwezi, malipo kupitia '
-      'payslip. Inakuja hivi karibuni kwenye GasLink. Wasiliana nasi kwa '
-      '0767304776 kupanga mpango wa wafanyakazi wenu.';
-
   Future<void> _shareWithHr() async {
+    final l10n = AppLocalizations.of(context);
     await Share.share(
-      _shareText,
-      subject: 'GasPlan kwa Waajiriwa — GasLink',
+      l10n.gasPlanShareText,
+      subject: l10n.gasPlanShareSubject,
       sharePositionOrigin: _shareOrigin(context),
     );
   }
@@ -53,6 +50,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
         return StatefulBuilder(
           builder: (context, setSheetState) {
             Future<void> submit() async {
@@ -74,9 +72,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                 if (!mounted) return;
                 ScaffoldMessenger.of(this.context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                      'Asante! Tutawasiliana nawe GasPlan inapoanza.',
-                    ),
+                    content: Text(l10n.gasPlanThanks),
                     backgroundColor: this.context.gasColors.success,
                   ),
                 );
@@ -85,7 +81,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                 setSheetState(() => saving = false);
                 ScaffoldMessenger.of(sheetContext).showSnackBar(
                   SnackBar(
-                    content: Text('Hitilafu / Error: $e'),
+                    content: Text(l10n.errorWithDetail('$e')),
                     backgroundColor: sheetContext.colors.error,
                   ),
                 );
@@ -106,17 +102,16 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ongea nasi / Register interest',
-                        style: TextStyle(
+                      Text(
+                        l10n.gasPlanRegisterTitle,
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Tuma taarifa zako; tutawasiliana na mwajiri wako '
-                        'kuhusu mpango huu.',
+                        l10n.gasPlanRegisterBody,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.colors.onSurfaceVariant,
@@ -126,28 +121,28 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                       TextFormField(
                         controller: nameCtrl,
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          labelText: 'Jina lako / Your name',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.yourName,
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
-                                ? 'Weka jina lako'
+                                ? l10n.nameRequired
                                 : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: phoneCtrl,
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Namba ya simu / Phone',
+                        decoration: InputDecoration(
+                          labelText: l10n.phoneLabel,
                           hintText: '0767304776',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           final phone = value?.trim() ?? '';
                           if (phone.length < 9) {
-                            return 'Weka namba sahihi ya simu';
+                            return l10n.phoneInvalid;
                           }
                           return null;
                         },
@@ -156,9 +151,9 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                       TextFormField(
                         controller: employerCtrl,
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          labelText: 'Mwajiri / Employer (hiari)',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.employerOptional,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -174,13 +169,13 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Tuma taarifa / Submit'),
+                              : Text(l10n.submitInfo),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          'Hakuna malipo yanayohitajika sasa.',
+                          l10n.gasPlanNoPayment,
                           style: TextStyle(
                             fontSize: 11,
                             color: context.colors.outline,
@@ -204,13 +199,14 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'GasPlan kwa Waajiriwa',
-          style: TextStyle(
+        title: Text(
+          l10n.gasPlanTitle,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 16,
@@ -223,45 +219,45 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
         children: [
           _buildHero(context),
           const SizedBox(height: 22),
-          const AppSectionHeader(
-            title: 'Jinsi Inavyofanya Kazi / How it works',
+          AppSectionHeader(
+            title: l10n.gasPlanHowItWorks,
             icon: Icons.auto_awesome_outlined,
           ),
           const SizedBox(height: 10),
-          const _PlanStep(
+          _PlanStep(
             step: '1',
-            title: 'Mwajiri anasaini makubaliano',
-            message: 'HR na GasLink hukubaliana kuhusu mpango wa wafanyakazi.',
+            title: l10n.gasPlanStep1Title,
+            message: l10n.gasPlanStep1Body,
           ),
-          const _PlanStep(
+          _PlanStep(
             step: '2',
-            title: 'Mfanyakazi anachagua mpango',
-            message: 'Mitungi kwa mwezi na ratiba ya kufikishwa.',
+            title: l10n.gasPlanStep2Title,
+            message: l10n.gasPlanStep2Body,
           ),
-          const _PlanStep(
+          _PlanStep(
             step: '3',
-            title: 'Gesi inawasili kila mwezi',
-            message: 'Malipo hukatwa kwenye payslip — hakuna fedha taslimu.',
+            title: l10n.gasPlanStep3Title,
+            message: l10n.gasPlanStep3Body,
           ),
           const SizedBox(height: 14),
-          const Wrap(
+          Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               AppStatusPill(
-                label: 'Gesi ya uhakika',
+                label: l10n.gasPlanPillReliable,
                 icon: Icons.verified_outlined,
               ),
               AppStatusPill(
-                label: 'Payslip deduction',
+                label: l10n.gasPlanPillPayslip,
                 icon: Icons.receipt_long_outlined,
               ),
               AppStatusPill(
-                label: 'Hakuna cash',
+                label: l10n.gasPlanPillNoCash,
                 icon: Icons.payments_outlined,
               ),
               AppStatusPill(
-                label: 'Mpango wa mwezi',
+                label: l10n.gasPlanPillMonthly,
                 icon: Icons.calendar_month_outlined,
               ),
             ],
@@ -279,9 +275,9 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                       color: context.colors.primary,
                     ),
                     const SizedBox(width: 6),
-                    const Text(
-                      'Mfano wa mpango',
-                      style: TextStyle(
+                    Text(
+                      l10n.gasPlanExampleTitle,
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -290,9 +286,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Mitungi 2 ya LPG kwa mwezi kwa kila mfanyakazi '
-                  'aliyejisajili. Bei na ukubwa wa mitungi hukubaliwa na '
-                  'mwajiri wako.',
+                  l10n.gasPlanExampleBody,
                   style: TextStyle(
                     fontSize: 12.5,
                     height: 1.45,
@@ -300,8 +294,8 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const AppStatusPill(
-                  label: 'Zawadi na punguzo zinakuja hivi karibuni',
+                AppStatusPill(
+                  label: l10n.gasPlanRewardsSoon,
                   icon: Icons.card_giftcard_outlined,
                 ),
               ],
@@ -314,7 +308,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             icon: const Icon(Icons.handshake_outlined),
-            label: const Text('Ongea nasi / Register interest'),
+            label: Text(l10n.gasPlanRegisterTitle),
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
@@ -323,13 +317,12 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             icon: const Icon(Icons.share_outlined),
-            label: const Text('Share with your HR'),
+            label: Text(l10n.gasPlanShareWithHr),
           ),
           const SizedBox(height: 14),
           Center(
             child: Text(
-              'Huduma hii bado haijaanza. Tuma taarifa yako tukuwasiliane '
-              'ilipoanza.',
+              l10n.gasPlanFooter,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
@@ -344,6 +337,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
   }
 
   Widget _buildHero(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -366,9 +360,9 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
               color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: const Text(
-              'Inakuja hivi karibuni / Coming soon',
-              style: TextStyle(
+            child: Text(
+              l10n.comingSoon,
+              style: const TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -376,9 +370,9 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Gesi ya uhakika kila mwezi.\nMalipo kupitia payslip.',
-            style: TextStyle(
+          Text(
+            l10n.gasPlanHeroTitle,
+            style: const TextStyle(
               fontSize: 20,
               height: 1.25,
               fontWeight: FontWeight.w800,
@@ -387,8 +381,7 @@ class _GasPlanScreenState extends State<GasPlanScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'GasPlan kwa Waajiriwa huwawezesha wafanyakazi kupata gesi '
-            'bila kushughulika na fedha taslimu kila mwezi.',
+            l10n.gasPlanHeroBody,
             style: TextStyle(
               fontSize: 12.5,
               height: 1.45,

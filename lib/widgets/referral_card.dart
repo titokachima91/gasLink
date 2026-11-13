@@ -6,6 +6,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../core/theme_ext.dart';
@@ -63,9 +64,10 @@ class _ReferralCardState extends State<ReferralCard> {
     if (code.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: code));
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Msimbo umenakiliwa / Code copied.'),
+        content: Text(l10n.referralCodeCopied),
         backgroundColor: context.gasColors.success,
       ),
     );
@@ -73,15 +75,13 @@ class _ReferralCardState extends State<ReferralCard> {
 
   Future<void> _shareCode(String code) async {
     if (code.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
     final text = _isVendor
-        ? 'Jiunge na GasLink kama muuzaji wa gesi. Tumia msimbo wangu $code '
-            'unaposajili duka lako. Zawadi zinakuja hivi karibuni.'
-        : 'Jiunge na GasLink — gesi mkononi, uthibitisho kabla ya ununuzi. '
-            'Tumia msimbo wangu $code unapofungua akaunti. Zawadi zinakuja '
-            'hivi karibuni.';
+        ? l10n.referralShareVendorText(code)
+        : l10n.referralShareConsumerText(code);
     await Share.share(
       text,
-      subject: 'GasLink referral',
+      subject: l10n.referralShareSubject,
       sharePositionOrigin: _shareOrigin(context),
     );
   }
@@ -107,6 +107,7 @@ class _ReferralCardState extends State<ReferralCard> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
         return StatefulBuilder(
           builder: (context, setSheetState) {
             Future<void> submit() async {
@@ -123,9 +124,7 @@ class _ReferralCardState extends State<ReferralCard> {
                 if (!mounted) return;
                 ScaffoldMessenger.of(this.context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                      'Asante! Tutawasiliana na muuzaji huyo.',
-                    ),
+                    content: Text(l10n.referralInviteSent),
                     backgroundColor: this.context.gasColors.success,
                   ),
                 );
@@ -134,7 +133,7 @@ class _ReferralCardState extends State<ReferralCard> {
                 setSheetState(() => saving = false);
                 ScaffoldMessenger.of(sheetContext).showSnackBar(
                   SnackBar(
-                    content: Text('Hitilafu / Error: $e'),
+                    content: Text(l10n.errorWithDetail('$e')),
                     backgroundColor: sheetContext.colors.error,
                   ),
                 );
@@ -155,17 +154,16 @@ class _ReferralCardState extends State<ReferralCard> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Mwalike muuzaji / Invite a vendor',
-                        style: TextStyle(
+                      Text(
+                        l10n.referralInviteVendorTitle,
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Unamjua muuzaji wa gesi? Tuma taarifa zake; '
-                        'tutamwalika kujiunga na GasLink.',
+                        l10n.referralInviteVendorBody,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.colors.onSurfaceVariant,
@@ -175,28 +173,28 @@ class _ReferralCardState extends State<ReferralCard> {
                       TextFormField(
                         controller: shopCtrl,
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          labelText: 'Jina la duka / Shop name',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.shopNameLabel,
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
-                                ? 'Weka jina la duka'
+                                ? l10n.shopNameRequired
                                 : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: phoneCtrl,
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Namba ya simu / Phone',
+                        decoration: InputDecoration(
+                          labelText: l10n.phoneLabel,
                           hintText: '0767304776',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           final phone = value?.trim() ?? '';
                           if (phone.length < 9) {
-                            return 'Weka namba sahihi ya simu';
+                            return l10n.phoneInvalid;
                           }
                           return null;
                         },
@@ -214,13 +212,13 @@ class _ReferralCardState extends State<ReferralCard> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Tuma mwaliko / Send invite'),
+                              : Text(l10n.referralSendInvite),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          'Zawadi zinakuja hivi karibuni.',
+                          l10n.rewardsComingSoon,
                           style: TextStyle(
                             fontSize: 11,
                             color: context.colors.outline,
@@ -244,6 +242,7 @@ class _ReferralCardState extends State<ReferralCard> {
   @override
   Widget build(BuildContext context) {
     if (widget.uid.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return AppCard(
       child: Column(
@@ -271,8 +270,8 @@ class _ReferralCardState extends State<ReferralCard> {
                   children: [
                     Text(
                       _isVendor
-                          ? 'Alika Wauzaji Wenzako'
-                          : 'Alika & Pata Zawadi',
+                          ? l10n.referralVendorTitle
+                          : l10n.referralConsumerTitle,
                       style: const TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -281,8 +280,8 @@ class _ReferralCardState extends State<ReferralCard> {
                     const SizedBox(height: 2),
                     Text(
                       _isVendor
-                          ? 'Shiriki msimbo wako na wauzaji wengine.'
-                          : 'Shiriki msimbo wako na marafiki.',
+                          ? l10n.referralVendorSubtitle
+                          : l10n.referralConsumerSubtitle,
                       style: TextStyle(
                         fontSize: 11.5,
                         color: context.colors.onSurfaceVariant,
@@ -323,7 +322,7 @@ class _ReferralCardState extends State<ReferralCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Msimbo wako / Your code',
+                            l10n.referralYourCode,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -344,7 +343,7 @@ class _ReferralCardState extends State<ReferralCard> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Nakili / Copy',
+                      tooltip: l10n.copy,
                       icon: Icon(
                         Icons.copy_all_outlined,
                         color: context.colors.primary,
@@ -366,7 +365,7 @@ class _ReferralCardState extends State<ReferralCard> {
                 await _shareCode(code);
               },
               icon: const Icon(Icons.share_outlined, size: 18),
-              label: const Text('Shiriki msimbo / Share code'),
+              label: Text(l10n.referralShareCode),
             ),
           ),
           if (widget.showVendorInvite) ...[
@@ -376,14 +375,14 @@ class _ReferralCardState extends State<ReferralCard> {
               child: OutlinedButton.icon(
                 onPressed: _openVendorInvite,
                 icon: const Icon(Icons.storefront_outlined, size: 18),
-                label: const Text('Mwalike muuzaji wa gesi'),
+                label: Text(l10n.referralInviteGasVendor),
               ),
             ),
           ],
           const SizedBox(height: 10),
           Center(
             child: Text(
-              'Zawadi zinakuja hivi karibuni.',
+              l10n.rewardsComingSoon,
               style: TextStyle(
                 fontSize: 10.5,
                 color: context.colors.outline,

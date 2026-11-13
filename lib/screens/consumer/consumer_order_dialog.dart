@@ -11,6 +11,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'consumer_order_screen.dart';
 import '../../core/constants.dart';
 import '../../services/order_service.dart';
@@ -72,6 +73,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
   /// Uses normalized string matching to prevent mismatch bugs between UI and DB.
   /// ===========================================================================
   Future<void> _validateAndSubmitOrder() async {
+    final l10n = AppLocalizations.of(context);
     // 🛠️ ROBUST USER ID CHECK WITH FALLBACK
     final currentUser = FirebaseAuth.instance.currentUser;
     final String uid =
@@ -80,8 +82,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
     if (uid.isEmpty) {
       // Show your sign-in prompt only if both are truly empty
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Tafadhali ingia kwenye akaunti yako kwanza')),
+        SnackBar(content: Text(l10n.pleaseSignInFirst)),
       );
       return;
     }
@@ -91,14 +92,14 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
 
     if (address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tafadhali weka anwani ya kupelekewa.')),
+        SnackBar(content: Text(l10n.addressRequired)),
       );
       return;
     }
 
     if (phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tafadhali weka nambari ya simu.')),
+        SnackBar(content: Text(l10n.phoneRequired)),
       );
       return;
     }
@@ -164,18 +165,18 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: const Text('Gas Yako Haijaisha!'),
+            title: Text(l10n.gasRemainingTitle),
             content: Text(
-              'Mtungi wako wa ${widget.brandName} (${widget.cylinderWeight}) bado una gesi. Je, unataka kuongeza akiba au kubadilisha mtungi?',
+              l10n.gasRemainingBody(widget.brandName, widget.cylinderWeight),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, 'add_stock'),
-                child: const Text('Ongeza Akiba'),
+                child: Text(l10n.orderAddStock),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, 'new_asset'),
-                child: const Text('Badili Mtungi'),
+                child: Text(l10n.changeCylinder),
               ),
             ],
           ),
@@ -193,7 +194,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
     } catch (e) {
       debugPrint('Error validating kitchen cylinder prior to order: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hitilafu wakati wa kuhakiki mtungi: $e')),
+        SnackBar(content: Text(l10n.cylinderCheckFailed('$e'))),
       );
     }
   }
@@ -207,6 +208,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        final l10n = AppLocalizations.of(context);
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -215,12 +217,12 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               Icon(Icons.warning_amber_rounded,
                   color: context.colors.primary, size: 24),
               SizedBox(width: 8),
-              Text('Gas Yako Haijaisha!',
+              Text(l10n.gasRemainingTitle,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
             ],
           ),
           content: Text(
-            'Bado una gesi ya kutosha kwenye mtungi huu nyumbani (Inakadiriwa kubaki siku ~$daysLeft). Je, ungependa kufanya nini?',
+            l10n.gasRemainingDays(daysLeft),
             style: TextStyle(fontSize: 13, color: context.colors.onSurface),
           ),
           actions: [
@@ -241,7 +243,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                         _phoneController.text.trim(),
                       );
                     },
-                    child: Text('Ongeza Akiba / Add Stock',
+                    child: Text(l10n.orderAddStock,
                         style: TextStyle(
                             color: context.colors.onPrimary,
                             fontSize: 12,
@@ -264,7 +266,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                         _phoneController.text.trim(),
                       );
                     },
-                    child: Text('Badili Mtungi / Change Cylinder',
+                    child: Text(l10n.changeCylinder,
                         style: TextStyle(
                             color: context.colors.onSurface, fontSize: 12)),
                   ),
@@ -274,7 +276,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: null,
-                    child: Text('Agizia Mwenzako (Soon)',
+                    child: Text(l10n.orderForFriendSoon,
                         style: TextStyle(
                             fontSize: 12,
                             color: context.colors.onSurfaceVariant)),
@@ -287,7 +289,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                     Navigator.pop(context);
                     Navigator.pop(this.context);
                   },
-                  child: Text('Ghairi Oda / Cancel',
+                  child: Text(l10n.cancelOrderShort,
                       style: TextStyle(
                           color: context.colors.error,
                           fontSize: 12,
@@ -310,6 +312,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
     String deliveryAddress,
     String contactPhone,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final totalPrice = widget.price * _quantity;
     final specialRequests = _specialController.text.trim();
     final receiverPhone = _receiverPhoneController.text.trim();
@@ -318,8 +321,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       if (uid.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tafadhali ingia kwenye akaunti yako kwanza.'),
+            SnackBar(
+              content: Text(l10n.pleaseSignInFirst),
             ),
           );
         }
@@ -395,7 +398,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Imeshindikana kuweka oda: $e'),
+              content: Text(l10n.orderFailed('$e')),
               backgroundColor: context.colors.error),
         );
       }
@@ -404,6 +407,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final double totalPrice = widget.price * _quantity;
 
     return Padding(
@@ -423,9 +427,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Weka Oda / Express Checkout',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(l10n.expressCheckout,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
                   IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(context)),
@@ -455,12 +459,13 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                                 '${widget.brandName} (${widget.cylinderWeight})',
                                 style: const TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),
-                            Text('Muuzaji: ${widget.vendorName}',
+                            Text(l10n.vendorPrefix(widget.vendorName),
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: context.colors.onSurface)),
                             Text(
-                                'TZS ${widget.price.toStringAsFixed(0)} kwa moja',
+                                l10n.priceEach(
+                                    widget.price.toStringAsFixed(0)),
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: context.colors.onSurfaceVariant)),
@@ -492,20 +497,21 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               const SizedBox(height: 16),
 
               // Delivery Information Section Title
-              const Text('Taarifa za Usafirishaji / Delivery Info',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(l10n.deliveryInfo,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
 
               // Delivery Address Form Field
               TextFormField(
                 controller: _addressController,
                 validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'Tafadhali weka anwani au eneo lako'
+                    ? l10n.addressRequiredShort
                     : null,
                 style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  labelText: 'Anwani au Eneo Lako *',
-                  hintText: 'Mfano: Nyumba No. 12, Karibu na Msikiti',
+                  labelText: l10n.addressLabel,
+                  hintText: l10n.addressHint,
                   prefixIcon: Icon(Icons.location_on_outlined,
                       color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
@@ -521,12 +527,12 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'Tafadhali weka namba ya simu'
+                    ? l10n.phoneRequiredShort
                     : null,
                 style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  labelText: 'Namba ya Simu ya Mawasiliano *',
-                  hintText: 'Mfano: 07XXXXXXXX',
+                  labelText: l10n.contactPhoneLabel,
+                  hintText: l10n.phoneHintShort,
                   prefixIcon: Icon(Icons.phone_outlined,
                       color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
@@ -542,8 +548,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 controller: _specialController,
                 style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  labelText: 'Maelezo ya Ziada (Ombi Maalumu)',
-                  hintText: 'Mfano: Dada yuko nyumbani kabisa',
+                  labelText: l10n.specialRequestsLabel,
+                  hintText: l10n.specialRequestsHint,
                   prefixIcon: Icon(Icons.assignment_outlined,
                       color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
@@ -560,8 +566,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 keyboardType: TextInputType.phone,
                 style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  labelText: 'Namba ya Mpokeaji wa Nyumbani',
-                  hintText: 'Mfano: 07XXXXXXXX',
+                  labelText: l10n.receiverPhoneLabel,
+                  hintText: l10n.phoneHintShort,
                   prefixIcon: Icon(Icons.phone_android_outlined,
                       color: context.colors.primary, size: 18),
                   border: OutlineInputBorder(
@@ -573,8 +579,9 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
               const SizedBox(height: 16),
 
               // Payment Method Section Title
-              const Text('Njia ya Malipo / Payment Method',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(l10n.paymentMethodLabel,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
 
               // Payment Choice Chips (Cash vs Mobile Money)
@@ -582,8 +589,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                 children: [
                   Expanded(
                       child: ChoiceChip(
-                          label: const Text('💵 Cash on Delivery',
-                              style: TextStyle(fontSize: 11)),
+                          label: Text(l10n.paymentCash,
+                              style: const TextStyle(fontSize: 11)),
                           selected: _paymentMethod == 'cash',
                           selectedColor: context.colors.primaryContainer,
                           onSelected: (val) {
@@ -592,8 +599,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                       child: ChoiceChip(
-                          label: const Text('📱 Mobile Money',
-                              style: TextStyle(fontSize: 11)),
+                          label: Text(l10n.paymentMobileMoney,
+                              style: const TextStyle(fontSize: 11)),
                           selected: _paymentMethod == 'mobile_money',
                           selectedColor: context.colors.primaryContainer,
                           onSelected: (val) {
@@ -611,7 +618,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Jumla Kuu / Total Price',
+                      Text(l10n.totalPrice,
                           style: TextStyle(
                               fontSize: 11,
                               color: context.colors.onSurfaceVariant)),
@@ -642,8 +649,8 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
                                 child: CircularProgressIndicator(
                                     color: context.colors.onPrimary,
                                     strokeWidth: 2))
-                            : const Text('Thibitisha Oda ➔',
-                                style: TextStyle(
+                            : Text(l10n.confirmOrder,
+                                style: const TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                       ),
                     ),

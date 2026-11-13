@@ -3,6 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/session_gate.dart';
 import '../../core/theme_ext.dart';
@@ -21,6 +22,7 @@ class ConsumerProfileScreen extends StatelessWidget {
       return const SessionRedirect();
     }
 
+    final l10n = AppLocalizations.of(context);
     final uid = AuthService.instance.currentUserId ?? '';
     final phone = AuthService.instance.currentPhone ?? '';
     final maskedPhone = phone.length >= 10
@@ -30,9 +32,10 @@ class ConsumerProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'Wasifu / Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          l10n.profile,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -41,7 +44,7 @@ class ConsumerProfileScreen extends StatelessWidget {
         builder: (context, snapshot) {
           final data = snapshot.data?.data() ?? {};
           final name = (data['name'] ?? '').toString().trim();
-          final displayName = name.isEmpty ? 'Mteja / Customer' : name;
+          final displayName = name.isEmpty ? l10n.consumerRole : name;
           final created = data['createdAt'];
 
           return ListView(
@@ -88,8 +91,8 @@ class ConsumerProfileScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const AppStatusPill(
-                            label: 'Mteja / Consumer',
+                          AppStatusPill(
+                            label: l10n.consumerRole,
                             icon: Icons.person_outline,
                           ),
                         ],
@@ -101,14 +104,17 @@ class ConsumerProfileScreen extends StatelessWidget {
               if (created != null && created is Timestamp) ...[
                 const SizedBox(height: 12),
                 AppStatusPill(
-                  label: 'Mwanachama tangu ${_formatDate(created.toDate())}',
+                  label: l10n.memberSince(
+                    MaterialLocalizations.of(context)
+                        .formatMediumDate(created.toDate()),
+                  ),
                   icon: Icons.calendar_month_outlined,
                   color: context.colors.onSurfaceVariant,
                 ),
               ],
               const SizedBox(height: 22),
-              const AppSectionHeader(
-                title: 'Haraka / Quick links',
+              AppSectionHeader(
+                title: l10n.quickLinks,
                 icon: Icons.link_outlined,
               ),
               const SizedBox(height: 10),
@@ -121,8 +127,8 @@ class ConsumerProfileScreen extends StatelessWidget {
                         Icons.propane_tank_outlined,
                         color: context.colors.primary,
                       ),
-                      title: const Text('Mitungi Yangu / My Cylinders'),
-                      subtitle: const Text('Fuatilia na simamia mitungi'),
+                      title: Text(l10n.myCylinders),
+                      subtitle: Text(l10n.myCylindersSubtitle),
                       trailing: const Icon(Icons.chevron_right, size: 18),
                       onTap: () => Navigator.push(
                         context,
@@ -137,8 +143,8 @@ class ConsumerProfileScreen extends StatelessWidget {
                         Icons.settings_outlined,
                         color: context.colors.primary,
                       ),
-                      title: const Text('Mipangilio / Settings'),
-                      subtitle: const Text('Akaunti, mandhari na mapendeleo'),
+                      title: Text(l10n.settings),
+                      subtitle: Text(l10n.settingsSubtitle),
                       trailing: const Icon(Icons.chevron_right, size: 18),
                       onTap: () => Navigator.push(
                         context,
@@ -153,7 +159,7 @@ class ConsumerProfileScreen extends StatelessWidget {
                         Icons.description_outlined,
                         color: context.colors.primary,
                       ),
-                      title: const Text('Vigezo na Masharti'),
+                      title: Text(l10n.terms),
                       trailing: const Icon(Icons.chevron_right, size: 18),
                       onTap: () => Navigator.push(
                         context,
@@ -168,23 +174,5 @@ class ConsumerProfileScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mac',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

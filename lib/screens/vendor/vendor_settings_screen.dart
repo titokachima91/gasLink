@@ -5,6 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,6 +13,7 @@ import '../../core/theme_controller.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/language_picker.dart';
+import '../../widgets/notifications_ai_settings.dart';
 import '../../widgets/referral_card.dart';
 import '../auth/landing_screen.dart';
 import 'vendor_profile_screen.dart';
@@ -29,8 +31,6 @@ class VendorSettingsScreen extends ConsumerStatefulWidget {
 
 class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
   static const String _supportPhone = '+255767304776';
-
-  bool _notificationsEnabled = true;
 
   String get _uid =>
       FirebaseAuth.instance.currentUser?.uid ??
@@ -86,6 +86,7 @@ class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -250,24 +251,25 @@ class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: colors.outlineVariant),
             ),
-            child: Column(
+            child: const Column(
               children: [
-                const LanguagePickerTile(),
-                const Divider(height: 1),
-                SwitchListTile(
-                  secondary:
-                      Icon(Icons.notifications_outlined, color: colors.primary),
-                  title: const Text('Taarifa / Notifications'),
-                  subtitle: const Text('Pokea taarifa za oda na mabadiliko'),
-                  value: _notificationsEnabled,
-                  activeColor: colors.primary,
-                  onChanged: (val) {
-                    setState(() => _notificationsEnabled = val);
-                  },
-                ),
+                LanguagePickerTile(),
               ],
             ),
           ),
+          const SizedBox(height: 20),
+
+          // ── SECTION 4A: NOTIFICATIONS & AI ───────────────────────────────
+          Text(
+            l10n.notificationsAiSection,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          NotificationsAiSettings(uid: _uid),
           const SizedBox(height: 20),
 
           // ── SECTION 4B: REFERRALS ────────────────────────────────────────

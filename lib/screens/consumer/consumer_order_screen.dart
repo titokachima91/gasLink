@@ -6,8 +6,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../services/notification_service.dart';
+import '../../services/notification_dispatcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/order_service.dart';
 
@@ -57,27 +58,28 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
   String? _activeOrderId;
   bool _isCreatingOrder = true;
 
-  final List<Map<String, String>> _orderSteps = [
+  List<Map<String, String>> _orderSteps(AppLocalizations l10n) => [
     {
-      'title': 'Oda Imetumwa / Placed',
-      'subtitle': 'Inasubiri muuzaji kuipokea'
+      'title': l10n.orderStepPlaced,
+      'subtitle': l10n.orderStepPlacedBody
     },
     {
-      'title': 'Oda Imepokelewa / Confirmed',
-      'subtitle': 'Oda imekubaliwa na inaandaliwa 📦'
+      'title': l10n.orderStepConfirmed,
+      'subtitle': l10n.orderStepConfirmedBody
     },
     {
-      'title': 'Gesi Yako Ipo Njiani / Dispatched',
-      'subtitle': 'Dereva yuko njiani kuleta mzigo wako 15%'
+      'title': l10n.orderStepDispatched,
+      'subtitle': l10n.orderStepDispatchedBody
     },
     {
-      'title': 'Imewasili / Delivered',
-      'subtitle': 'Oda imekamilika kikamilifu'
+      'title': l10n.orderStepDelivered,
+      'subtitle': l10n.orderStepDeliveredBody
     },
   ];
 
   /// 🌟 PERSISTENT REVIEW CARD
   Widget _buildPersistentReviewCard(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context);
     final String currentStatus =
         (data['status'] as String? ?? '').toLowerCase().trim();
     final bool isDelivered =
@@ -106,9 +108,9 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                 Icon(Icons.star_rate_rounded,
                     color: context.gasColors.warning, size: 26),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Toa Tathmini / Rate & Review',
+                    l10n.reviewPromptTitle,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                 ),
@@ -116,7 +118,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Oda yako imewasili! Hujaweka tathmini ya huduma hii. Bonyeza hapa chini kukamilisha.',
+              l10n.reviewPromptBody,
               style: TextStyle(fontSize: 12, color: context.colors.onSurface),
             ),
             const SizedBox(height: 12),
@@ -132,7 +134,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.rate_review, size: 16),
-                label: const Text('Toa Tathmini Sasa',
+                label: Text(l10n.reviewNow,
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 onPressed: () => _showReviewSheet(),
@@ -159,6 +161,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context);
     try {
       final docRef = await FirebaseFirestore.instance.collection('orders').add({
         'consumer_uid': FirebaseAuth.instance.currentUser?.uid ?? '',
@@ -190,18 +193,42 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       });
 
       try {
-        await NotificationService.instance.sendNotificationToUser(
+        await NotificationDispatcher.instance.dispatchToUser(
           userId: widget.vendorId,
-          title: 'Oda Mpya! / New Order!',
-          body:
-              'Umepokea oda mpya ya ${widget.brandName} (${widget.cylinderWeight}).',
+          title: l10n.newOrderNotificationTitle,
+          body: l10n.newOrderNotificationBody(
+              widget.brandName, widget.cylinderWeight),
+          smsMessage: l10n.smsOrderPlacedVendor(
+              widget.brandName, widget.cylinderWeight),
           data: {
             'orderId': docRef.id,
             'type': 'new_order',
           },
         );
       } catch (e) {
-        debugPrint('Failed to send vendor push notification: $e');
+        debugPrint('Failed to send vendor notification: $e');
+      }
+
+      try {
+        final consumerUid =
+            FirebaseAuth.instance.currentUser?.uid ?? '';
+        if (consumerUid.isNotEmpty) {
+          await NotificationDispatcher.instance.dispatchToUser(
+            userId: consumerUid,
+            title: l10n.orderPlacedNotificationTitle,
+            body: l10n.orderPlacedNotificationBody(
+                widget.brandName, widget.cylinderWeight),
+            smsMessage: l10n.smsOrderPlacedCustomer(
+                widget.brandName, widget.cylinderWeight),
+            data: {
+              'orderId': docRef.id,
+              'type': 'order_created',
+              'status': 'placed',
+            },
+          );
+        }
+      } catch (e) {
+        debugPrint('Failed to send customer notification: $e');
       }
 
       if (mounted) {
@@ -237,24 +264,24 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
     }
   }
 
-  String _getStepSubtitle(int index, String status) {
+  String _getStepSubtitle(
+      int index, String status, AppLocalizations l10n) {
     final String cleanStatus = status.toLowerCase().trim();
     if (index == 0) {
-      if (cleanStatus == 'seen')
-        return 'Muuzaji ameona oda yako na yuko mtandaoni'; // 🟢 Updated text
-      return 'Oda Imetumwa • Inasubiri Muuzaji';
+      if (cleanStatus == 'seen') return l10n.orderSeenSubtitle;
+      return l10n.orderPlacedSubtitle;
     }
     if (index == 1) {
-      if (cleanStatus == 'accepted') return 'Oda Imepokelewa • Inaandaliwa 📦';
+      if (cleanStatus == 'accepted') return l10n.orderAcceptedSubtitle;
     }
     if (index == 2) {
       if (cleanStatus == 'on_the_way' ||
           cleanStatus == 'in_transit' ||
           cleanStatus == 'delivered_pending') {
-        return 'Gesi Yako Ipo Njiani! 🛵';
+        return l10n.orderOnTheWaySubtitle;
       }
     }
-    return _orderSteps[index]['subtitle']!;
+    return _orderSteps(l10n)[index]['subtitle']!;
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -264,13 +291,17 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       await launchUrl(launchUri);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Simu ya $phoneNumber haikuweza kupigwa.')),
+        SnackBar(
+            content: Text(
+                AppLocalizations.of(context).callFailed(phoneNumber))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final steps = _orderSteps(l10n);
     final displayId = _activeOrderId != null
         ? '#GL-${_activeOrderId!.substring(0, _activeOrderId!.length > 6 ? 6 : _activeOrderId!.length).toUpperCase()}'
         : '...';
@@ -279,7 +310,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: Text('Fuatilia Oda $displayId',
+        title: Text(l10n.trackOrderTitle(displayId),
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -293,7 +324,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                 children: [
                   CircularProgressIndicator(color: context.colors.primary),
                   SizedBox(height: 12),
-                  Text('Inatengeneza Oda Yako...',
+                  Text(l10n.creatingOrder,
                       style: TextStyle(color: context.colors.onSurfaceVariant)),
                 ],
               ),
@@ -356,14 +387,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                               Icon(Icons.cancel_outlined,
                                   color: context.colors.error, size: 40),
                               const SizedBox(height: 8),
-                              Text('Oda Imesitishwa / Order Cancelled',
+                              Text(l10n.orderCancelledTitle,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       color: context.colors.error)),
                               const SizedBox(height: 4),
                               Text(
-                                  'Oda hii imeghairiwa. Tafadhali chagua muuzaji mwingine.',
+                                  l10n.orderCancelledBody,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 12, color: context.colors.onSurface)),
@@ -378,7 +409,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                           borderRadius:
                                               BorderRadius.circular(8))),
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text('Rudi Kwenye Duka'),
+                                  child: Text(l10n.backToShop),
                                 ),
                               ),
                             ],
@@ -407,18 +438,18 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Muda wa Kuwasili (ETA)',
+                                  Text(l10n.etaLabel,
                                       style: TextStyle(
                                           fontSize: 11, color: context.colors.onSurfaceVariant)),
                                   const SizedBox(height: 2),
                                   Text(
                                     isCancelled
-                                        ? 'Imesitishwa'
+                                        ? l10n.etaCancelled
                                         : (currentStep >= 3
-                                            ? 'Imewasili!'
+                                            ? l10n.etaDelivered
                                             : (currentStep == 0
-                                                ? 'Inasubiri Muuzaji...'
-                                                : 'Dakika $etaMinutes')),
+                                                ? l10n.etaWaiting
+                                                : l10n.minutesShort(etaMinutes))),
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -450,14 +481,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                   color: context.gasColors.info, size: 36),
                               const SizedBox(height: 8),
                               Text(
-                                  'Je, umepokea gesi yako? / Confirm Delivery',
+                                  l10n.confirmDeliveryTitle,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       color: context.colors.onSurface)),
                               const SizedBox(height: 4),
                               Text(
-                                  'Muuzaji ameweka alama kuwa oda imefika. Tafadhali thibitisha ikiwa umepokea mtungi na umelipa.',
+                                  l10n.confirmDeliveryBody,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 11, color: context.colors.onSurfaceVariant)),
@@ -479,8 +510,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                           foregroundColor: context.colors.error,
                                           side: BorderSide(
                                               color: context.colors.error)),
-                                      child: const Text('Sijapokea',
-                                          style: TextStyle(
+                                      child: Text(l10n.notReceived,
+                                          style: const TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold)),
                                     ),
@@ -516,9 +547,9 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                         backgroundColor: context.gasColors.success,
                                         foregroundColor: context.gasColors.onSuccess,
                                       ),
-                                      child: const Text(
-                                        'Nimepokea',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.received,
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -563,9 +594,9 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                           },
                           icon:
                               const Icon(Icons.check_circle_outline, size: 16),
-                          label: const Text(
-                              'Nimepokea Gesi Tayari / Confirm Received',
-                              style: TextStyle(
+                          label: Text(
+                              l10n.confirmReceived,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
                       ),
@@ -582,11 +613,11 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Hatua ya Oda / Order Status',
-                                style: TextStyle(
+                            Text(l10n.orderStatusSection,
+                                style: const TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 16),
-                            ...List.generate(_orderSteps.length, (index) {
+                            ...List.generate(steps.length, (index) {
                               final isDone =
                                   !isCancelled && index <= currentStep;
                               final isCurrent =
@@ -608,7 +639,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                 ? context.colors.onPrimary
                                                 : context.colors.onSurface),
                                       ),
-                                      if (index < _orderSteps.length - 1)
+                                      if (index < steps.length - 1)
                                         Container(
                                             width: 2,
                                             height: 36,
@@ -623,7 +654,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(_orderSteps[index]['title']!,
+                                        Text(steps[index]['title']!,
                                             style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: isCurrent
@@ -634,7 +665,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                     : context.colors.onSurfaceVariant)),
                                         Text(
                                             _getStepSubtitle(
-                                                index, currentStatus),
+                                                index, currentStatus, l10n),
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: context.colors.onSurfaceVariant)),
@@ -677,7 +708,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13)),
-                                      Text('Muuzaji / Office Depot',
+                                      Text(l10n.orderVendorRole,
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: context.colors.onSurfaceVariant)),
@@ -688,8 +719,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                   onPressed: () =>
                                       _makePhoneCall(widget.contactPhone),
                                   icon: const Icon(Icons.phone, size: 12),
-                                  label: const Text('Ofisini',
-                                      style: TextStyle(fontSize: 10)),
+                                  label: Text(l10n.callOffice,
+                                      style: const TextStyle(fontSize: 10)),
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: context.colors.primary,
                                       foregroundColor: context.colors.onPrimary,
@@ -724,12 +755,12 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text('Dereva wa Mtungi',
-                                                    style: TextStyle(
+                                                Text(l10n.driverTitle,
+                                                    style: const TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         fontSize: 13)),
-                                                Text('Anakuja na mzigo wako',
+                                                Text(l10n.driverSubtitle,
                                                     style: TextStyle(
                                                         fontSize: 11,
                                                         color: context.colors.onSurfaceVariant)),
@@ -741,8 +772,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                 _makePhoneCall(driverPhone),
                                             icon: const Icon(Icons.phone,
                                                 size: 12),
-                                            label: const Text('Piga Simu',
-                                                style: TextStyle(fontSize: 10)),
+                                            label: Text(l10n.callDriver,
+                                                style: const TextStyle(fontSize: 10)),
                                             style: ElevatedButton.styleFrom(
                                                 backgroundColor: context.gasColors.success,
                                                 foregroundColor: context.gasColors.onSuccess,
@@ -771,7 +802,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                   icon: Icon(Icons.cancel_outlined,
                                       color: context.colors.error, size: 16),
                                   label: Text(
-                                      'Ghairi Oda Hii / Cancel Order',
+                                      l10n.cancelOrder,
                                       style: TextStyle(
                                           color: context.colors.error,
                                           fontSize: 12,
@@ -795,23 +826,23 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Muhtasari wa Oda',
-                                style: TextStyle(
+                            Text(l10n.orderSummary,
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 13)),
                             const Divider(),
-                            _buildSummaryRow('Bidhaa',
+                            _buildSummaryRow(l10n.summaryProduct,
                                 '${widget.brandName} (${widget.cylinderWeight}) x${widget.quantity}'),
-                            _buildSummaryRow('Anwani', widget.deliveryAddress),
+                            _buildSummaryRow(l10n.summaryAddress, widget.deliveryAddress),
                             if (widget.contactPhone.isNotEmpty)
                               _buildSummaryRow(
-                                  'Simu ya Mteja', widget.contactPhone),
-                            _buildSummaryRow('Gharama Kuu',
+                                  l10n.summaryConsumerPhone, widget.contactPhone),
+                            _buildSummaryRow(l10n.summaryTotal,
                                 'TZS ${widget.totalPrice.toStringAsFixed(0)}'),
                             _buildSummaryRow(
-                                'Njia ya Malipo',
+                                l10n.summaryPayment,
                                 widget.paymentMethod == 'mobile_money'
-                                    ? '📱 Mobile Money'
-                                    : '💵 Cash on Delivery'),
+                                    ? l10n.paymentMobileMoney
+                                    : l10n.paymentCash),
                           ],
                         ),
                       ),
@@ -888,12 +919,13 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
   String _reminderInterval = 'Every 30 days';
   final TextEditingController _commentController = TextEditingController();
 
-  final List<Map<String, String>> _availableTags = [
-    {'id': 'fast', 'label': '⚡ Mbio / Fast Delivery'},
-    {'id': 'safe', 'label': '👍 Usalama / Safe Handle'},
-    {'id': 'friendly', 'label': '😊 Lugha Nzuri / Polite'},
-    {'id': 'ontime', 'label': '⏱️ Kwa Wakati / On Time'},
-  ];
+  final List<Map<String, String>> Function(AppLocalizations) _availableTags =
+      (l10n) => [
+            {'id': 'fast', 'label': l10n.tagFast},
+            {'id': 'safe', 'label': l10n.tagSafe},
+            {'id': 'friendly', 'label': l10n.tagFriendly},
+            {'id': 'ontime', 'label': l10n.tagOnTime},
+          ];
 
   @override
   void dispose() {
@@ -939,7 +971,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Asante! Tathmini imerekodiwa.'),
+          content: Text(AppLocalizations.of(context).reviewThanks),
           backgroundColor: context.gasColors.success,
         ),
       );
@@ -948,6 +980,8 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final tags = _availableTags(l10n);
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -961,9 +995,9 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header – no close (X) button
-            const Text(
-              'Tathmini Huduma / Post-Order Review',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            Text(
+              l10n.postOrderReview,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             const SizedBox(height: 8),
@@ -973,7 +1007,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               child: Column(
                 children: [
                   Text(
-                    'Unaipeaje huduma ya ${widget.vendorName}?',
+                    l10n.rateVendor(widget.vendorName),
                     style: TextStyle(fontSize: 13, color: context.colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 8),
@@ -997,15 +1031,15 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
             const SizedBox(height: 12),
 
             // Tags
-            const Text(
-              'Sifa Kuu / Quick Feedback Tags',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            Text(
+              l10n.feedbackTags,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 6,
-              children: _availableTags.map((tag) {
+              children: tags.map((tag) {
                 final isSelected = _selectedTags.contains(tag['id']);
                 return FilterChip(
                   label:
@@ -1029,7 +1063,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
 
             // Comment
             Text(
-              'Maelezo ya Ziada / Custom Comments (Sio Lazima)',
+              l10n.customComments,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -1043,7 +1077,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               keyboardType: TextInputType.multiline,
               style: TextStyle(fontSize: 13, color: context.colors.onSurface),
               decoration: InputDecoration(
-                hintText: 'Andika maelezo au pongezi hapa...',
+                hintText: l10n.commentHint,
                 hintStyle: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                 contentPadding: const EdgeInsets.all(12),
                 filled: true,
@@ -1073,13 +1107,13 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'Kumbukumbu ya Kuagiza Tena',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    title: Text(
+                      l10n.reminderTitle,
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      'Pata taarifa gesi inapokaribia kuisha',
+                      l10n.reminderSubtitle,
                       style: TextStyle(fontSize: 11, color: context.colors.onSurfaceVariant),
                     ),
                     value: _enableReminder,
@@ -1091,9 +1125,9 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Mzunguko / Refill Cycle:',
-                          style: TextStyle(fontSize: 12),
+                        Text(
+                          l10n.refillCycleLabel,
+                          style: const TextStyle(fontSize: 12),
                         ),
                         DropdownButton<String>(
                           value: _reminderInterval,
@@ -1143,9 +1177,10 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text(
-                  'Hifadhi & Maliza / Submit & Complete',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                child: Text(
+                  l10n.submitComplete,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),
@@ -1157,7 +1192,7 @@ class _RatingAndRefillSheetState extends State<RatingAndRefillSheet> {
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Funga / Close (unaweza kufungua tena baadaye)',
+                  l10n.closeReview,
                   style: TextStyle(
                     color: context.colors.onSurfaceVariant,
                     fontSize: 13,

@@ -207,6 +207,8 @@ class AuthService {
       'mustChangePin': false,
       'termsAcceptedAt': FieldValue.serverTimestamp(),
       'adsConsent': adsConsent,
+      'notification_channel': 'both',
+      'ai_assistant_enabled': false,
       'createdAt': FieldValue.serverTimestamp(),
     });
 
@@ -405,6 +407,8 @@ class AuthService {
         'pinAttempts': 0,
         'lockedUntil': null,
         'mustChangePin': false,
+        'notification_channel': 'both',
+        'ai_assistant_enabled': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {

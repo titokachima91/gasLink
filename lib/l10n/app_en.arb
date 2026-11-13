@@ -95,5 +95,584 @@
   "supportSection": "Support",
   "callSupport": "Call",
   "emailSupport": "Email",
-  "copyright": "© 2026 GasLink"
+  "copyright": "© 2026 GasLink",
+  "errorWithDetail": "Error: {detail}",
+  "@errorWithDetail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoon": "Coming soon",
+  "comingSoonShort": "Coming soon",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "submitInfo": "Submit",
+  "phoneInvalid": "Enter a valid phone number",
+  "nameRequired": "Enter your name",
+  "yourName": "Your name",
+  "orderAddStock": "Add stock",
+  "orderNewCylinder": "New cylinder",
+  "orderStatusPending": "Pending",
+  "orderStatusPreparing": "Preparing",
+  "orderStatusOnTheWay": "On the way",
+  "orderStatusDelivered": "Completed",
+  "orderStatusCancelled": "Cancelled",
+  "paymentCash": "💵 Cash on Delivery",
+  "paymentMobileMoney": "📱 Mobile Money",
+  "daysLeft": "~{days} days left ({percent}%)",
+  "@daysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyPercent": "Empty (0%)",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "customer": "Customer",
+  "consumerRole": "Consumer",
+  "gasPlanTitle": "GasPlan for employees",
+  "referralCodeCopied": "Code copied.",
+  "referralShareVendorText": "Join GasLink as a gas vendor. Use my code {code} when you register your shop. Rewards are coming soon.",
+  "@referralShareVendorText": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareConsumerText": "Join GasLink — gas on hand, verification before purchase. Use my code {code} when you open an account. Rewards are coming soon.",
+  "@referralShareConsumerText": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareSubject": "GasLink referral",
+  "referralInviteSent": "Thank you! We will contact that vendor.",
+  "referralInviteVendorTitle": "Invite a vendor",
+  "referralInviteVendorBody": "Know a gas vendor? Send their details; we will invite them to join GasLink.",
+  "shopNameLabel": "Shop name",
+  "shopNameRequired": "Enter the shop name",
+  "referralSendInvite": "Send invite",
+  "rewardsComingSoon": "Rewards are coming soon.",
+  "referralVendorTitle": "Invite fellow vendors",
+  "referralConsumerTitle": "Invite & earn rewards",
+  "referralVendorSubtitle": "Share your code with other vendors.",
+  "referralConsumerSubtitle": "Share your code with friends.",
+  "referralYourCode": "Your code",
+  "copy": "Copy",
+  "referralShareCode": "Share code",
+  "referralInviteGasVendor": "Invite a gas vendor",
+  "gasPlanShareText": "GasPlan for employees — reliable gas every month, paid through payslip. Coming soon to GasLink. Contact us on 0767304776 to plan your staff programme.",
+  "gasPlanShareSubject": "GasPlan for employees — GasLink",
+  "gasPlanThanks": "Thank you! We will contact you when GasPlan launches.",
+  "gasPlanRegisterTitle": "Register interest",
+  "gasPlanRegisterBody": "Send your details; we will contact your employer about this plan.",
+  "employerOptional": "Employer (optional)",
+  "gasPlanNoPayment": "No payment is required now.",
+  "gasPlanHowItWorks": "How it works",
+  "gasPlanStep1Title": "The employer signs an agreement",
+  "gasPlanStep1Body": "HR and GasLink agree on the staff plan.",
+  "gasPlanStep2Title": "The employee chooses a plan",
+  "gasPlanStep2Body": "Cylinders per month and a delivery schedule.",
+  "gasPlanStep3Title": "Gas arrives every month",
+  "gasPlanStep3Body": "Payment is deducted from the payslip — no cash.",
+  "gasPlanPillReliable": "Reliable gas",
+  "gasPlanPillPayslip": "Payslip deduction",
+  "gasPlanPillNoCash": "No cash",
+  "gasPlanPillMonthly": "Monthly plan",
+  "gasPlanExampleTitle": "Example plan",
+  "gasPlanExampleBody": "Two LPG cylinders per month for each registered employee. Prices and cylinder sizes are agreed with your employer.",
+  "gasPlanRewardsSoon": "Rewards and discounts are coming soon",
+  "gasPlanShareWithHr": "Share with your HR",
+  "gasPlanFooter": "This service has not launched yet. Send your details and we will contact you when it does.",
+  "gasPlanHeroTitle": "Reliable gas every month.\nPaid through payslip.",
+  "gasPlanHeroBody": "GasPlan for employees lets staff get gas without handling cash every month.",
+  "ordersHistoryTitle": "My order history",
+  "noOrderHistory": "No order history yet",
+  "noOrderHistoryBody": "All your orders will appear here.",
+  "orderDateLabel": "Date: {date}",
+  "@orderDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAllOrdersTitle": "All orders",
+  "historyOrdersFound": "{count} orders found.",
+  "@historyOrdersFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openAllOrdersHistory": "Open all order history",
+  "orderHistoryCenter": "My orders",
+  "noActiveOrder": "You have no active order right now.",
+  "activeTracker": "MY ORDERS",
+  "profile": "Profile",
+  "memberSince": "Member since {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "quickLinks": "Quick links",
+  "myCylinders": "My cylinders",
+  "myCylindersSubtitle": "Track and manage your cylinders",
+  "settings": "Settings",
+  "settingsSubtitle": "Account, theme and preferences",
+  "account": "Account",
+  "changeName": "Change name",
+  "nameUpdated": "Name updated.",
+  "registerAsVendor": "Register as a vendor",
+  "appearance": "Appearance",
+  "preferences": "Preferences",
+  "notifications": "Notifications",
+  "features": "Features",
+  "gasPlanSettingsSubtitle": "Gas by the month, paid through payslip.",
+  "about": "About",
+  "support": "Support",
+  "signOut": "Sign out",
+  "deleteCylinderTitle": "Delete cylinder?",
+  "deleteCylinderBody": "Are you sure you want to remove this cylinder from your account?",
+  "cylinderDeleted": "Cylinder removed.",
+  "editCylinderTitle": "Edit cylinder details",
+  "addCylinderTitle": "Add a new cylinder",
+  "brandLabel": "Brand",
+  "weightLabel": "Weight",
+  "refillCycleLabel": "Refill cycle",
+  "supplierLabel": "Supplier / depot",
+  "supplierHint": "e.g. Oryx Depot",
+  "priceLabel": "Price (TZS)",
+  "priceHint": "e.g. 25000",
+  "lastRefillDateLabel": "Last refill date",
+  "saveChanges": "Save changes",
+  "saveCylinder": "Save cylinder",
+  "cylinderHubTitle": "My cylinders",
+  "cylinderHubSubtitle": "Each cylinder's status using FIFO.",
+  "addAction": "Add",
+  "noCylindersTitle": "No cylinder registered yet",
+  "noCylindersBody": "Add your cylinder to start tracking gas with FIFO.",
+  "addCylinderAction": "Add cylinder",
+  "smartFeaturesTitle": "Smart features",
+  "smartFeaturesSubtitle": "Extra safety and usage tools.",
+  "featureDishLogger": "🍲 Daily Dish Consumption Logger",
+  "featureLpgMatrix": "⚡ LPG vs Charcoal vs Electricity Matrix",
+  "featureBrandSwap": "🔀 Brand Swap & Upgrade Estimator",
+  "featureTrivia": "💡 Facts & Misconceptions",
+  "featureFraudShield": "🔍 Gross Weight Fraud Shield",
+  "featureBubbleTest": "🫧 Bubble Leak Test & Regulator Safety",
+  "featureCarbonTracker": "🏆 Carbon Credit Progress",
+  "featureEmpty": "{feature} is empty for now.",
+  "@featureEmpty": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "tapToClose": "Tap to close details",
+  "noCylinderHistory": "No order history for this cylinder yet.",
+  "collectiveLevel": "Collective level:",
+  "unitOldest": "Unit {unit} (oldest – used first)",
+  "@unitOldest": {
+    "placeholders": {
+      "unit": {
+        "type": "int"
+      }
+    }
+  },
+  "unitLabel": "Unit {unit}",
+  "@unitLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "int"
+      }
+    }
+  },
+  "levelLabel": "Level:",
+  "dateLabel": "Date:",
+  "vendorLabel": "Vendor:",
+  "costLabel": "Cost:",
+  "editUnitComingSoon": "Edit unit – coming next",
+  "markEmptyComingSoon": "Mark empty – coming next",
+  "markEmpty": "Mark empty",
+  "deleteEntireStack": "Delete entire stack",
+  "reviewPromptTitle": "Rate & review",
+  "reviewPromptBody": "Your order has arrived! You have not reviewed this service yet. Tap below to complete it.",
+  "reviewNow": "Review now",
+  "newOrderNotificationTitle": "New order!",
+  "newOrderNotificationBody": "You received a new order for {brand} ({weight}).",
+  "@newOrderNotificationBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStepPlaced": "Order placed",
+  "orderStepPlacedBody": "Waiting for the vendor to receive it",
+  "orderStepConfirmed": "Order confirmed",
+  "orderStepConfirmedBody": "The order is accepted and being prepared 📦",
+  "orderStepDispatched": "Your gas is on the way",
+  "orderStepDispatchedBody": "The driver is on the way with your order",
+  "orderStepDelivered": "Delivered",
+  "orderStepDeliveredBody": "The order is complete",
+  "orderSeenSubtitle": "The vendor has seen your order and is online",
+  "orderPlacedSubtitle": "Order placed • Waiting for the vendor",
+  "orderAcceptedSubtitle": "Order confirmed • Being prepared 📦",
+  "orderOnTheWaySubtitle": "Your gas is on the way! 🛵",
+  "callFailed": "Could not call {phone}.",
+  "@callFailed": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrderTitle": "Track order {orderId}",
+  "@trackOrderTitle": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "creatingOrder": "Creating your order...",
+  "orderCancelledTitle": "Order cancelled",
+  "orderCancelledBody": "This order was cancelled. Please choose another vendor.",
+  "backToShop": "Back to shop",
+  "etaLabel": "Estimated arrival (ETA)",
+  "etaCancelled": "Cancelled",
+  "etaDelivered": "Delivered!",
+  "etaWaiting": "Waiting for the vendor...",
+  "confirmDeliveryTitle": "Did you receive your gas?",
+  "confirmDeliveryBody": "The vendor marked the order as arrived. Please confirm that you received the cylinder and paid.",
+  "notReceived": "Not received",
+  "received": "Received",
+  "confirmReceived": "Confirm received",
+  "orderStatusSection": "Order status",
+  "orderVendorRole": "Vendor",
+  "callOffice": "Call",
+  "driverTitle": "Cylinder driver",
+  "driverSubtitle": "Bringing your order",
+  "callDriver": "Call",
+  "cancelOrder": "Cancel this order",
+  "orderSummary": "Order summary",
+  "summaryProduct": "Product",
+  "summaryAddress": "Address",
+  "summaryConsumerPhone": "Customer phone",
+  "summaryTotal": "Total",
+  "summaryPayment": "Payment method",
+  "reviewThanks": "Thank you! Your review has been recorded.",
+  "postOrderReview": "Post-order review",
+  "rateVendor": "How would you rate {vendor}?",
+  "@rateVendor": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackTags": "Quick feedback tags",
+  "customComments": "Custom comments (optional)",
+  "commentHint": "Write a comment or compliment here...",
+  "reminderTitle": "Reorder reminder",
+  "reminderSubtitle": "Get notified when your gas is running low",
+  "submitComplete": "Submit & complete",
+  "closeReview": "Close (you can reopen it later)",
+  "tagFast": "⚡ Fast delivery",
+  "tagSafe": "👍 Safe handling",
+  "tagFriendly": "😊 Polite",
+  "tagOnTime": "⏱️ On time",
+  "pleaseSignInFirst": "Please sign in to your account first.",
+  "addressRequired": "Please enter a delivery address.",
+  "phoneRequired": "Please enter a phone number.",
+  "gasRemainingTitle": "Your gas is not finished!",
+  "gasRemainingBody": "Your {brand} cylinder ({weight}) still has gas. Do you want to add stock or change the cylinder?",
+  "@gasRemainingBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "changeCylinder": "Change cylinder",
+  "orderForFriendSoon": "Order for a friend (soon)",
+  "cancelOrderShort": "Cancel order",
+  "cylinderCheckFailed": "Could not check the cylinder: {detail}",
+  "@cylinderCheckFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "gasRemainingDays": "You still have enough gas in this cylinder at home (about {days} days left). What would you like to do?",
+  "@gasRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "orderFailed": "Could not place the order: {detail}",
+  "@orderFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expressCheckout": "Express checkout",
+  "vendorPrefix": "Vendor: {name}",
+  "@vendorPrefix": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "priceEach": "TZS {amount} each",
+  "@priceEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryInfo": "Delivery info",
+  "addressLabel": "Address or area *",
+  "addressHint": "e.g. House No. 12, near the mosque",
+  "addressRequiredShort": "Please enter your address or area",
+  "contactPhoneLabel": "Contact phone number *",
+  "phoneHintShort": "e.g. 07XXXXXXXX",
+  "phoneRequiredShort": "Please enter a phone number",
+  "specialRequestsLabel": "Special requests",
+  "specialRequestsHint": "e.g. My sister is at home",
+  "receiverPhoneLabel": "Home receiver phone",
+  "paymentMethodLabel": "Payment method",
+  "totalPrice": "Total price",
+  "confirmOrder": "Confirm order ➔",
+  "selectBrandFullSet": "Select brand (full set)",
+  "selectAccessory": "Select accessory",
+  "selectService": "Select service",
+  "selectBrandRefill": "Select brand (refill)",
+  "logoutTitle": "Log out",
+  "logoutConfirm": "Are you sure you want to log out?",
+  "logout": "Log out",
+  "myOrders": "My orders",
+  "myOrdersSubtitle": "Track your active orders.",
+  "gasEstimate": "Gas estimate",
+  "noCylinderRegistered": "No cylinder registered yet",
+  "registerCylinderToEstimate": "Add your details to start estimating usage.",
+  "moreInfo": "More info",
+  "setNow": "Set up now",
+  "reorder": "Reorder",
+  "welcomeTitle": "Hello! Welcome to GasLink 👋",
+  "welcomeSubtitle": "Gas on hand — verification before purchase.",
+  "myCylindersSubtitleHome": "Your registered cylinders and their status.",
+  "gasEstimator": "Gas estimator",
+  "gasEstimatorSubtitle": "Estimated days of gas remaining.",
+  "cylindersRegistered": "{count} cylinders registered",
+  "@cylindersRegistered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "registerCylinderHint": "Register a cylinder to get gas estimates.",
+  "manage": "Manage",
+  "setUp": "Set up",
+  "chooseService": "What would you like to do?",
+  "refillSubtitle": "Refill",
+  "fullSetSubtitle": "Cylinder + gas",
+  "accessoriesSubtitle": "Accessories",
+  "servicesSubtitle": "Repairs",
+  "showingItems": "Showing {visible} of {total}",
+  "@showingItems": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "viewMore": "View more",
+  "nearbyVendors": "Gas vendors near you",
+  "nearbyVendorsSubtitle": "Compare price, distance and verification.",
+  "vendorsCount": "{count} vendors",
+  "@vendorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browsingAsGuest": "Browsing as guest",
+  "browsingAsGuestBody": "Sign in to order, track orders and manage your cylinders.",
+  "vendorFallback": "Gas vendor",
+  "fromPrice": "From TZS {amount}",
+  "@fromPrice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "verifiedShop": "Verified shop",
+  "noVendorsTitle": "No vendors near you",
+  "noVendorsBody": "No vendor is registered in your area yet. Service is expanding.",
+  "phoneLabel": "Phone number",
+  "featureDishLoggerShort": "Dish Logger",
+  "featureLpgMatrixShort": "Energy Matrix",
+  "featureBrandSwapShort": "Brand Swap Estimator",
+  "featureTriviaShort": "Trivia & Myths",
+  "featureFraudShieldShort": "Fraud Shield",
+  "featureBubbleTestShort": "Bubble Test",
+  "featureCarbonTrackerShort": "Carbon Credit",
+  "orderSeenChecking": "The vendor is reviewing your order...",
+  "orderArrivedConfirm": "Arrived • Please confirm",
+  "tapToOpenDetails": "Tap to open details ➔",
+  "addCylinderEstimateTitle": "Add cylinder & gas estimate",
+  "notificationsAiSection": "Notifications & AI assistant",
+  "notificationChannel": "Communication channel",
+  "notificationChannelHint": "Choose how we reach you about orders.",
+  "notificationChannelPushOnly": "Push only",
+  "notificationChannelSmsOnly": "SMS only",
+  "notificationChannelBoth": "Push and SMS",
+  "notificationChannelNone": "None",
+  "aiAssistantTitle": "AI SMS assistant",
+  "aiAssistantSubtitle": "Order by SMS in Swahili. Coming soon.",
+  "preferenceSaved": "Preferences saved.",
+  "preferenceSaveFailed": "Could not save preferences. Try again.",
+  "orderPlacedNotificationTitle": "Order received",
+  "orderPlacedNotificationBody": "Your {brand} ({size}) order has been received. We are preparing it now.",
+  "@orderPlacedNotificationBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "orderUpdatedTitle": "Order updated",
+  "orderUpdatedBody": "Your {brand} order status has changed.",
+  "@orderUpdatedBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderPlacedCustomer": "GasLink: Your {brand} ({size}) order has been received. We are preparing it now.",
+  "@smsOrderPlacedCustomer": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderPlacedVendor": "GasLink: New {brand} ({size}) order. Open the app to confirm.",
+  "@smsOrderPlacedVendor": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderConfirmed": "GasLink: Your {brand} order is confirmed and being prepared.",
+  "@smsOrderConfirmed": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderOnTheWay": "GasLink: Your {brand} gas is on the way.",
+  "@smsOrderOnTheWay": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDelivered": "GasLink: Your {brand} order has arrived. Thank you for using GasLink.",
+  "@smsOrderDelivered": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderCancelled": "GasLink: Your {brand} order was cancelled. Contact us for help.",
+  "@smsOrderCancelled": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderUpdated": "GasLink: Your {brand} order status has changed.",
+  "@smsOrderUpdated": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "otpLoginTitle": "SMS login",
+  "otpLoginBody": "We sent a verification code to {phone}.",
+  "@otpLoginBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpCodeLabel": "6-digit code",
+  "otpVerify": "Verify",
+  "otpResend": "Resend code",
+  "otpSending": "Sending...",
+  "otpDisabled": "SMS login is not available yet.",
+  "otpSendFailed": "Could not send the code. Try again.",
+  "otpInvalid": "The code is incorrect."
 }

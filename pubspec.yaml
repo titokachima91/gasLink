@@ -64,6 +64,8 @@ dependencies:
   # v12.x uses `compileSdk = flutter.compileSdkVersion`, which resolves to null
   # under this toolchain; do not upgrade without upgrading Android Gradle.
   share_plus: 10.1.4
+  # Direct HTTP client for the self-hosted SMS/AI gateway.
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:

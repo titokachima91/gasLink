@@ -16,6 +16,9 @@ class AppError implements Exception {
   static const String accountLocked = 'account_locked';
   static const String incorrectPin = 'incorrect_pin';
   static const String roleNotConfigured = 'role_not_configured';
+  static const String otpDisabled = 'otp_disabled';
+  static const String otpSendFailed = 'otp_send_failed';
+  static const String otpInvalid = 'otp_invalid';
 
   @override
   String toString() => 'AppError($code)';

@@ -9,7 +9,7 @@
   "languageEnglish": "English",
   "login": "Ingia",
   "register": "Fungua akaunti",
-  "createAccount": "Unda akaunti",
+  "createAccount": "Unda Akaunti",
   "continueWithoutAccount": "Endelea bila kuingia",
   "cancel": "Ghairi",
   "exit": "Ndiyo, funga",
@@ -102,5 +102,584 @@
   "supportSection": "Msaada",
   "callSupport": "Piga simu",
   "emailSupport": "Barua pepe",
-  "copyright": "© 2026 GasLink"
+  "copyright": "© 2026 GasLink",
+  "errorWithDetail": "Hitilafu: {detail}",
+  "@errorWithDetail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoon": "Inakuja hivi karibuni",
+  "comingSoonShort": "Inakuja",
+  "save": "Hifadhi",
+  "delete": "Ondoa",
+  "edit": "Hariri",
+  "close": "Funga",
+  "submitInfo": "Tuma taarifa",
+  "phoneInvalid": "Weka namba sahihi ya simu",
+  "nameRequired": "Weka jina lako",
+  "yourName": "Jina lako",
+  "orderAddStock": "Ongeza Akiba",
+  "orderNewCylinder": "Mtungi Mpya",
+  "orderStatusPending": "Inasubiri",
+  "orderStatusPreparing": "Inaandaliwa",
+  "orderStatusOnTheWay": "Ipo Njiani",
+  "orderStatusDelivered": "Imekamilika",
+  "orderStatusCancelled": "Imeghairiwa",
+  "paymentCash": "💵 Fedha taslimu",
+  "paymentMobileMoney": "📱 Mobile Money",
+  "daysLeft": "Zimebaki ~{days} siku ({percent}%)",
+  "@daysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyPercent": "Imeisha (0%)",
+  "minutesShort": "Dakika {minutes}",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "customer": "Mteja",
+  "consumerRole": "Mteja",
+  "gasPlanTitle": "GasPlan kwa Waajiriwa",
+  "referralCodeCopied": "Msimbo umenakiliwa.",
+  "referralShareVendorText": "Jiunge na GasLink kama muuzaji wa gesi. Tumia msimbo wangu {code} unaposajili duka lako. Zawadi zinakuja hivi karibuni.",
+  "@referralShareVendorText": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareConsumerText": "Jiunge na GasLink — gesi mkononi, uthibitisho kabla ya ununuzi. Tumia msimbo wangu {code} unapofungua akaunti. Zawadi zinakuja hivi karibuni.",
+  "@referralShareConsumerText": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralShareSubject": "GasLink referral",
+  "referralInviteSent": "Asante! Tutawasiliana na muuzaji huyo.",
+  "referralInviteVendorTitle": "Mwalike muuzaji",
+  "referralInviteVendorBody": "Unamjua muuzaji wa gesi? Tuma taarifa zake; tutamwalika kujiunga na GasLink.",
+  "shopNameLabel": "Jina la duka",
+  "shopNameRequired": "Weka jina la duka",
+  "referralSendInvite": "Tuma mwaliko",
+  "rewardsComingSoon": "Zawadi zinakuja hivi karibuni.",
+  "referralVendorTitle": "Alika Wauzaji Wenzako",
+  "referralConsumerTitle": "Alika & Pata Zawadi",
+  "referralVendorSubtitle": "Shiriki msimbo wako na wauzaji wengine.",
+  "referralConsumerSubtitle": "Shiriki msimbo wako na marafiki.",
+  "referralYourCode": "Msimbo wako",
+  "copy": "Nakili",
+  "referralShareCode": "Shiriki msimbo",
+  "referralInviteGasVendor": "Mwalike muuzaji wa gesi",
+  "gasPlanShareText": "GasPlan kwa Waajiriwa — gesi ya uhakika kila mwezi, malipo kupitia payslip. Inakuja hivi karibuni kwenye GasLink. Wasiliana nasi kwa 0767304776 kupanga mpango wa wafanyakazi wenu.",
+  "gasPlanShareSubject": "GasPlan kwa Waajiriwa — GasLink",
+  "gasPlanThanks": "Asante! Tutawasiliana nawe GasPlan inapoanza.",
+  "gasPlanRegisterTitle": "Ongea nasi",
+  "gasPlanRegisterBody": "Tuma taarifa zako; tutawasiliana na mwajiri wako kuhusu mpango huu.",
+  "employerOptional": "Mwajiri (hiari)",
+  "gasPlanNoPayment": "Hakuna malipo yanayohitajika sasa.",
+  "gasPlanHowItWorks": "Jinsi Inavyofanya Kazi",
+  "gasPlanStep1Title": "Mwajiri anasaini makubaliano",
+  "gasPlanStep1Body": "HR na GasLink hukubaliana kuhusu mpango wa wafanyakazi.",
+  "gasPlanStep2Title": "Mfanyakazi anachagua mpango",
+  "gasPlanStep2Body": "Mitungi kwa mwezi na ratiba ya kufikishwa.",
+  "gasPlanStep3Title": "Gesi inawasili kila mwezi",
+  "gasPlanStep3Body": "Malipo hukatwa kwenye payslip — hakuna fedha taslimu.",
+  "gasPlanPillReliable": "Gesi ya uhakika",
+  "gasPlanPillPayslip": "Makato ya payslip",
+  "gasPlanPillNoCash": "Hakuna cash",
+  "gasPlanPillMonthly": "Mpango wa mwezi",
+  "gasPlanExampleTitle": "Mfano wa mpango",
+  "gasPlanExampleBody": "Mitungi 2 ya LPG kwa mwezi kwa kila mfanyakazi aliyejisajili. Bei na ukubwa wa mitungi hukubaliwa na mwajiri wako.",
+  "gasPlanRewardsSoon": "Zawadi na punguzo zinakuja hivi karibuni",
+  "gasPlanShareWithHr": "Shiriki na HR yako",
+  "gasPlanFooter": "Huduma hii bado haijaanza. Tuma taarifa yako tukuwasiliane ilipoanza.",
+  "gasPlanHeroTitle": "Gesi ya uhakika kila mwezi.\nMalipo kupitia payslip.",
+  "gasPlanHeroBody": "GasPlan kwa Waajiriwa huwawezesha wafanyakazi kupata gesi bila kushughulika na fedha taslimu kila mwezi.",
+  "ordersHistoryTitle": "Historia ya Oda Zangu",
+  "noOrderHistory": "Huna historia ya oda bado",
+  "noOrderHistoryBody": "Oda zote utakazofanya zitaonekana hapa.",
+  "orderDateLabel": "Tarehe: {date}",
+  "@orderDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAllOrdersTitle": "Oda Zote",
+  "historyOrdersFound": "{count} oda zimepatikana.",
+  "@historyOrdersFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openAllOrdersHistory": "Fungua Historia Yote ya Oda",
+  "orderHistoryCenter": "Oda Zangu",
+  "noActiveOrder": "Huna oda inayotembea kwa sasa.",
+  "activeTracker": "ODA ZANGU",
+  "profile": "Wasifu",
+  "memberSince": "Mwanachama tangu {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "quickLinks": "Haraka",
+  "myCylinders": "Mitungi Yangu",
+  "myCylindersSubtitle": "Fuatilia na simamia mitungi",
+  "settings": "Mipangilio",
+  "settingsSubtitle": "Akaunti, mandhari na mapendeleo",
+  "account": "Akaunti",
+  "changeName": "Badilisha Jina",
+  "nameUpdated": "Jina limebadilishwa.",
+  "registerAsVendor": "Jiandikishe kama muuzaji",
+  "appearance": "Muonekano",
+  "preferences": "Mapendeleo",
+  "notifications": "Taarifa",
+  "features": "Vipengele",
+  "gasPlanSettingsSubtitle": "Gesi kwa mwezi, malipo kupitia payslip.",
+  "about": "Kuhusu",
+  "support": "Msaada",
+  "signOut": "Ondoka",
+  "deleteCylinderTitle": "Futa Mtungi?",
+  "deleteCylinderBody": "Je, una uhakika unataka kuondoa kabisa mtungi huu kwenye mfumo wako?",
+  "cylinderDeleted": "Mtungi umeondolewa kikamilifu.",
+  "editCylinderTitle": "Hariri Taarifa za Mtungi",
+  "addCylinderTitle": "Sajili Mtungi Mpya",
+  "brandLabel": "Chapa",
+  "weightLabel": "Uzito",
+  "refillCycleLabel": "Mzunguko",
+  "supplierLabel": "Muuzaji / Depot",
+  "supplierHint": "Mf. Oryx Depot",
+  "priceLabel": "Gharama (TZS)",
+  "priceHint": "Mf. 25000",
+  "lastRefillDateLabel": "Tarehe ya mwisho ulipojaza",
+  "saveChanges": "Hifadhi Mabadiliko",
+  "saveCylinder": "Hifadhi Mtungi",
+  "cylinderHubTitle": "Mitungi Yangu",
+  "cylinderHubSubtitle": "Hali ya kila mtungi kwa FIFO.",
+  "addAction": "Ongeza",
+  "noCylindersTitle": "Hujasajili mtungi bado",
+  "noCylindersBody": "Ongeza mtungi wako kuanza kufuatilia gesi kwa FIFO.",
+  "addCylinderAction": "Weka Mtungi",
+  "smartFeaturesTitle": "Mifumo ya Ndani",
+  "smartFeaturesSubtitle": "Zana za ziada za usalama na matumizi.",
+  "featureDishLogger": "🍲 Kumbukumbu ya Vyakula vya Kila Siku",
+  "featureLpgMatrix": "⚡ Ulinganisho wa LPG, Mkaa na Umeme",
+  "featureBrandSwap": "🔀 Kadirio la Kubadilisha Chapa",
+  "featureTrivia": "💡 Ukweli na Imani Potofu",
+  "featureFraudShield": "🔍 Kinga ya Udanganyifu wa Uzito",
+  "featureBubbleTest": "🫧 Jaribio la Bubble na Usalama wa Regulator",
+  "featureCarbonTracker": "🏆 Maendeleo ya Carbon Credit",
+  "featureEmpty": "{feature} bado haijaanza.",
+  "@featureEmpty": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "tapToClose": "Bofya kufunga maelezo",
+  "noCylinderHistory": "Hakuna historia ya oda kwa mtungi huu bado.",
+  "collectiveLevel": "Jumla:",
+  "unitOldest": "Kipande {unit} (cha zamani – kinatumika kwanza)",
+  "@unitOldest": {
+    "placeholders": {
+      "unit": {
+        "type": "int"
+      }
+    }
+  },
+  "unitLabel": "Kipande {unit}",
+  "@unitLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "int"
+      }
+    }
+  },
+  "levelLabel": "Kiwango:",
+  "dateLabel": "Tarehe:",
+  "vendorLabel": "Muuzaji:",
+  "costLabel": "Gharama:",
+  "editUnitComingSoon": "Kuhariri kipande — inakuja",
+  "markEmptyComingSoon": "Weka kama tupu — inakuja",
+  "markEmpty": "Weka Tupu",
+  "deleteEntireStack": "Futa Chapa Hii Kabisa",
+  "reviewPromptTitle": "Toa Tathmini",
+  "reviewPromptBody": "Oda yako imewasili! Hujaweka tathmini ya huduma hii. Bonyeza hapa chini kukamilisha.",
+  "reviewNow": "Toa Tathmini Sasa",
+  "newOrderNotificationTitle": "Oda Mpya!",
+  "newOrderNotificationBody": "Umepokea oda mpya ya {brand} ({weight}).",
+  "@newOrderNotificationBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStepPlaced": "Oda Imetumwa",
+  "orderStepPlacedBody": "Inasubiri muuzaji kuipokea",
+  "orderStepConfirmed": "Oda Imepokelewa",
+  "orderStepConfirmedBody": "Oda imekubaliwa na inaandaliwa 📦",
+  "orderStepDispatched": "Gesi Yako Ipo Njiani",
+  "orderStepDispatchedBody": "Dereva yuko njiani kuleta mzigo wako",
+  "orderStepDelivered": "Imewasili",
+  "orderStepDeliveredBody": "Oda imekamilika kikamilifu",
+  "orderSeenSubtitle": "Muuzaji ameona oda yako na yuko mtandaoni",
+  "orderPlacedSubtitle": "Oda Imetumwa • Inasubiri Muuzaji",
+  "orderAcceptedSubtitle": "Oda Imepokelewa • Inaandaliwa 📦",
+  "orderOnTheWaySubtitle": "Gesi Yako Ipo Njiani! 🛵",
+  "callFailed": "Simu ya {phone} haikuweza kupigwa.",
+  "@callFailed": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrderTitle": "Fuatilia Oda {orderId}",
+  "@trackOrderTitle": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "creatingOrder": "Inatengeneza Oda Yako...",
+  "orderCancelledTitle": "Oda Imesitishwa",
+  "orderCancelledBody": "Oda hii imeghairiwa. Tafadhali chagua muuzaji mwingine.",
+  "backToShop": "Rudi Kwenye Duka",
+  "etaLabel": "Muda wa Kuwasili (ETA)",
+  "etaCancelled": "Imesitishwa",
+  "etaDelivered": "Imewasili!",
+  "etaWaiting": "Inasubiri Muuzaji...",
+  "confirmDeliveryTitle": "Je, umepokea gesi yako?",
+  "confirmDeliveryBody": "Muuzaji ameweka alama kuwa oda imefika. Tafadhali thibitisha ikiwa umepokea mtungi na umelipa.",
+  "notReceived": "Sijapokea",
+  "received": "Nimepokea",
+  "confirmReceived": "Nimepokea Gesi Tayari",
+  "orderStatusSection": "Hatua ya Oda",
+  "orderVendorRole": "Muuzaji",
+  "callOffice": "Ofisini",
+  "driverTitle": "Dereva wa Mtungi",
+  "driverSubtitle": "Anakuja na mzigo wako",
+  "callDriver": "Piga Simu",
+  "cancelOrder": "Ghairi Oda Hii",
+  "orderSummary": "Muhtasari wa Oda",
+  "summaryProduct": "Bidhaa",
+  "summaryAddress": "Anwani",
+  "summaryConsumerPhone": "Simu ya Mteja",
+  "summaryTotal": "Gharama Kuu",
+  "summaryPayment": "Njia ya Malipo",
+  "reviewThanks": "Asante! Tathmini imerekodiwa.",
+  "postOrderReview": "Tathmini Huduma",
+  "rateVendor": "Unaipeaje huduma ya {vendor}?",
+  "@rateVendor": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackTags": "Sifa Kuu",
+  "customComments": "Maelezo ya Ziada (Sio Lazima)",
+  "commentHint": "Andika maelezo au pongezi hapa...",
+  "reminderTitle": "Kumbukumbu ya Kuagiza Tena",
+  "reminderSubtitle": "Pata taarifa gesi inapokaribia kuisha",
+  "submitComplete": "Hifadhi & Maliza",
+  "closeReview": "Funga (unaweza kufungua tena baadaye)",
+  "tagFast": "⚡ Mbio",
+  "tagSafe": "👍 Usalama",
+  "tagFriendly": "😊 Lugha Nzuri",
+  "tagOnTime": "⏱️ Kwa Wakati",
+  "pleaseSignInFirst": "Tafadhali ingia kwenye akaunti yako kwanza.",
+  "addressRequired": "Tafadhali weka anwani ya kupelekewa.",
+  "phoneRequired": "Tafadhali weka nambari ya simu.",
+  "gasRemainingTitle": "Gas Yako Haijaisha!",
+  "gasRemainingBody": "Mtungi wako wa {brand} ({weight}) bado una gesi. Je, unataka kuongeza akiba au kubadilisha mtungi?",
+  "@gasRemainingBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "changeCylinder": "Badili Mtungi",
+  "orderForFriendSoon": "Agizia Mwenzako (Hivi Karibuni)",
+  "cancelOrderShort": "Ghairi Oda",
+  "cylinderCheckFailed": "Hitilafu wakati wa kuhakiki mtungi: {detail}",
+  "@cylinderCheckFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "gasRemainingDays": "Bado una gesi ya kutosha kwenye mtungi huu nyumbani (Inakadiriwa kubaki siku ~{days}). Je, ungependa kufanya nini?",
+  "@gasRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "orderFailed": "Imeshindikana kuweka oda: {detail}",
+  "@orderFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "expressCheckout": "Weka Oda",
+  "vendorPrefix": "Muuzaji: {name}",
+  "@vendorPrefix": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "priceEach": "TZS {amount} kwa moja",
+  "@priceEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryInfo": "Taarifa za Usafirishaji",
+  "addressLabel": "Anwani au Eneo Lako *",
+  "addressHint": "Mfano: Nyumba No. 12, Karibu na Msikiti",
+  "addressRequiredShort": "Tafadhali weka anwani au eneo lako",
+  "contactPhoneLabel": "Namba ya Simu ya Mawasiliano *",
+  "phoneHintShort": "Mfano: 07XXXXXXXX",
+  "phoneRequiredShort": "Tafadhali weka namba ya simu",
+  "specialRequestsLabel": "Maelezo ya Ziada (Ombi Maalumu)",
+  "specialRequestsHint": "Mfano: Dada yuko nyumbani kabisa",
+  "receiverPhoneLabel": "Namba ya Mpokeaji wa Nyumbani",
+  "paymentMethodLabel": "Njia ya Malipo",
+  "totalPrice": "Jumla Kuu",
+  "confirmOrder": "Thibitisha Oda ➔",
+  "selectBrandFullSet": "Chagua Chapa (Set Kamili)",
+  "selectAccessory": "Chagua Kifaa",
+  "selectService": "Chagua Huduma",
+  "selectBrandRefill": "Chagua Chapa (Kujaza)",
+  "logoutTitle": "Ondoka",
+  "logoutConfirm": "Unahakika unataka kuondoka?",
+  "logout": "Ondoka",
+  "myOrders": "Oda Zangu",
+  "myOrdersSubtitle": "Fuatilia oda zinazoendelea.",
+  "gasEstimate": "Makadirio ya Gesi",
+  "noCylinderRegistered": "Hujasajili Mtungi Bado",
+  "registerCylinderToEstimate": "Weka taarifa kuanza kukadiria matumizi yako.",
+  "moreInfo": "Taarifa Zaidi",
+  "setNow": "Weka Sasa",
+  "reorder": "Agiza Tena",
+  "welcomeTitle": "Habari! Karibu GasLink 👋",
+  "welcomeSubtitle": "Gesi mkononi — uthibitisho kabla ya ununuzi.",
+  "myCylindersSubtitleHome": "Mitungi uliyosajili na hali yake.",
+  "gasEstimator": "Kikadirio cha Gesi",
+  "gasEstimatorSubtitle": "Makadirio ya siku za gesi zilizobaki.",
+  "cylindersRegistered": "Mitungi {count} imesajiliwa",
+  "@cylindersRegistered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "registerCylinderHint": "Sajili mtungi kupata makadirio ya gesi.",
+  "manage": "Simamia",
+  "setUp": "Weka",
+  "chooseService": "Unataka kufanya nini?",
+  "refillSubtitle": "Kujaza",
+  "fullSetSubtitle": "Mtungi + Gesi",
+  "accessoriesSubtitle": "Vifaa",
+  "servicesSubtitle": "Matengenezo",
+  "showingItems": "Unaona {visible} kati ya {total}",
+  "@showingItems": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "viewMore": "Ona zaidi",
+  "nearbyVendors": "Wauza Gesi Walio Karibu Nawe",
+  "nearbyVendorsSubtitle": "Linganisha bei, umbali na uhakiki.",
+  "vendorsCount": "{count} Wauza Gesi",
+  "@vendorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browsingAsGuest": "Unaangalia kama mgeni",
+  "browsingAsGuestBody": "Ingia kuagiza, kufuatilia oda, na kusimamia mitungi yako.",
+  "vendorFallback": "Muuzaji Gesi",
+  "fromPrice": "Kuanzia TZS {amount}",
+  "@fromPrice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "verifiedShop": "Duka Lililothibitishwa",
+  "noVendorsTitle": "Hakuna Muuzaji Karibu Nawe",
+  "noVendorsBody": "Hakuna muuzaji aliyesajiliwa katika eneo lako kwa sasa. Huduma inazidi kusambaa.",
+  "phoneLabel": "Namba ya simu",
+  "featureDishLoggerShort": "Kumbukumbu ya Vyakula",
+  "featureLpgMatrixShort": "Ulinganisho wa Nishati",
+  "featureBrandSwapShort": "Kadirio la Kubadilisha Chapa",
+  "featureTriviaShort": "Ukweli na Imani Potofu",
+  "featureFraudShieldShort": "Kinga ya Udanganyifu",
+  "featureBubbleTestShort": "Jaribio la Bubble",
+  "featureCarbonTrackerShort": "Carbon Credit",
+  "orderSeenChecking": "Muuzaji Anakagua Oda Yako...",
+  "orderArrivedConfirm": "Imefika • Tafadhali Thibitisha",
+  "tapToOpenDetails": "Gusa Kufungua Maelezo Zaidi ➔",
+  "addCylinderEstimateTitle": "Weka Mtungi & Makadirio ya Gesi",
+  "notificationsAiSection": "Taarifa & Msaidizi wa AI",
+  "notificationChannel": "Njia ya mawasiliano",
+  "notificationChannelHint": "Chagua jinsi tunavyokufikia kuhusu oda.",
+  "notificationChannelPushOnly": "Push tu",
+  "notificationChannelSmsOnly": "SMS tu",
+  "notificationChannelBoth": "Push na SMS",
+  "notificationChannelNone": "Hakuna",
+  "aiAssistantTitle": "Msaidizi wa AI kwa SMS",
+  "aiAssistantSubtitle": "Agiza kwa SMS kwa Kiswahili. Inakuja hivi karibuni.",
+  "preferenceSaved": "Mapendeleo yamehifadhiwa.",
+  "preferenceSaveFailed": "Imeshindikana kuhifadhi mapendeleo. Jaribu tena.",
+  "orderPlacedNotificationTitle": "Oda Imepokelewa",
+  "orderPlacedNotificationBody": "Oda yako ya {brand} ({size}) imepokelewa. Tunaiandaa sasa.",
+  "@orderPlacedNotificationBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "orderUpdatedTitle": "Oda Imebadilishwa",
+  "orderUpdatedBody": "Hali ya oda yako ya {brand} imebadilika.",
+  "@orderUpdatedBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderPlacedCustomer": "GasLink: Oda yako ya {brand} ({size}) imepokelewa. Tunaiandaa sasa.",
+  "@smsOrderPlacedCustomer": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderPlacedVendor": "GasLink: Oda mpya ya {brand} ({size}). Fungua app kuidhinisha.",
+  "@smsOrderPlacedVendor": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderConfirmed": "GasLink: Oda yako ya {brand} imethibitishwa na inaandaliwa.",
+  "@smsOrderConfirmed": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderOnTheWay": "GasLink: Gesi yako ya {brand} ipo njiani kuja kwako.",
+  "@smsOrderOnTheWay": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDelivered": "GasLink: Oda yako ya {brand} imefika. Asante kwa kutumia GasLink.",
+  "@smsOrderDelivered": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderCancelled": "GasLink: Oda yako ya {brand} imesitishwa. Wasiliana nasi kwa msaada.",
+  "@smsOrderCancelled": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderUpdated": "GasLink: Hali ya oda yako ya {brand} imebadilika.",
+  "@smsOrderUpdated": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "otpLoginTitle": "Ingia kwa SMS",
+  "otpLoginBody": "Tumekutumia msimbo wa kuthibitisha kwenye {phone}.",
+  "@otpLoginBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpCodeLabel": "Msimbo wa tarakimu 6",
+  "otpVerify": "Thibitisha",
+  "otpResend": "Tuma msimbo tena",
+  "otpSending": "Inatuma...",
+  "otpDisabled": "Kuingia kwa SMS bado hakujaanza.",
+  "otpSendFailed": "Imeshindikana kutuma msimbo. Jaribu tena.",
+  "otpInvalid": "Msimbo si sahihi."
 }

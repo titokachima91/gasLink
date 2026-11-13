@@ -5,6 +5,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/order_service.dart';
 import 'consumer_order_screen.dart';
 
@@ -17,12 +18,13 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Historia ya Oda Zangu / Orders History',
-          style: TextStyle(
+        title: Text(
+          l10n.ordersHistoryTitle,
+          style: const TextStyle(
               fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
@@ -43,7 +45,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                       size: 64, color: context.colors.outline),
                   const SizedBox(height: 12),
                   Text(
-                    'Huna historia ya oda bado',
+                    l10n.noOrderHistory,
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -51,7 +53,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Oda zote utakazofanya zitaonekana hapa.',
+                    l10n.noOrderHistoryBody,
                     style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
                   ),
                 ],
@@ -87,25 +89,25 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
 
               // Determine status badge color and label
               Color badgeColor = context.colors.primary;
-              String statusLabel = 'Inasubiri';
+              String statusLabel = l10n.orderStatusPending;
 
               if (status == 'delivered' || status == 'completed') {
                 badgeColor = context.gasColors.success;
-                statusLabel = 'Imekamilika';
+                statusLabel = l10n.orderStatusDelivered;
               } else if (status == 'on_the_way' || status == 'in_transit') {
                 badgeColor = context.colors.tertiary;
-                statusLabel = 'Ipo Njiani';
+                statusLabel = l10n.orderStatusOnTheWay;
               } else if (status == 'confirmed' ||
                   status == 'accepted' ||
                   status == 'preparing' ||
                   status == 'seen') {
                 badgeColor = context.colors.secondary;
-                statusLabel = 'Inaendelea / Inaandaliwa';
+                statusLabel = l10n.orderStatusPreparing;
               } else if (status == 'cancelled' ||
                   status == 'rejected' ||
                   status == 'refused') {
                 badgeColor = context.colors.error;
-                statusLabel = 'Imeghairiwa';
+                statusLabel = l10n.orderStatusCancelled;
               }
 
               return Card(
@@ -129,7 +131,7 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                                   .toString(),
                           vendorName: (data['vendor_name'] ??
                                   data['vendorName'] ??
-                                  'Gas Vendor')
+                                  l10n.vendorFallback)
                               .toString(),
                           brandName: brand,
                           cylinderSize: size,
@@ -205,13 +207,17 @@ class ConsumerOrdersHistoryScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'TZS ${total.toStringAsFixed(0)} • ${intent == 'add_stock' ? '🔄 Ongeza Akiba' : '📦 Mtungi Mpya'}',
+                                'TZS ${total.toStringAsFixed(0)} • '
+                                '${intent == 'add_stock' ? '🔄 ${l10n.orderAddStock}' : '📦 ${l10n.orderNewCylinder}'}',
                                 style: TextStyle(
                                     fontSize: 11, color: context.colors.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Tarehe: ${createdAt.toLocal().toString().split('.').first}',
+                                l10n.orderDateLabel(
+                                  MaterialLocalizations.of(context)
+                                      .formatMediumDate(createdAt.toLocal()),
+                                ),
                                 style: TextStyle(
                                     fontSize: 10, color: context.colors.onSurfaceVariant),
                               ),

@@ -10,8 +10,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gaslink_app/core/constants.dart';
+import 'package:gaslink_app/l10n/localized_messages.dart';
 import 'package:gaslink_app/models/order.dart' as models;
-import 'notification_service.dart';
+import 'notification_dispatcher.dart';
 
 class OrderService {
   OrderService._();
@@ -92,20 +93,38 @@ class OrderService {
     // Save order document flat in Firestore with complete consistency
     final docRef = await _orders.add(orderMap);
 
-    // Send instant push notification to the vendor
+    final l10n = await loadLocalizedMessages();
+
+    // Notify the vendor and the customer through their preferred channels.
     try {
-      await NotificationService.instance.sendNotificationToUser(
+      await NotificationDispatcher.instance.dispatchToUser(
         userId: vendorId,
-        title: 'Oda Mpya! / New Order!',
-        body: 'Umepokea oda mpya ya $brand ($size).',
+        title: l10n.newOrderNotificationTitle,
+        body: l10n.newOrderNotificationBody(brand, size),
+        smsMessage: l10n.smsOrderPlacedVendor(brand, size),
         data: {
           'orderId': docRef.id,
           'type': 'new_order',
         },
       );
     } catch (e) {
-      debugPrint(
-          'FCM direct vendor notification warning during placeOrder: $e');
+      debugPrint('Vendor notification warning during placeOrder: $e');
+    }
+
+    try {
+      await NotificationDispatcher.instance.dispatchToUser(
+        userId: consumerUid,
+        title: l10n.orderPlacedNotificationTitle,
+        body: l10n.orderPlacedNotificationBody(brand, size),
+        smsMessage: l10n.smsOrderPlacedCustomer(brand, size),
+        data: {
+          'orderId': docRef.id,
+          'type': 'order_created',
+          'status': AppConstants.statusPlaced,
+        },
+      );
+    } catch (e) {
+      debugPrint('Customer notification warning during placeOrder: $e');
     }
 
     return docRef;
@@ -235,41 +254,47 @@ class OrderService {
       await handleOrderCompletion(cleanOrderId);
     }
 
-    // Send push notification update to customer
+    // Notify the customer through their preferred channels.
     try {
       final doc = await _orders.doc(cleanOrderId).get();
       final data = doc.data() as Map<String, dynamic>?;
       if (data != null) {
         final consumerUid =
             (data['consumer_uid'] ?? data['consumerUid']) as String?;
-        final brandName = data['brand'] ?? data['brand_name'] ?? 'Gesi';
+        final brandName =
+            (data['brand'] ?? data['brand_name'] ?? 'Gesi').toString();
 
         if (consumerUid != null && consumerUid.trim().isNotEmpty) {
-          String notificationTitle = 'Mabadiliko ya Oda / Order Update';
-          String notificationBody = 'Oda yako imebadilishwa hali.';
+          final l10n = await loadLocalizedMessages();
+          String notificationTitle = l10n.orderUpdatedTitle;
+          String notificationBody = l10n.orderUpdatedBody(brandName);
+          String smsMessage = l10n.smsOrderUpdated(brandName);
 
           if (status == 'confirmed' || status == 'accepted') {
-            notificationTitle = 'Oda Imethibitishwa! / Order Confirmed!';
-            notificationBody = 'Muuzaji amethibitisha oda yako ya $brandName.';
+            notificationTitle = l10n.orderStepConfirmed;
+            notificationBody = l10n.orderStepConfirmedBody;
+            smsMessage = l10n.smsOrderConfirmed(brandName);
           } else if (status == 'on_the_way' ||
               status == 'dispatched' ||
               status == 'in_transit') {
-            notificationTitle = 'Ipo Njiani! / On The Way!';
-            notificationBody = 'Gesi yako ya $brandName ipo njiani kuja kwako.';
+            notificationTitle = l10n.orderStepDispatched;
+            notificationBody = l10n.orderStepDispatchedBody;
+            smsMessage = l10n.smsOrderOnTheWay(brandName);
           } else if (status == 'delivered' || status == 'completed') {
-            notificationTitle = 'Imewasili! / Delivered!';
-            notificationBody =
-                'Oda yako ya $brandName imekamilika kikamilifu. Asante!';
+            notificationTitle = l10n.orderStepDelivered;
+            notificationBody = l10n.orderStepDeliveredBody;
+            smsMessage = l10n.smsOrderDelivered(brandName);
           } else if (status == 'cancelled' || status == 'rejected') {
-            notificationTitle = 'Oda Imesitishwa / Order Cancelled';
-            notificationBody =
-                'Oda yako ya $brandName imesitishwa. Wasiliana na msaada kama una swali.';
+            notificationTitle = l10n.orderCancelledTitle;
+            notificationBody = l10n.orderCancelledBody;
+            smsMessage = l10n.smsOrderCancelled(brandName);
           }
 
-          await NotificationService.instance.sendNotificationToUser(
+          await NotificationDispatcher.instance.dispatchToUser(
             userId: consumerUid.trim(),
             title: notificationTitle,
             body: notificationBody,
+            smsMessage: smsMessage,
             data: {
               'orderId': cleanOrderId,
               'status': status,
@@ -279,7 +304,7 @@ class OrderService {
         }
       }
     } catch (e) {
-      debugPrint('FCM consumer status update notification warning: $e');
+      debugPrint('Order status notification warning: $e');
     }
   }
 

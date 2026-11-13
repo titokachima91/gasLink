@@ -48,3 +48,7 @@ serviceAccountKey.json
 .claude/settings.local.json
 
 *firebase-adminsdk*.json
+
+# Local gateway credentials for --dart-define-from-file. Never commit.
+env.local.json
+dart_defines.local.json

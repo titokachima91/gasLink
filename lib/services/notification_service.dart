@@ -10,7 +10,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'auth_service.dart';
 
-class NotificationService {
+abstract class PushNotificationSink {
+  Future<void> sendNotificationToUser({
+    required String userId,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  });
+}
+
+class NotificationService implements PushNotificationSink {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
   FirebaseMessaging? _fcm;
@@ -143,6 +152,7 @@ class NotificationService {
   }
 
   /// Sends a notification payload targeted to a specific user by ID
+  @override
   Future<void> sendNotificationToUser({
     required String userId,
     required String title,

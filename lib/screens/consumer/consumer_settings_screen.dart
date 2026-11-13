@@ -4,8 +4,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants.dart';
@@ -15,6 +15,7 @@ import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/language_picker.dart';
+import '../../widgets/notifications_ai_settings.dart';
 import '../about_screen.dart';
 import '../auth/landing_screen.dart';
 import '../legal/legal_screens.dart';
@@ -32,54 +33,32 @@ class _ConsumerSettingsScreenState
     extends ConsumerState<ConsumerSettingsScreen> {
   static const _supportPhone = '+255767304776';
   static const _supportEmail = 'support@gaslink.co.tz';
-  static const _notificationsPref = 'consumer_notifications_enabled';
-
-  bool _notificationsEnabled = true;
 
   String get _uid => AuthService.instance.currentUserId ?? '';
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPrefs();
-  }
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    setState(() {
-      _notificationsEnabled = prefs.getBool(_notificationsPref) ?? true;
-    });
-  }
-
-  Future<void> _setNotifications(bool value) async {
-    setState(() => _notificationsEnabled = value);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_notificationsPref, value);
-  }
-
   Future<void> _editName(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Badilisha Jina / Change name'),
+        title: Text(l10n.changeName),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Jina lako / Your name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.yourName,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Ghairi / Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Hifadhi / Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -93,7 +72,7 @@ class _ConsumerSettingsScreenState
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Jina limebadilishwa / Name updated.'),
+        content: Text(l10n.nameUpdated),
         backgroundColor: context.gasColors.success,
       ),
     );
@@ -122,6 +101,7 @@ class _ConsumerSettingsScreenState
       return const SessionRedirect();
     }
 
+    final l10n = AppLocalizations.of(context);
     final phone = AuthService.instance.currentPhone ?? '';
     final maskedPhone = phone.length >= 10
         ? '${phone.substring(0, phone.length - 4)}••••'
@@ -130,17 +110,17 @@ class _ConsumerSettingsScreenState
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'Mipangilio / Settings',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          l10n.settings,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ── ACCOUNT ────────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Akaunti / Account',
+          AppSectionHeader(
+            title: l10n.account,
             icon: Icons.account_circle_outlined,
           ),
           const SizedBox(height: 10),
@@ -156,7 +136,7 @@ class _ConsumerSettingsScreenState
                   builder: (context, snapshot) {
                     final data = snapshot.data?.data() ?? {};
                     final name = (data['name'] ?? '').toString().trim().isEmpty
-                        ? 'Mteja / Customer'
+                        ? l10n.customer
                         : data['name'].toString();
                     return ListTile(
                       leading: Container(
@@ -182,7 +162,7 @@ class _ConsumerSettingsScreenState
                       ),
                       subtitle: Text(maskedPhone),
                       trailing: IconButton(
-                        tooltip: 'Badilisha jina',
+                        tooltip: l10n.changeName,
                         icon: const Icon(Icons.edit_outlined, size: 20),
                         onPressed: () => _editName(context),
                       ),
@@ -190,10 +170,10 @@ class _ConsumerSettingsScreenState
                   },
                 ),
                 const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.storefront_outlined),
-                  title: Text('Jiandikishe kama muuzaji'),
-                  subtitle: Text('Inakuja hivi karibuni / Coming soon'),
+                ListTile(
+                  leading: const Icon(Icons.storefront_outlined),
+                  title: Text(l10n.registerAsVendor),
+                  subtitle: Text(l10n.comingSoon),
                   enabled: false,
                 ),
               ],
@@ -202,8 +182,8 @@ class _ConsumerSettingsScreenState
           const SizedBox(height: 20),
 
           // ── APPEARANCE ─────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Muonekano / Appearance',
+          AppSectionHeader(
+            title: l10n.appearance,
             icon: Icons.brightness_6_outlined,
           ),
           const SizedBox(height: 10),
@@ -218,25 +198,25 @@ class _ConsumerSettingsScreenState
                     Icons.palette_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Mandhari / Theme'),
+                  title: Text(l10n.theme),
                 ),
                 SegmentedButton<ThemeMode>(
                   showSelectedIcon: false,
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: ThemeMode.system,
-                      icon: Icon(Icons.settings_suggest_outlined),
-                      label: Text('System'),
+                      icon: const Icon(Icons.settings_suggest_outlined),
+                      label: Text(l10n.themeSystem),
                     ),
                     ButtonSegment(
                       value: ThemeMode.light,
-                      icon: Icon(Icons.light_mode_outlined),
-                      label: Text('Light'),
+                      icon: const Icon(Icons.light_mode_outlined),
+                      label: Text(l10n.themeLight),
                     ),
                     ButtonSegment(
                       value: ThemeMode.dark,
-                      icon: Icon(Icons.dark_mode_outlined),
-                      label: Text('Dark'),
+                      icon: const Icon(Icons.dark_mode_outlined),
+                      label: Text(l10n.themeDark),
                     ),
                   ],
                   selected: {ref.watch(themeControllerProvider)},
@@ -252,36 +232,29 @@ class _ConsumerSettingsScreenState
           const SizedBox(height: 20),
 
           // ── PREFERENCES ────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Mapendeleo / Preferences',
+          AppSectionHeader(
+            title: l10n.preferences,
             icon: Icons.tune_outlined,
           ),
           const SizedBox(height: 10),
           AppCard(
             padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.notifications_outlined,
-                    color: context.colors.primary,
-                  ),
-                  title: const Text('Taarifa / Notifications'),
-                  subtitle: const Text('Oda, matangazo na usalama'),
-                  value: _notificationsEnabled,
-                  activeColor: context.colors.primary,
-                  onChanged: _setNotifications,
-                ),
-                const Divider(height: 1),
-                const LanguagePickerTile(),
-              ],
-            ),
+            child: const LanguagePickerTile(),
           ),
           const SizedBox(height: 20),
 
+          // ── NOTIFICATIONS & AI ─────────────────────────────────────
+          AppSectionHeader(
+            title: l10n.notificationsAiSection,
+            icon: Icons.notifications_active_outlined,
+          ),
+          const SizedBox(height: 10),
+          NotificationsAiSettings(uid: _uid),
+          const SizedBox(height: 20),
+
           // ── FEATURES ───────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Vipengele / Features',
+          AppSectionHeader(
+            title: l10n.features,
             icon: Icons.extension_outlined,
           ),
           const SizedBox(height: 10),
@@ -301,12 +274,10 @@ class _ConsumerSettingsScreenState
                   size: 21,
                 ),
               ),
-              title: const Text('GasPlan kwa Waajiriwa'),
-              subtitle: const Text(
-                'Gesi kwa mwezi, malipo kupitia payslip.',
-              ),
-              trailing: const AppStatusPill(
-                label: 'Inakuja',
+              title: Text(l10n.gasPlanTitle),
+              subtitle: Text(l10n.gasPlanSettingsSubtitle),
+              trailing: AppStatusPill(
+                label: l10n.comingSoonShort,
                 icon: Icons.schedule,
               ),
               onTap: () => Navigator.push(
@@ -318,8 +289,8 @@ class _ConsumerSettingsScreenState
           const SizedBox(height: 20),
 
           // ── ABOUT ──────────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Kuhusu / About',
+          AppSectionHeader(
+            title: l10n.about,
             icon: Icons.info_outline,
           ),
           const SizedBox(height: 10),
@@ -332,9 +303,9 @@ class _ConsumerSettingsScreenState
                     Icons.info_outline,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Kuhusu GasLink'),
-                  subtitle: const Text(
-                    'Toleo / Version ${AppConstants.appVersion}',
+                  title: Text(l10n.aboutTitle),
+                  subtitle: Text(
+                    l10n.versionLabel(AppConstants.appVersion),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => Navigator.push(
@@ -348,7 +319,7 @@ class _ConsumerSettingsScreenState
                     Icons.privacy_tip_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Sera ya Faragha'),
+                  title: Text(l10n.privacy),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => Navigator.push(
                     context,
@@ -361,8 +332,8 @@ class _ConsumerSettingsScreenState
           const SizedBox(height: 20),
 
           // ── SUPPORT ────────────────────────────────────────────────
-          const AppSectionHeader(
-            title: 'Msaada / Support',
+          AppSectionHeader(
+            title: l10n.support,
             icon: Icons.support_agent_outlined,
           ),
           const SizedBox(height: 10),
@@ -373,7 +344,7 @@ class _ConsumerSettingsScreenState
                 ListTile(
                   leading:
                       Icon(Icons.call_outlined, color: context.colors.primary),
-                  title: const Text('Piga simu / Call us'),
+                  title: Text(l10n.callSupport),
                   subtitle: const Text(_supportPhone),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: _callSupport,
@@ -384,7 +355,7 @@ class _ConsumerSettingsScreenState
                     Icons.mail_outline,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Barua pepe / Email us'),
+                  title: Text(l10n.emailSupport),
                   subtitle: const Text(_supportEmail),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: _emailSupport,
@@ -405,7 +376,7 @@ class _ConsumerSettingsScreenState
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               icon: const Icon(Icons.logout),
-              label: const Text('Ondoka / Sign out'),
+              label: Text(l10n.signOut),
             ),
           ),
           const SizedBox(height: 16),

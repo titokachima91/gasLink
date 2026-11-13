@@ -15,6 +15,9 @@ String authErrorText(AppLocalizations l10n, Object error) {
       AppError.accountLocked => l10n.errorAccountLocked,
       AppError.incorrectPin => l10n.errorIncorrectPin,
       AppError.roleNotConfigured => l10n.accountRoleMissing,
+      AppError.otpDisabled => l10n.otpDisabled,
+      AppError.otpSendFailed => l10n.otpSendFailed,
+      AppError.otpInvalid => l10n.otpInvalid,
       _ => l10n.errorGeneric,
     };
   }
