@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 import '../../l10n/localized_messages.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_dispatcher.dart';
@@ -77,45 +78,47 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         'updated_at': FieldValue.serverTimestamp(),
       });
 
-      // Notify the customer through their preferred channels.
+      // Notify the customer without blocking the status transition.
       if (consumerUid.isNotEmpty) {
-        final l10n = await loadLocalizedMessages();
-        final brandName =
-            (orderData['brand'] ?? orderData['brand_name'] ?? 'Gesi')
-                .toString();
-        String title = l10n.orderUpdatedTitle;
-        String body = l10n.orderUpdatedBody(brandName);
-        String smsMessage = l10n.smsOrderUpdated(brandName);
+        unawaited(() async {
+          final l10n = await loadLocalizedMessages();
+          final brandName =
+              (orderData['brand'] ?? orderData['brand_name'] ?? 'Gesi')
+                  .toString();
+          String title = l10n.orderUpdatedTitle;
+          String body = l10n.orderUpdatedBody(brandName);
+          String smsMessage = l10n.smsOrderUpdated(brandName);
 
-        if (newStatus == 'cancelled' || newStatus == 'rejected') {
-          title = l10n.orderCancelledTitle;
-          body = l10n.orderCancelledBody;
-          smsMessage = l10n.smsOrderCancelled(brandName);
-        } else if (newStatus == 'on_the_way' || newStatus == 'dispatched') {
-          title = l10n.orderStepDispatched;
-          body = l10n.orderStepDispatchedBody;
-          smsMessage = l10n.smsOrderOnTheWay(brandName);
-        } else if (newStatus == 'delivered' || newStatus == 'completed') {
-          title = l10n.orderStepDelivered;
-          body = l10n.orderStepDeliveredBody;
-          smsMessage = l10n.smsOrderDelivered(brandName);
-        }
+          if (newStatus == 'cancelled' || newStatus == 'rejected') {
+            title = l10n.orderCancelledTitle;
+            body = l10n.orderCancelledBody;
+            smsMessage = l10n.smsOrderCancelled(brandName);
+          } else if (newStatus == 'on_the_way' || newStatus == 'dispatched') {
+            title = l10n.orderStepDispatched;
+            body = l10n.orderStepDispatchedBody;
+            smsMessage = l10n.smsOrderOnTheWay(brandName);
+          } else if (newStatus == 'delivered' || newStatus == 'completed') {
+            title = l10n.orderStepDelivered;
+            body = l10n.orderStepDeliveredBody;
+            smsMessage = l10n.smsOrderDelivered(brandName);
+          }
 
-        try {
-          await NotificationDispatcher.instance.dispatchToUser(
-            userId: consumerUid,
-            title: title,
-            body: body,
-            smsMessage: smsMessage,
-            data: {
-              'orderId': orderId,
-              'type': 'order_status',
-              'status': newStatus,
-            },
-          );
-        } catch (e) {
-          debugPrint('Failed to send consumer notification: $e');
-        }
+          try {
+            await NotificationDispatcher.instance.dispatchToUser(
+              userId: consumerUid,
+              title: title,
+              body: body,
+              smsMessage: smsMessage,
+              data: {
+                'orderId': orderId,
+                'type': 'order_status',
+                'status': newStatus,
+              },
+            );
+          } catch (e) {
+            debugPrint('Failed to send consumer notification: $e');
+          }
+        }());
       }
 
       // When order is completed, update vendor's total delivery stats for rolling average
@@ -283,30 +286,32 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             'eta_minutes': selectedEta,
                             'updated_at': FieldValue.serverTimestamp(),
                           });
-                          // Notify the consumer through their preferred channels.
+                          // Notify the consumer without blocking the accept flow.
                           if (consumerUid.isNotEmpty) {
-                            try {
-                              final l10n = await loadLocalizedMessages();
-                              final brandName = (orderData['brand'] ??
-                                      orderData['brand_name'] ??
-                                      'Gesi')
-                                  .toString();
-                              await NotificationDispatcher.instance
-                                  .dispatchToUser(
-                                userId: consumerUid,
-                                title: l10n.orderStepConfirmed,
-                                body: l10n.orderStepConfirmedBody,
-                                smsMessage: l10n.smsOrderConfirmed(brandName),
-                                data: {
-                                  'orderId': orderId,
-                                  'type': 'order_status',
-                                  'status': 'accepted',
-                                },
-                              );
-                            } catch (e) {
-                              debugPrint(
-                                  'Failed to send consumer accept notification: $e');
-                            }
+                            unawaited(() async {
+                              try {
+                                final l10n = await loadLocalizedMessages();
+                                final brandName = (orderData['brand'] ??
+                                        orderData['brand_name'] ??
+                                        'Gesi')
+                                    .toString();
+                                await NotificationDispatcher.instance
+                                    .dispatchToUser(
+                                  userId: consumerUid,
+                                  title: l10n.orderStepConfirmed,
+                                  body: l10n.orderStepConfirmedBody,
+                                  smsMessage: l10n.smsOrderConfirmed(brandName),
+                                  data: {
+                                    'orderId': orderId,
+                                    'type': 'order_status',
+                                    'status': 'accepted',
+                                  },
+                                );
+                              } catch (e) {
+                                debugPrint(
+                                    'Failed to send consumer accept notification: $e');
+                              }
+                            }());
                           }
 
                           // FIXED: Use the parent widget's lifecycle state verification

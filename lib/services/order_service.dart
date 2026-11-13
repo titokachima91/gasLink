@@ -9,6 +9,7 @@
 // ============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import 'package:gaslink_app/core/constants.dart';
 import 'package:gaslink_app/l10n/localized_messages.dart';
 import 'package:gaslink_app/models/order.dart' as models;
@@ -93,9 +94,28 @@ class OrderService {
     // Save order document flat in Firestore with complete consistency
     final docRef = await _orders.add(orderMap);
 
+    // Never block checkout on push/SMS delivery. The dispatcher still fires
+    // immediately and logs failures; the customer can start tracking now.
+    unawaited(_notifyOrderCreated(
+      orderId: docRef.id,
+      vendorId: vendorId,
+      consumerUid: consumerUid,
+      brand: brand,
+      size: size,
+    ));
+
+    return docRef;
+  }
+
+  Future<void> _notifyOrderCreated({
+    required String orderId,
+    required String vendorId,
+    required String consumerUid,
+    required String brand,
+    required String size,
+  }) async {
     final l10n = await loadLocalizedMessages();
 
-    // Notify the vendor and the customer through their preferred channels.
     try {
       await NotificationDispatcher.instance.dispatchToUser(
         userId: vendorId,
@@ -103,7 +123,7 @@ class OrderService {
         body: l10n.newOrderNotificationBody(brand, size),
         smsMessage: l10n.smsOrderPlacedVendor(brand, size),
         data: {
-          'orderId': docRef.id,
+          'orderId': orderId,
           'type': 'new_order',
         },
       );
@@ -118,7 +138,7 @@ class OrderService {
         body: l10n.orderPlacedNotificationBody(brand, size),
         smsMessage: l10n.smsOrderPlacedCustomer(brand, size),
         data: {
-          'orderId': docRef.id,
+          'orderId': orderId,
           'type': 'order_created',
           'status': AppConstants.statusPlaced,
         },
@@ -126,8 +146,6 @@ class OrderService {
     } catch (e) {
       debugPrint('Customer notification warning during placeOrder: $e');
     }
-
-    return docRef;
   }
 
   /// Live tracking stream for a customer's active and historical orders.
@@ -254,55 +272,58 @@ class OrderService {
       await handleOrderCompletion(cleanOrderId);
     }
 
-    // Notify the customer through their preferred channels.
+    // Notify the customer without blocking the vendor's status transition.
+    unawaited(_notifyStatusChanged(cleanOrderId, status));
+  }
+
+  Future<void> _notifyStatusChanged(String orderId, String status) async {
     try {
-      final doc = await _orders.doc(cleanOrderId).get();
+      final doc = await _orders.doc(orderId).get();
       final data = doc.data() as Map<String, dynamic>?;
-      if (data != null) {
-        final consumerUid =
-            (data['consumer_uid'] ?? data['consumerUid']) as String?;
-        final brandName =
-            (data['brand'] ?? data['brand_name'] ?? 'Gesi').toString();
+      if (data == null) return;
 
-        if (consumerUid != null && consumerUid.trim().isNotEmpty) {
-          final l10n = await loadLocalizedMessages();
-          String notificationTitle = l10n.orderUpdatedTitle;
-          String notificationBody = l10n.orderUpdatedBody(brandName);
-          String smsMessage = l10n.smsOrderUpdated(brandName);
+      final consumerUid =
+          (data['consumer_uid'] ?? data['consumerUid']) as String?;
+      final brandName =
+          (data['brand'] ?? data['brand_name'] ?? 'Gesi').toString();
+      if (consumerUid == null || consumerUid.trim().isEmpty) return;
 
-          if (status == 'confirmed' || status == 'accepted') {
-            notificationTitle = l10n.orderStepConfirmed;
-            notificationBody = l10n.orderStepConfirmedBody;
-            smsMessage = l10n.smsOrderConfirmed(brandName);
-          } else if (status == 'on_the_way' ||
-              status == 'dispatched' ||
-              status == 'in_transit') {
-            notificationTitle = l10n.orderStepDispatched;
-            notificationBody = l10n.orderStepDispatchedBody;
-            smsMessage = l10n.smsOrderOnTheWay(brandName);
-          } else if (status == 'delivered' || status == 'completed') {
-            notificationTitle = l10n.orderStepDelivered;
-            notificationBody = l10n.orderStepDeliveredBody;
-            smsMessage = l10n.smsOrderDelivered(brandName);
-          } else if (status == 'cancelled' || status == 'rejected') {
-            notificationTitle = l10n.orderCancelledTitle;
-            notificationBody = l10n.orderCancelledBody;
-            smsMessage = l10n.smsOrderCancelled(brandName);
-          }
+      final l10n = await loadLocalizedMessages();
+      String notificationTitle = l10n.orderUpdatedTitle;
+      String notificationBody = l10n.orderUpdatedBody(brandName);
+      String smsMessage = l10n.smsOrderUpdated(brandName);
 
-          await NotificationDispatcher.instance.dispatchToUser(
-            userId: consumerUid.trim(),
-            title: notificationTitle,
-            body: notificationBody,
-            smsMessage: smsMessage,
-            data: {
-              'orderId': cleanOrderId,
-              'status': status,
-              'type': 'order_status_update',
-            },
-          );
-        }
+      if (status == 'confirmed' || status == 'accepted') {
+        notificationTitle = l10n.orderStepConfirmed;
+        notificationBody = l10n.orderStepConfirmedBody;
+        smsMessage = l10n.smsOrderConfirmed(brandName);
+      } else if (status == 'on_the_way' ||
+          status == 'dispatched' ||
+          status == 'in_transit') {
+        notificationTitle = l10n.orderStepDispatched;
+        notificationBody = l10n.orderStepDispatchedBody;
+        smsMessage = l10n.smsOrderOnTheWay(brandName);
+      } else if (status == 'delivered' || status == 'completed') {
+        notificationTitle = l10n.orderStepDelivered;
+        notificationBody = l10n.orderStepDeliveredBody;
+        smsMessage = l10n.smsOrderDelivered(brandName);
+      } else if (status == 'cancelled' || status == 'rejected') {
+        notificationTitle = l10n.orderCancelledTitle;
+        notificationBody = l10n.orderCancelledBody;
+        smsMessage = l10n.smsOrderCancelled(brandName);
       }
+
+      await NotificationDispatcher.instance.dispatchToUser(
+        userId: consumerUid.trim(),
+        title: notificationTitle,
+        body: notificationBody,
+        smsMessage: smsMessage,
+        data: {
+          'orderId': orderId,
+          'status': status,
+          'type': 'order_status_update',
+        },
+      );
     } catch (e) {
       debugPrint('Order status notification warning: $e');
     }

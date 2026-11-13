@@ -4,10 +4,13 @@
 // Enforces reinforced consumer master handshake validation and automatic 10-minute expirations.
 // ============================================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../l10n/localized_messages.dart';
 import '../../services/notification_dispatcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/order_service.dart';
@@ -161,7 +164,6 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       return;
     }
 
-    final l10n = AppLocalizations.of(context);
     try {
       final docRef = await FirebaseFirestore.instance.collection('orders').add({
         'consumer_uid': FirebaseAuth.instance.currentUser?.uid ?? '',
@@ -192,53 +194,58 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      try {
-        await NotificationDispatcher.instance.dispatchToUser(
-          userId: widget.vendorId,
-          title: l10n.newOrderNotificationTitle,
-          body: l10n.newOrderNotificationBody(
-              widget.brandName, widget.cylinderWeight),
-          smsMessage: l10n.smsOrderPlacedVendor(
-              widget.brandName, widget.cylinderWeight),
-          data: {
-            'orderId': docRef.id,
-            'type': 'new_order',
-          },
-        );
-      } catch (e) {
-        debugPrint('Failed to send vendor notification: $e');
-      }
-
-      try {
-        final consumerUid =
-            FirebaseAuth.instance.currentUser?.uid ?? '';
-        if (consumerUid.isNotEmpty) {
-          await NotificationDispatcher.instance.dispatchToUser(
-            userId: consumerUid,
-            title: l10n.orderPlacedNotificationTitle,
-            body: l10n.orderPlacedNotificationBody(
-                widget.brandName, widget.cylinderWeight),
-            smsMessage: l10n.smsOrderPlacedCustomer(
-                widget.brandName, widget.cylinderWeight),
-            data: {
-              'orderId': docRef.id,
-              'type': 'order_created',
-              'status': 'placed',
-            },
-          );
-        }
-      } catch (e) {
-        debugPrint('Failed to send customer notification: $e');
-      }
-
       if (mounted) {
         setState(() {
           _activeOrderId = docRef.id;
           _isCreatingOrder = false;
         });
       }
+
+      // Do not block tracking on push/SMS delivery.
+      unawaited(_notifyOrderCreated(docRef.id));
     } catch (e) {
       if (mounted) setState(() => _isCreatingOrder = false);
+    }
+  }
+
+  Future<void> _notifyOrderCreated(String orderId) async {
+    final l10n = await loadLocalizedMessages();
+    final consumerUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    try {
+      await NotificationDispatcher.instance.dispatchToUser(
+        userId: widget.vendorId,
+        title: l10n.newOrderNotificationTitle,
+        body: l10n.newOrderNotificationBody(
+            widget.brandName, widget.cylinderWeight),
+        smsMessage: l10n.smsOrderPlacedVendor(
+            widget.brandName, widget.cylinderWeight),
+        data: {
+          'orderId': orderId,
+          'type': 'new_order',
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to send vendor notification: $e');
+    }
+
+    if (consumerUid.isEmpty) return;
+    try {
+      await NotificationDispatcher.instance.dispatchToUser(
+        userId: consumerUid,
+        title: l10n.orderPlacedNotificationTitle,
+        body: l10n.orderPlacedNotificationBody(
+            widget.brandName, widget.cylinderWeight),
+        smsMessage: l10n.smsOrderPlacedCustomer(
+            widget.brandName, widget.cylinderWeight),
+        data: {
+          'orderId': orderId,
+          'type': 'order_created',
+          'status': 'placed',
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to send customer notification: $e');
     }
   }
 

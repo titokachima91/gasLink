@@ -681,5 +681,7 @@
   "otpSending": "Inatuma...",
   "otpDisabled": "Kuingia kwa SMS bado hakujaanza.",
   "otpSendFailed": "Imeshindikana kutuma msimbo. Jaribu tena.",
-  "otpInvalid": "Msimbo si sahihi."
+  "otpInvalid": "Msimbo si sahihi.",
+  "orderNow": "Oda Sasa",
+  "noProductsToOrder": "Muuzaji hajaweka bidhaa bado."
 }

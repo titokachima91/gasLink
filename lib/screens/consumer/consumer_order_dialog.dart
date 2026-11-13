@@ -58,6 +58,15 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       'new_asset'; // Default intent: new asset / baseline reset
 
   @override
+  void initState() {
+    super.initState();
+    final phone = AuthService.instance.currentPhone;
+    if (phone != null && phone.trim().isNotEmpty) {
+      _phoneController.text = phone.trim();
+    }
+  }
+
+  @override
   void dispose() {
     // Clean up controllers when widget is disposed to prevent memory leaks
     _addressController.dispose();
@@ -73,6 +82,16 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
   /// Uses normalized string matching to prevent mismatch bugs between UI and DB.
   /// ===========================================================================
   Future<void> _validateAndSubmitOrder() async {
+    if (_isCheckingThreshold) return;
+    setState(() => _isCheckingThreshold = true);
+    try {
+      await _validateAndSubmitOrderInner();
+    } finally {
+      if (mounted) setState(() => _isCheckingThreshold = false);
+    }
+  }
+
+  Future<void> _validateAndSubmitOrderInner() async {
     final l10n = AppLocalizations.of(context);
     // 🛠️ ROBUST USER ID CHECK WITH FALLBACK
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -369,11 +388,11 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
       );
 
       if (!mounted) return;
-      Navigator.pop(context); // Close express checkout bottom sheet modal
+      final navigator = Navigator.of(context);
+      navigator.pop(); // Close express checkout bottom sheet modal
 
       // 2. Push to live tracking screen with actual orderId and order intent[cite: 5]
-      Navigator.push(
-        context,
+      navigator.push(
         MaterialPageRoute(
           builder: (context) => ConsumerOrderScreen(
             orderId: docRef.id,

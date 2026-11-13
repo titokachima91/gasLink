@@ -674,5 +674,7 @@
   "otpSending": "Sending...",
   "otpDisabled": "SMS login is not available yet.",
   "otpSendFailed": "Could not send the code. Try again.",
-  "otpInvalid": "The code is incorrect."
+  "otpInvalid": "The code is incorrect.",
+  "orderNow": "Order Now",
+  "noProductsToOrder": "This vendor has no products yet."
 }

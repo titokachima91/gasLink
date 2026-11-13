@@ -100,22 +100,32 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Wauza Gesi / Vendors',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.onSurface,
+                Expanded(
+                  child: Text(
+                    'Wauza Gesi / Vendors',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.onSurface,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 DropdownButton<String>(
                   value: _sortBy,
+                  isDense: true,
                   underline: const SizedBox(),
                   icon: Icon(Icons.sort, size: 18, color: context.colors.primary),
                   style: TextStyle(fontSize: 12, color: context.colors.onSurface),
                   onChanged: (val) {
                     if (val != null) setState(() => _sortBy = val);
                   },
+                  selectedItemBuilder: (context) => const [
+                    Text('Chini → Juu'),
+                    Text('Juu → Chini'),
+                  ],
                   items: const [
                     DropdownMenuItem(
                       value: 'price_low',
@@ -180,6 +190,8 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                                 vendor.businessName.isNotEmpty
                                                     ? vendor.businessName
                                                     : 'Muuzaji',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14),
@@ -194,12 +206,16 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                         ),
                                         Text(
                                           '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 11, color: context.colors.onSurfaceVariant),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           'TZS ${price.toStringAsFixed(0)}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
@@ -236,11 +252,15 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: context.colors.primary,
                                       foregroundColor: context.colors.onPrimary,
+                                      visualDensity: VisualDensity.compact,
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 8),
+                                          horizontal: 14, vertical: 10),
                                     ),
-                                    child: const Text('Chagua',
-                                        style: TextStyle(fontSize: 12)),
+                                    child: const Text('Oda Sasa',
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold)),
                                   ),
                                 ],
                               ),
