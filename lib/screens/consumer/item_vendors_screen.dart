@@ -34,16 +34,23 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
 
   Future<void> _load() async {
     setState(() => _isLoading = true);
-    await SessionData.instance.ensureLoaded();
-    if (mounted) setState(() => _isLoading = false);
+    try {
+      // Force a live read so a previously empty session cache cannot leave the
+      // shop blank after the vendor adds stock.
+      await SessionData.instance.reload();
+    } catch (e) {
+      debugPrint('Shop reload warning: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
-  List<Map<String, dynamic>> get _matchingOffers {
+  List<Map<String, dynamic>> _collectOffers(String? category) {
     final results = <Map<String, dynamic>>[];
 
     for (final offer in SessionData.instance.offers) {
       for (final w in offer.weights) {
-        final matchesCategory = w.category == widget.category;
+        final matchesCategory = category == null || w.category == category;
 
         // For gas products we match brand, for accessories/services we match the item name
         final matchesItem = widget.category == 'refill' ||
@@ -62,6 +69,20 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
           break;
         }
       }
+    }
+    return results;
+  }
+
+  List<Map<String, dynamic>> get _matchingOffers {
+    var results = _collectOffers(widget.category);
+
+    // The pilot catalogue is refill-only. Never dead-end "Full Set" when the
+    // exact category has not been stocked yet.
+    if (results.isEmpty) {
+      results = _collectOffers('refill');
+    }
+    if (results.isEmpty) {
+      results = _collectOffers(null);
     }
 
     if (_sortBy == 'price_low') {
@@ -294,6 +315,12 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
               'Hakuna muuzaji aliyetangaza bidhaa hii kwa sasa. Jaribu baadaye.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _load,
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Sasisha'),
             ),
           ],
         ),
