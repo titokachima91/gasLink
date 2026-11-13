@@ -553,6 +553,20 @@ function createFirebaseBridgeRouter(options = {}) {
     }
   });
 
+  // Warm Firestore/gRPC at startup so the first subscriber check does not
+  // hit the subscriber gate's short remote timeout after a cold start.
+  try {
+    db()
+      .collection('users')
+      .limit(1)
+      .get()
+      .catch((error) => {
+        console.warn('[bridge] Firestore warm-up warning:', error.message);
+      });
+  } catch (error) {
+    console.warn('[bridge] Firestore warm-up skipped:', error.message);
+  }
+
   return router;
 }
 

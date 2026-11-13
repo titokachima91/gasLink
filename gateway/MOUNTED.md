@@ -41,6 +41,13 @@ Changes made there (outside this repo):
 - APK download server: **8090**
 - Old gateway on 3000 has been stopped.
 
+The Mac’s current LAN IP is `192.168.1.104`. If DHCP changes it again:
+1. update `gaslink_app/env.local.json` and rebuild the APK,
+2. add the new IP to `android/app/src/main/res/xml/network_security_config.xml`,
+3. restart the APK server on 8090.
+
+A DHCP reservation for the Mac or an HTTPS tunnel avoids the rebuild step.
+
 ## Verified
 
 - `GET /health`
