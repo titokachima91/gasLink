@@ -94,6 +94,10 @@ only for the pilot LAN hosts; public tunnel URLs must use HTTPS.
   the admin test number; bridge `/subscriber` returned the seeded vendor with
   `aiAssistantEnabled: false`; `/catalog` returned 6 live products and the four
   brand colours; `/orders` correctly rejected a non-opted-in subscriber (403).
+- End-to-end bridge order: with a temporarily opted-in seeded consumer, the
+  bridge created a `placed` 26,000 TZS Oryx 6kg order with `source: sms_ai`;
+  the order and its notification ledger entry were deleted and the opt-in flag
+  restored immediately after the check.
 - The gateway currently runs on `192.168.1.11:3000`; `env.local.json` points
   there for the pilot APK. The code default remains `192.168.1.12:3000` as
   specified.
