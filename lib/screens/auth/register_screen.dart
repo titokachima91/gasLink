@@ -2,13 +2,16 @@
 // Branded registration: logo, phone + PIN + confirm, Terms & marketing consent.
 
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
-import '../role_router.dart';
-import 'login_screen.dart';
-import 'landing_screen.dart';
-import 'widgets/auth_widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/theme_ext.dart';
+import '../../l10n/error_messages.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/language_picker.dart';
+import '../role_router.dart';
+import 'landing_screen.dart';
+import 'login_screen.dart';
+import 'widgets/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,8 +38,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    final l10n = AppLocalizations.of(context);
     if (_pinCtrl.text.trim() != _pin2Ctrl.text.trim()) {
-      setState(() => _error = 'PIN hazifanana / PINs do not match');
+      setState(() => _error = l10n.errorPinsDoNotMatch);
       return;
     }
     setState(() {
@@ -57,7 +61,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         (_) => false,
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (!mounted) return;
+      setState(() => _error = authErrorText(AppLocalizations.of(context), e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -76,13 +81,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fungua akaunti / Register'),
+        title: Text(l10n.registerTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _backToLanding,
         ),
+        actions: const [LanguageActionButton()],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -90,18 +97,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AuthHeader(
-                subtitle: 'Unda akaunti ya bure uanze kuagiza.',
-              ),
+              AuthHeader(subtitle: l10n.registerSubtitle),
               const SizedBox(height: 24),
               TextField(
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Namba ya simu / Phone number',
-                  hintText: 'e.g. 0767304776',
-                  prefixIcon: Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.phoneNumber,
+                  hintText: l10n.phoneHint,
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 14),
@@ -110,11 +115,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: true,
                 keyboardType: TextInputType.number,
                 maxLength: 4,
-                decoration: const InputDecoration(
-                  labelText: 'PIN (namba 4) / 4-digit PIN',
+                decoration: InputDecoration(
+                  labelText: l10n.pin4,
                   counterText: '',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 14),
@@ -123,11 +128,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: true,
                 keyboardType: TextInputType.number,
                 maxLength: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Rudia PIN / Confirm PIN',
+                decoration: InputDecoration(
+                  labelText: l10n.confirmPin,
                   counterText: '',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -151,12 +156,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Fungua akaunti / Create account'),
+                    : Text(l10n.register),
               ),
               if (!_termsAccepted) ...[
                 const SizedBox(height: 6),
                 Text(
-                  'Kubali Vigezo na Masharti kuendelea.',
+                  l10n.acceptTermsPrompt,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
@@ -173,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           MaterialPageRoute(
                               builder: (_) => const LoginScreen()),
                         ),
-                child: const Text('Tayari una akaunti? Ingia / Log in'),
+                child: Text(l10n.alreadyHaveAccount),
               ),
             ],
           ),

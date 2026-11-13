@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,6 +14,9 @@ Widget wrap(Brightness brightness, Widget child) {
   return ProviderScope(
     child: MaterialApp(
       theme: buildAppTheme(brightness),
+      locale: const Locale('sw'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: const [Locale('sw'), Locale('en')],
       home: child,
     ),
   );
@@ -26,7 +30,7 @@ void main() {
     expect(find.byType(CheckboxListTile), findsNothing);
 
     final loginButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Ingia / Login'),
+      find.widgetWithText(FilledButton, 'Ingia'),
     );
     expect(loginButton.onPressed, isNotNull);
   });
@@ -35,7 +39,7 @@ void main() {
     await tester.pumpWidget(wrap(Brightness.light, const LoginScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Vigezo na Masharti / Terms'));
+    await tester.tap(find.text('Vigezo na Masharti'));
     await tester.pumpAndSettle();
 
     expect(find.byType(TermsScreen), findsOneWidget);
@@ -65,7 +69,7 @@ void main() {
     expect(checkboxes[1].value, isFalse); // marketing push consent
 
     FilledButton createButton() => tester.widget<FilledButton>(
-          find.widgetWithText(FilledButton, 'Fungua akaunti / Create account'),
+          find.widgetWithText(FilledButton, 'Fungua akaunti'),
         );
     expect(createButton().onPressed, isNull);
 

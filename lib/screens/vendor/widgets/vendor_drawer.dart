@@ -13,6 +13,7 @@ import '../vendor_badge_screen.dart';
 import '../vendor_settings_screen.dart';
 
 import '../../../core/theme_ext.dart';
+import '../../../widgets/language_picker.dart';
 
 class VendorDrawer extends StatelessWidget {
   final String storeName;
@@ -335,12 +336,7 @@ class VendorDrawer extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(Icons.language, color: context.colors.primary),
-              title: const Text('Lugha / Language'),
-              subtitle: const Text('Kiswahili (Chaguo kuu)'),
-              onTap: () => Navigator.pop(context),
-            ),
+            const LanguagePickerTile(),
             ListTile(
               leading: Icon(Icons.notifications_active_outlined,
                   color: context.colors.primary),

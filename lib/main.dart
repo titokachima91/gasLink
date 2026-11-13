@@ -11,6 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/app_locale.dart';
+import 'core/locale_controller.dart';
+import 'core/locale_preferences.dart';
 import 'core/theme_controller.dart';
 import 'core/theme_preferences.dart';
 import 'firebase_options.dart'; // <--- Added generated options import
@@ -70,11 +73,15 @@ void main() async {
   // 4. Restore the saved theme preference (light, dark or system).
   final ThemeMode initialThemeMode = await ThemePreferences.readThemeMode();
 
-  // 5. Mount app. ProviderScope must sit above every ConsumerWidget.
+  // 5. Restore the saved language preference (system, Kiswahili or English).
+  final AppLocale initialLocale = await LocalePreferences.readLocale();
+
+  // 6. Mount app. ProviderScope must sit above every ConsumerWidget.
   runApp(
     ProviderScope(
       overrides: [
         initialThemeModeProvider.overrideWithValue(initialThemeMode),
+        initialLocaleProvider.overrideWithValue(initialLocale),
       ],
       child: const GasLinkApp(),
     ),

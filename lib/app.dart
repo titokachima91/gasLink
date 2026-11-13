@@ -6,7 +6,10 @@
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/app_locale.dart';
+import 'core/locale_controller.dart';
 import 'core/notification_routing.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
@@ -77,7 +80,7 @@ class _GasLinkAppState extends ConsumerState<GasLinkApp> {
                 data.orderId,
               );
             },
-            child: const Text('Angalia / View'),
+            child: Text(AppLocalizations.of(context).view),
           ),
         ],
       ),
@@ -87,6 +90,7 @@ class _GasLinkAppState extends ConsumerState<GasLinkApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeControllerProvider);
+    final appLocale = ref.watch(localeControllerProvider);
 
     return MaterialApp(
       title: 'GasLink',
@@ -95,6 +99,9 @@ class _GasLinkAppState extends ConsumerState<GasLinkApp> {
       theme: buildAppTheme(Brightness.light),
       darkTheme: buildAppTheme(Brightness.dark),
       themeMode: themeMode,
+      locale: appLocale.locale,
+      supportedLocales: const [Locale('sw'), Locale('en')],
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       // The session is restored in main() before runApp, and every login or
       // logout navigation replaces this route, so AuthService is the only
       // source of truth for the active role.

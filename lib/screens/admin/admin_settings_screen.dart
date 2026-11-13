@@ -6,6 +6,7 @@ import '../../models/admin_models.dart';
 import '../../services/admin_service.dart';
 import '../../services/auth_service.dart';
 import '../../utils/formatters.dart';
+import '../../widgets/language_picker.dart';
 import '../../widgets/theme_mode_button.dart';
 import '../auth/landing_screen.dart';
 import 'widgets/admin_ui.dart';
@@ -159,6 +160,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
           children: [
+            const AdminCard(
+              child: LanguagePickerTile(),
+            ),
+            const SizedBox(height: 22),
             const AdminSectionHeader(
               title: 'Commercial defaults',
               subtitle:

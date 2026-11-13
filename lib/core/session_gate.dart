@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../screens/auth/landing_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -36,6 +37,7 @@ class SessionGate {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
         final bottomPadding = MediaQuery.viewInsetsOf(sheetContext).bottom;
         return SafeArea(
           child: Padding(
@@ -47,13 +49,14 @@ class SessionGate {
                 Icon(Icons.account_circle_outlined,
                     size: 32, color: context.colors.primary),
                 const SizedBox(height: 10),
-                const Text(
-                  'Ingia kuagiza / Sign in to order',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.signInToOrderTitle,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Unda akaunti ya bure au ingia kuendelea na oda yako.',
+                  l10n.signInToOrderMessage,
                   style: TextStyle(
                     fontSize: 13,
                     color: context.colors.onSurfaceVariant,
@@ -73,7 +76,7 @@ class SessionGate {
                       );
                     },
                     icon: const Icon(Icons.login),
-                    label: const Text('Ingia / Log in'),
+                    label: Text(l10n.login),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -90,7 +93,7 @@ class SessionGate {
                       );
                     },
                     icon: const Icon(Icons.person_add_alt),
-                    label: const Text('Unda Akaunti / Create account'),
+                    label: Text(l10n.createAccount),
                   ),
                 ),
               ],

@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RootBackGuard extends StatelessWidget {
   const RootBackGuard({
@@ -31,19 +32,20 @@ class RootBackGuard extends StatelessWidget {
           return;
         }
 
+        final l10n = AppLocalizations.of(context);
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Funga App / Exit App'),
-            content: const Text('Unataka kufunga app? / Exit GasLink?'),
+            title: Text(l10n.exitAppTitle),
+            content: Text(l10n.exitAppMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Hapana / Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Ndiyo / Exit'),
+                child: Text(l10n.exit),
               ),
             ],
           ),

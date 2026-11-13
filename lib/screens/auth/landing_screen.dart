@@ -3,12 +3,14 @@
 // register screens or guest mode. No form on this page.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/constants.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
+import '../../widgets/language_picker.dart';
 import '../advertise_screen.dart';
 import '../role_router.dart';
 import 'login_screen.dart';
@@ -29,12 +31,13 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            _buildHero(context),
+            _buildHero(context, l10n),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -55,7 +58,7 @@ class LandingScreen extends StatelessWidget {
                           );
                         },
                         icon: const Icon(Icons.login, size: 18),
-                        label: const Text('Ingia / Log in'),
+                        label: Text(l10n.login),
                       ),
                       TextButton.icon(
                         onPressed: () {
@@ -66,65 +69,63 @@ class LandingScreen extends StatelessWidget {
                           );
                         },
                         icon: const Icon(Icons.person_add_alt, size: 18),
-                        label: const Text('Jiandikishe / Register'),
+                        label: Text(l10n.register),
                       ),
                       TextButton.icon(
                         onPressed: () => _exploreAsGuest(context),
                         icon: const Icon(Icons.visibility_outlined, size: 18),
-                        label: const Text('Mgeni / Guest'),
+                        label: Text(l10n.guest),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  const AppSectionHeader(
-                    title: 'Kwa nini GasLink? / Why GasLink?',
-                    subtitle: 'Uthibitisho kabla ya ununuzi.',
+                  AppSectionHeader(
+                    title: l10n.whyGasLink,
+                    subtitle: l10n.whyGasLinkSubtitle,
                     icon: Icons.workspace_premium_outlined,
                   ),
                   const SizedBox(height: 12),
-                  const _ValuePropCard(
+                  _ValuePropCard(
                     icon: Icons.verified_user_outlined,
-                    title: 'Wauzaji Waliohakikiwa',
-                    message:
-                        'Maduka yaliyothibitishwa na kukaguliwa na GasLink.',
+                    title: l10n.verifiedVendors,
+                    message: l10n.verifiedVendorsBody,
                   ),
                   const SizedBox(height: 10),
-                  const _ValuePropCard(
+                  _ValuePropCard(
                     icon: Icons.local_shipping_outlined,
-                    title: 'Usafirishaji Mpaka Mlango',
-                    message:
-                        'Agiza mtungi au kujaza gesi, tunakuletea nyumbani.',
+                    title: l10n.doorDelivery,
+                    message: l10n.doorDeliveryBody,
                   ),
                   const SizedBox(height: 10),
-                  const _ValuePropCard(
+                  _ValuePropCard(
                     icon: Icons.price_check_outlined,
-                    title: 'Bei za Soko',
-                    message: 'Linganisha bei za wauzaji wote kabla hujaagiza.',
+                    title: l10n.marketPrices,
+                    message: l10n.marketPricesBody,
                   ),
                   const SizedBox(height: 22),
-                  const AppSectionHeader(
-                    title: 'Inavyofanya kazi / How it works',
+                  AppSectionHeader(
+                    title: l10n.howItWorks,
                     icon: Icons.auto_awesome_outlined,
                   ),
                   const SizedBox(height: 12),
-                  const _StepRow(
+                  _StepRow(
                     step: '1',
-                    title: 'Chagua huduma',
-                    message: 'Refill, mtungi mpya, vifaa au matengenezo.',
+                    title: l10n.stepChooseService,
+                    message: l10n.stepChooseServiceBody,
                   ),
-                  const _StepRow(
+                  _StepRow(
                     step: '2',
-                    title: 'Linganisha wauzaji',
-                    message: 'Bei, umbali na uhakiki wa kila duka.',
+                    title: l10n.stepCompareVendors,
+                    message: l10n.stepCompareVendorsBody,
                   ),
-                  const _StepRow(
+                  _StepRow(
                     step: '3',
-                    title: 'Agiza & Fuatilia',
-                    message: 'Fuatilia oda yako mpaka mlangoni.',
+                    title: l10n.stepOrderTrack,
+                    message: l10n.stepOrderTrackBody,
                   ),
                   const SizedBox(height: 22),
-                  const AppSectionHeader(
-                    title: 'Tunahudumia / We serve',
+                  AppSectionHeader(
+                    title: l10n.weServe,
                     icon: Icons.location_on_outlined,
                   ),
                   const SizedBox(height: 12),
@@ -150,7 +151,7 @@ class LandingScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text('Tangaza nasi / Advertise with us'),
+                      child: Text(l10n.advertiseWithUs),
                     ),
                   ),
                   const LegalLinks(),
@@ -163,7 +164,7 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHero(BuildContext context) {
+  Widget _buildHero(BuildContext context, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       decoration: BoxDecoration(
@@ -179,6 +180,10 @@ class LandingScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
+          const Align(
+            alignment: Alignment.centerRight,
+            child: LanguageActionButton(color: Colors.white),
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Image.asset(
@@ -212,10 +217,10 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Gesi Mkononi. Uthibitisho Kabla ya Ununuzi.',
+          Text(
+            l10n.heroTagline,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -223,7 +228,7 @@ class LandingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Wauzaji waliothibitishwa, bei za soko, na usafirishaji mpaka mlangoni wa LPG katika Dar es Salaam.',
+            l10n.heroBody,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.5,

@@ -14,6 +14,7 @@ import '../../core/theme_controller.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_ui.dart';
+import '../../widgets/language_picker.dart';
 import '../about_screen.dart';
 import '../auth/landing_screen.dart';
 import '../legal/legal_screens.dart';
@@ -272,18 +273,7 @@ class _ConsumerSettingsScreenState
                   onChanged: _setNotifications,
                 ),
                 const Divider(height: 1),
-                ListTile(
-                  leading: Icon(
-                    Icons.translate_outlined,
-                    color: context.colors.primary,
-                  ),
-                  title: const Text('Lugha / Language'),
-                  subtitle: const Text('Kiswahili'),
-                  trailing: const AppStatusPill(
-                    label: 'Kiswahili',
-                    icon: Icons.check,
-                  ),
-                ),
+                const LanguagePickerTile(),
               ],
             ),
           ),

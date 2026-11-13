@@ -3,14 +3,17 @@
 // and the landing page.
 
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
-import '../role_router.dart';
-import '../../widgets/theme_mode_button.dart';
-import 'register_screen.dart';
-import 'landing_screen.dart';
-import 'widgets/auth_widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/theme_ext.dart';
+import '../../l10n/error_messages.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/language_picker.dart';
+import '../../widgets/theme_mode_button.dart';
+import '../role_router.dart';
+import 'landing_screen.dart';
+import 'register_screen.dart';
+import 'widgets/auth_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,27 +45,28 @@ class _LoginScreenState extends State<LoginScreen> {
         _phoneCtrl.text.trim(),
         _pinCtrl.text.trim(),
       );
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       if (data == null) {
-        setState(() => _error = 'Ingia imeshindikana / Login failed');
+        setState(() => _error = l10n.loginFailed);
         return;
       }
 
       final role = data['role'] as String?;
       if (role == null || !AuthService.validRoles.contains(role)) {
-        setState(() => _error =
-            'Akaunti haina wadhifa sahihi / Account role is not configured');
+        setState(() => _error = l10n.accountRoleMissing);
         return;
       }
 
       // Consent is collected at registration only.
-      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => RoleRouter(userRole: role)),
         (_) => false,
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (!mounted) return;
+      setState(() => _error = authErrorText(AppLocalizations.of(context), e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -91,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -99,12 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Karibu / Welcome'),
+          title: Text(l10n.welcome),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: _backToLanding,
           ),
-          actions: const [ThemeModeButton()],
+          actions: const [LanguageActionButton(), ThemeModeButton()],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -112,16 +117,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const AuthHeader(subtitle: 'Gesi mkononi, uthibitisho kwanza.'),
+                AuthHeader(subtitle: l10n.appTagline),
                 const SizedBox(height: 24),
                 TextField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Namba ya simu / Phone number',
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
                     hintText: '+255777000777',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -130,11 +135,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                   keyboardType: TextInputType.number,
                   maxLength: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'PIN (namba 4) / 4-digit PIN',
+                  decoration: InputDecoration(
+                    labelText: l10n.pin4,
                     counterText: '',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -150,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Ingia / Login'),
+                      : Text(l10n.login),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
@@ -161,19 +166,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             MaterialPageRoute(
                                 builder: (_) => const RegisterScreen()),
                           ),
-                  child: const Text('Fungua akaunti / Register'),
+                  child: Text(l10n.register),
                 ),
                 TextButton(
                   onPressed: _loading ? null : _guest,
                   child: Text(
-                    'Endelea bila kuingia / Continue without account',
+                    l10n.continueWithoutAccount,
                     style: TextStyle(color: context.colors.onSurfaceVariant),
                   ),
                 ),
                 const LegalLinks(),
                 Center(
                   child: Text(
-                    '🔒 PIN yako ni siri. Data salama na GasLink.',
+                    l10n.pinPrivacyNote,
                     style: TextStyle(
                       fontSize: 11,
                       color: context.colors.outline,

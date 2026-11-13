@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/theme_ext.dart';
 import '../../../widgets/app_ui.dart';
@@ -32,6 +33,7 @@ class _AuthConsentsState extends State<AuthConsents> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Column(
@@ -42,9 +44,9 @@ class _AuthConsentsState extends State<AuthConsents> {
             dense: true,
             value: _termsAccepted,
             activeColor: context.colors.primary,
-            title: const Text(
-              'Nakubali Vigezo na Masharti',
-              style: TextStyle(fontSize: 12.5),
+            title: Text(
+              l10n.acceptTerms,
+              style: const TextStyle(fontSize: 12.5),
             ),
             onChanged: (value) {
               setState(() => _termsAccepted = value ?? false);
@@ -57,13 +59,13 @@ class _AuthConsentsState extends State<AuthConsents> {
             dense: true,
             value: _adsConsent,
             activeColor: context.colors.primary,
-            title: const Text(
-              'Nakubali ujumbe wa push, vidokezo na ofa / I agree to push messages, tips and offers',
-              style: TextStyle(fontSize: 12.5),
+            title: Text(
+              l10n.marketingConsent,
+              style: const TextStyle(fontSize: 12.5),
             ),
-            subtitle: const Text(
-              'Sio matangazo ya ndani ya app / Not in-app ads',
-              style: TextStyle(fontSize: 11),
+            subtitle: Text(
+              l10n.marketingConsentNote,
+              style: const TextStyle(fontSize: 11),
             ),
             onChanged: (value) {
               setState(() => _adsConsent = value ?? false);
@@ -83,6 +85,7 @@ class LegalLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 2,
@@ -92,9 +95,9 @@ class LegalLinks extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => const TermsScreen()),
           ),
-          child: const Text(
-            'Vigezo na Masharti / Terms',
-            style: TextStyle(fontSize: 11.5),
+          child: Text(
+            l10n.terms,
+            style: const TextStyle(fontSize: 11.5),
           ),
         ),
         TextButton(
@@ -102,9 +105,9 @@ class LegalLinks extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => const PrivacyScreen()),
           ),
-          child: const Text(
-            'Sera ya Faragha / Privacy',
-            style: TextStyle(fontSize: 11.5),
+          child: Text(
+            l10n.privacy,
+            style: const TextStyle(fontSize: 11.5),
           ),
         ),
       ],

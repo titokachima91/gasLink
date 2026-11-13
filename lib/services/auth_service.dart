@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'admin_pin_service.dart';
 import 'notification_service.dart';
+import '../core/app_error.dart';
 import '../utils/utils.dart';
 
 class AuthService {
@@ -175,16 +176,15 @@ class AuthService {
   }
 
   Future<void> register(String phone, String pin,
-      {bool adsConsent = true}) async {
+      {bool adsConsent = false}) async {
     final cleanPhone = Utils.normalizePhone(phone);
     final cleanPin = pin.trim();
 
     if (!Utils.isValidTzPhone(cleanPhone)) {
-      throw Exception(
-          'Namba ya simu si sahihi / Invalid phone number (e.g. 0767304776)');
+      throw const AppError(AppError.invalidPhone);
     }
     if (cleanPin.length != 4 || int.tryParse(cleanPin) == null) {
-      throw Exception('PIN lazima iwe namba 4 / PIN must be 4 digits');
+      throw const AppError(AppError.invalidPin);
     }
 
     final db = FirebaseFirestore.instance;
@@ -195,7 +195,7 @@ class AuthService {
         .get();
 
     if (existing.docs.isNotEmpty) {
-      throw Exception('Akaunti ipo tayari / Account already exists');
+      throw const AppError(AppError.accountExists);
     }
 
     final newDoc = await db.collection('users').add({
@@ -253,7 +253,7 @@ class AuthService {
 
     if (cleanPhone != adminPhone) return null;
     if (cleanPin != adminPin) {
-      throw Exception('PIN si sahihi / Incorrect PIN');
+      throw const AppError(AppError.incorrectPin);
     }
 
     currentRole = roleAdmin;
@@ -275,11 +275,10 @@ class AuthService {
     currentUserId = null;
 
     if (!Utils.isValidTzPhone(cleanPhone)) {
-      throw Exception(
-          'Namba ya simu si sahihi / Invalid phone number (e.g. 0767304776)');
+      throw const AppError(AppError.invalidPhone);
     }
     if (cleanPin.length != 4 || int.tryParse(cleanPin) == null) {
-      throw Exception('PIN lazima iwe namba 4 / PIN must be 4 digits');
+      throw const AppError(AppError.invalidPin);
     }
 
     // 1. Hardcoded admin is checked before touching Firestore.
@@ -301,7 +300,7 @@ class AuthService {
         '🔐 Login query phone=$cleanPhone variants=$variants matches=${doc.docs.length}');
 
     if (doc.docs.isEmpty) {
-      throw Exception('Account haijatambuliwa / Account not found');
+      throw const AppError(AppError.accountNotFound);
     }
 
     final data = doc.docs.first.data();
@@ -310,8 +309,7 @@ class AuthService {
 
     final lockedUntil = data['lockedUntil'] as Timestamp?;
     if (lockedUntil != null && lockedUntil.toDate().isAfter(DateTime.now())) {
-      throw Exception(
-          'Akaunti imefungwa kwa dakika 15 / Account locked for 15 minutes');
+      throw const AppError(AppError.accountLocked);
     }
 
     if (data['passcodeHash'] != _hash(cleanPin, storedPhone)) {
@@ -322,17 +320,15 @@ class AuthService {
           'lockedUntil': Timestamp.fromDate(
               DateTime.now().add(const Duration(minutes: 15))),
         });
-        throw Exception(
-            'Akaunti imefungwa kwa dakika 15 / Account locked for 15 minutes');
+        throw const AppError(AppError.accountLocked);
       }
       await ref.update({'pinAttempts': attempts});
-      throw Exception('PIN si sahihi / Incorrect PIN');
+      throw const AppError(AppError.incorrectPin);
     }
 
     final role = data['role'] as String?;
     if (role == null || !validRoles.contains(role)) {
-      throw Exception(
-          'Akaunti haina wadhifa sahihi / Account role is not configured');
+      throw const AppError(AppError.roleNotConfigured);
     }
 
     final updates = <String, dynamic>{'pinAttempts': 0, 'lockedUntil': null};

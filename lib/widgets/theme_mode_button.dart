@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme_controller.dart';
@@ -12,7 +13,7 @@ class ThemeModeButton extends ConsumerWidget {
     final mode = ref.watch(themeControllerProvider);
 
     return IconButton(
-      tooltip: 'Mandhari / Theme',
+      tooltip: AppLocalizations.of(context).theme,
       icon: Icon(switch (mode) {
         ThemeMode.system => Icons.brightness_auto,
         ThemeMode.light => Icons.light_mode,
@@ -28,17 +29,21 @@ class ThemeModeButton extends ConsumerWidget {
     ThemeMode current,
   ) async {
     final controller = ref.read(themeControllerProvider.notifier);
+    final l10n = AppLocalizations.of(context);
     final selected = await showModalBottomSheet<ThemeMode>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
-                'Mandhari / Theme',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                l10n.theme,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             for (final mode in ThemeMode.values)
@@ -46,7 +51,7 @@ class ThemeModeButton extends ConsumerWidget {
                 value: mode,
                 groupValue: current,
                 secondary: Icon(_icon(mode)),
-                title: Text(_label(mode)),
+                title: Text(_label(l10n, mode)),
                 onChanged: (value) => Navigator.pop(context, value),
               ),
             const SizedBox(height: 8),
@@ -71,14 +76,14 @@ class ThemeModeButton extends ConsumerWidget {
     }
   }
 
-  static String _label(ThemeMode mode) {
+  static String _label(AppLocalizations l10n, ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        return 'Inafuata mfumo / System';
+        return l10n.themeSystem;
       case ThemeMode.light:
-        return 'Nuru / Light';
+        return l10n.themeLight;
       case ThemeMode.dark:
-        return 'Giza / Dark';
+        return l10n.themeDark;
     }
   }
 }

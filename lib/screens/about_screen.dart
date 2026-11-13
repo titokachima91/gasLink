@@ -2,6 +2,7 @@
 // App information, readable Terms/Privacy copies, and support contacts.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/constants.dart';
@@ -25,12 +26,16 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'Kuhusu GasLink / About GasLink',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          l10n.aboutTitle,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
       body: ListView(
@@ -60,7 +65,7 @@ class AboutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Toleo / Version ${AppConstants.appVersion}',
+                  l10n.versionLabel(AppConstants.appVersion),
                   style: TextStyle(
                     fontSize: 12.5,
                     color: context.colors.onSurfaceVariant,
@@ -68,7 +73,7 @@ class AboutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Gesi mkononi — uthibitisho kabla ya ununuzi.',
+                  l10n.aboutTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
@@ -79,8 +84,8 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const AppSectionHeader(
-            title: 'Sera / Legal',
+          AppSectionHeader(
+            title: l10n.legalSection,
             icon: Icons.gavel_outlined,
           ),
           const SizedBox(height: 10),
@@ -93,9 +98,7 @@ class AboutScreen extends StatelessWidget {
                     Icons.description_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text(
-                    'Vigezo na Masharti / Terms & Conditions',
-                  ),
+                  title: Text(l10n.terms),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => Navigator.push(
                     context,
@@ -108,7 +111,7 @@ class AboutScreen extends StatelessWidget {
                     Icons.privacy_tip_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Sera ya Faragha / Privacy Policy'),
+                  title: Text(l10n.privacy),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => Navigator.push(
                     context,
@@ -119,8 +122,8 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const AppSectionHeader(
-            title: 'Msaada / Support',
+          AppSectionHeader(
+            title: l10n.supportSection,
             icon: Icons.support_agent_outlined,
           ),
           const SizedBox(height: 10),
@@ -133,7 +136,7 @@ class AboutScreen extends StatelessWidget {
                     Icons.phone_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Piga simu / Call'),
+                  title: Text(l10n.callSupport),
                   subtitle: const Text(_supportPhone),
                   onTap: () => _callSupport(),
                 ),
@@ -143,7 +146,7 @@ class AboutScreen extends StatelessWidget {
                     Icons.email_outlined,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Barua pepe / Email'),
+                  title: Text(l10n.emailSupport),
                   subtitle: const Text(_supportEmail),
                   onTap: () => _emailSupport(),
                 ),
@@ -153,7 +156,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              '© 2026 GasLink',
+              l10n.copyright,
               style: TextStyle(
                 fontSize: 11,
                 color: context.colors.outline,

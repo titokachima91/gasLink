@@ -30,6 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # flutter_localizations for Flutter 3.24.5 pins intl 0.19.0.
+  intl: 0.19.0
   # Pinned to the Feb 2025 FlutterFire set. Newer releases use Firebase
   # Android BoM 33.9+ / firebase-auth 23.2+, which ships Kotlin 2.1 metadata
   # that this Flutter 3.24.5 / AGP 8.3 / Kotlin 1.9.22 toolchain cannot read.
@@ -77,6 +81,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # Generates lib/l10n strings from the ARB files on pub get/build.
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

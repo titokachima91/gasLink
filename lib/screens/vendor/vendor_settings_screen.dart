@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme_controller.dart';
 import '../../models/vendor.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/language_picker.dart';
 import '../../widgets/referral_card.dart';
 import '../auth/landing_screen.dart';
 import 'vendor_profile_screen.dart';
@@ -249,16 +250,22 @@ class _VendorSettingsScreenState extends ConsumerState<VendorSettingsScreen> {
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: colors.outlineVariant),
             ),
-            child: SwitchListTile(
-              secondary:
-                  Icon(Icons.notifications_outlined, color: colors.primary),
-              title: const Text('Taarifa / Notifications'),
-              subtitle: const Text('Pokea taarifa za oda na mabadiliko'),
-              value: _notificationsEnabled,
-              activeColor: colors.primary,
-              onChanged: (val) {
-                setState(() => _notificationsEnabled = val);
-              },
+            child: Column(
+              children: [
+                const LanguagePickerTile(),
+                const Divider(height: 1),
+                SwitchListTile(
+                  secondary:
+                      Icon(Icons.notifications_outlined, color: colors.primary),
+                  title: const Text('Taarifa / Notifications'),
+                  subtitle: const Text('Pokea taarifa za oda na mabadiliko'),
+                  value: _notificationsEnabled,
+                  activeColor: colors.primary,
+                  onChanged: (val) {
+                    setState(() => _notificationsEnabled = val);
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),

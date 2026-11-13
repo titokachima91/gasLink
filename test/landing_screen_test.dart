@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gaslink_app/core/theme.dart';
@@ -8,17 +10,22 @@ void main() {
   testWidgets('landing page renders hero, props, steps, and CTAs',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: buildAppTheme(Brightness.light),
-        home: const LandingScreen(),
+      ProviderScope(
+        child: MaterialApp(
+          theme: buildAppTheme(Brightness.light),
+          locale: const Locale('sw'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: const [Locale('sw'), Locale('en')],
+          home: const LandingScreen(),
+        ),
       ),
     );
     await tester.pump();
 
     expect(find.text('GasLink'), findsOneWidget);
-    expect(find.text('Ingia / Log in'), findsOneWidget);
-    expect(find.text('Mgeni / Guest'), findsOneWidget);
-    expect(find.text('Jiandikishe / Register'), findsOneWidget);
+    expect(find.text('Ingia'), findsOneWidget);
+    expect(find.text('Mgeni'), findsOneWidget);
+    expect(find.text('Fungua akaunti'), findsOneWidget);
     expect(find.textContaining('Advertise Here'), findsOneWidget);
     expect(find.textContaining('Inavyofanya kazi'), findsOneWidget);
 
@@ -29,9 +36,14 @@ void main() {
   testWidgets('landing page renders in dark mode without exceptions',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: buildAppTheme(Brightness.dark),
-        home: const LandingScreen(),
+      ProviderScope(
+        child: MaterialApp(
+          theme: buildAppTheme(Brightness.dark),
+          locale: const Locale('sw'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: const [Locale('sw'), Locale('en')],
+          home: const LandingScreen(),
+        ),
       ),
     );
     await tester.pump();
