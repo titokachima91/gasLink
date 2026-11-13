@@ -641,6 +641,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   Expanded(
                     child: Text(
                       brandName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
