@@ -54,62 +54,12 @@ def on_notification_added(col_snapshot, changes, read_time):
                     'sentAt': firestore.SERVER_TIMESTAMP
                 })
 
-def on_order_updated(col_snapshot, changes, read_time):
-    """AUTOMATED CLOUD BRIDGE: Watches order status changes and alerts consumers natively"""
-    for change in changes:
-        if change.type.name == 'MODIFIED':
-            order_id = change.document.id
-            order_data = change.document.to_dict()
-            status = str(order_data.get('status', '')).lower().strip()
-            
-            # Extract tracking targets safely using your model attributes
-            consumer_uid = order_data.get('consumer_uid') or order_data.get('user_id')
-            brand = order_data.get('brand_name') or order_data.get('brand') or "Gesi"
-            
-            if not consumer_uid:
-                continue
-
-            # Check if this status change has already been alerted to prevent loops
-            alert_key = f"alerted_{status}"
-            if order_data.get(alert_key) is True:
-                continue
-
-            # Map appropriate user-friendly language to stepper shifts.
-            # Statuses match Flutter's AppConstants.orderStatuses:
-            # placed, seen, confirmed, on_the_way, delivered_pending, delivered, cancelled
-            title, body = None, None
-            if status == 'confirmed':
-                title = 'Oda Imethibitishwa! / Order Confirmed!'
-                body = f"Muuzaji amethibitisha oda yako. Muda wa kuwasili ni takriban dakika {order_data.get('eta_minutes', 20)}."
-            elif status == 'on_the_way':
-                title = 'Ipo Njiani! / On The Way!'
-                body = f"Dereva yuko njiani kuleta oda yako ya {brand}."
-            elif status == 'delivered_pending':
-                title = 'Mzigo Umewasilishwa / Delivered (Pending Confirm)'
-                body = f"Muuzaji amesema oda yako ya {brand} imewasilishwa. Tafadhali thibitisha kupokea."
-            elif status == 'delivered':
-                title = 'Imewasili! / Delivered!'
-                body = f"Oda yako ya {brand} imekamilika kikamilifu. Asante!"
-            elif status == 'cancelled':
-                title = 'Oda Imesitishwa / Order Cancelled'
-                body = "Muuzaji amesitisha oda yako. Tafadhali jaribu muuzaji mwingine."
-
-            if title and body:
-                # Look up consumer token directly from their user record safely
-                user_doc = db.collection('users').document(consumer_uid).get()
-                if user_doc.exists:
-                    fcm_token = user_doc.to_dict().get('fcmToken')
-                    if fcm_token:
-                        print(f"🔔 Order status shift detected ({status}). Alerting consumer: {consumer_uid}")
-                        if send_fcm_push(fcm_token, title, body, {'orderId': order_id, 'type': 'order_status'}):
-                            # Mark this status as alerted on the order doc so it never double-fires
-                            db.collection('orders').document(order_id).update({
-                                alert_key: True
-                            })
-
-# Attach the background listeners to your cloud database nodes
+# Attach the background listener to the notification ledger only.
+# Order events are dispatched centrally by the Flutter NotificationDispatcher,
+# which applies each user's notification_channel preference and mirrors to SMS.
+# The previous orders listener is intentionally NOT attached: it bypassed those
+# preferences and duplicated every status push.
 db.collection('notifications').on_snapshot(on_notification_added)
-db.collection('orders').on_snapshot(on_order_updated)
 
 try:
     while True:
