@@ -98,8 +98,9 @@ only for the pilot LAN hosts; public tunnel URLs must use HTTPS.
   bridge created a `placed` 26,000 TZS Oryx 6kg order with `source: sms_ai`;
   the order and its notification ledger entry were deleted and the opt-in flag
   restored immediately after the check.
-- The gateway runs on `192.168.1.11:8080`; `env.local.json` points there for
-  the pilot APK. The code default remains `192.168.1.12:8080` as specified.
+- The gateway runs on the Mac’s current LAN IP at port 8080
+  (`ipconfig getifaddr en0`); `env.local.json` points there for the pilot APK.
+  The code default remains `192.168.1.12:8080` as specified.
 
 ## 7. Out of scope / next
 
