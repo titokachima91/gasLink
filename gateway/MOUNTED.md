@@ -48,3 +48,7 @@ Changes made there (outside this repo):
 - `POST /v1/bridge/subscriber` returns `registered` / `aiEnabled`
 - Subscriber gate live check returned `remote_ai_disabled` for an AI-off user
 - `GET /v1/bridge/catalog` returns 6 live products
+- `POST /v1/send-sms` and both OTP routes are mounted and authenticated
+
+The AI reply engine itself still needs a provider key saved in the gateway
+dashboard (`/dashboard` → SMS & AI) or `GEMINI_API_KEY_PRIMARY` in `.env`.
