@@ -43,6 +43,20 @@ build/app/outputs/flutter-apk/app-release.apk
 build. Most of that is R8 register allocation. A warm build is faster, but do
 not assume the build is hung just because it is quiet. See “Is it stuck?” below.
 
+### SMS/AI gateway build
+
+The gateway URL and tenant key are build-time values, never committed:
+
+```bash
+cp env.local.example.json env.local.json   # fill in the real gl-... key
+flutter build apk --release --dart-define-from-file=env.local.json
+```
+
+`env.local.json` is gitignored. If it is missing or the key is empty, SMS is
+disabled safely and the app still builds. The LAN defaults in
+`android/app/src/main/res/xml/network_security_config.xml` allow cleartext only
+for the pilot hosts; use HTTPS for a public tunnel.
+
 ---
 
 ## Dependency pins — do not bump
