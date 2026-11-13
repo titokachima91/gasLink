@@ -1,5 +1,5 @@
 // lib/screens/auth/register_screen.dart
-// Branded registration: logo, phone + PIN + confirm, Terms & ads consent.
+// Branded registration: logo, phone + PIN + confirm, Terms & marketing consent.
 
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
@@ -23,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _pin2Ctrl = TextEditingController();
   bool _loading = false;
   bool _termsAccepted = false;
-  bool _adsConsent = true;
+  bool _adsConsent = false;
   String? _error;
 
   @override

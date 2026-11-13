@@ -1,9 +1,8 @@
 // lib/screens/auth/login_screen.dart
-// Branded login screen: logo, phone + PIN, Terms & ads consent, and links to
-// register, guest mode, and the landing page.
+// Branded login screen: logo, phone + PIN, and links to register, guest mode,
+// and the landing page.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
 import '../role_router.dart';
 import '../../widgets/theme_mode_button.dart';
@@ -24,8 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();
   final _pinCtrl = TextEditingController();
   bool _loading = false;
-  bool _termsAccepted = false;
-  bool _adsConsent = true;
   String? _error;
 
   @override
@@ -57,15 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Record consent on the user document (skipped for admin).
-      final uid = AuthService.instance.currentUserId;
-      if (uid != null && uid != 'admin_local') {
-        await AuthService.instance.saveConsents(
-          uid: uid,
-          adsConsent: _adsConsent,
-        );
-      }
-
+      // Consent is collected at registration only.
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
@@ -149,21 +138,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                AuthConsents(
-                  onChanged: ({required termsAccepted, required adsConsent}) {
-                    setState(() {
-                      _termsAccepted = termsAccepted;
-                      _adsConsent = adsConsent;
-                    });
-                  },
-                ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
                   Text(_error!, style: TextStyle(color: context.colors.error)),
                 ],
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: (_loading || !_termsAccepted) ? null : _login,
+                  onPressed: _loading ? null : _login,
                   child: _loading
                       ? const SizedBox(
                           height: 20,
@@ -171,17 +152,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Ingia / Login'),
                 ),
-                if (!_termsAccepted) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Kubali Vigezo na Masharti kuendelea.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: _loading
@@ -200,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: context.colors.onSurfaceVariant),
                   ),
                 ),
+                const LegalLinks(),
                 Center(
                   child: Text(
                     '🔒 PIN yako ni siri. Data salama na GasLink.',

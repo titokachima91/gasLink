@@ -4,8 +4,10 @@ import '../../../core/theme_ext.dart';
 import '../../../widgets/app_ui.dart';
 import '../../legal/legal_screens.dart';
 
-/// Shared Terms & Conditions + advertising-consent block used by the login
-/// and register screens.
+/// Shared Terms & Conditions + marketing-consent block used by registration.
+///
+/// Marketing consent is optional, defaults to off, and covers push messages,
+/// tips and offers — not in-app ad slots.
 class AuthConsents extends StatefulWidget {
   const AuthConsents({super.key, required this.onChanged});
 
@@ -19,7 +21,7 @@ class AuthConsents extends StatefulWidget {
 
 class _AuthConsentsState extends State<AuthConsents> {
   bool _termsAccepted = false;
-  bool _adsConsent = true;
+  bool _adsConsent = false;
 
   void _emit() {
     widget.onChanged(
@@ -40,25 +42,9 @@ class _AuthConsentsState extends State<AuthConsents> {
             dense: true,
             value: _termsAccepted,
             activeColor: context.colors.primary,
-            title: Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Nakubali Vigezo na Masharti',
-                    style: TextStyle(fontSize: 12.5),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const TermsScreen()),
-                  ),
-                  child: const Text(
-                    'Soma',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-              ],
+            title: const Text(
+              'Nakubali Vigezo na Masharti',
+              style: TextStyle(fontSize: 12.5),
             ),
             onChanged: (value) {
               setState(() => _termsAccepted = value ?? false);
@@ -72,11 +58,11 @@ class _AuthConsentsState extends State<AuthConsents> {
             value: _adsConsent,
             activeColor: context.colors.primary,
             title: const Text(
-              'Nakubali kupokea matangazo na ofa',
+              'Nakubali ujumbe wa push, vidokezo na ofa / I agree to push messages, tips and offers',
               style: TextStyle(fontSize: 12.5),
             ),
             subtitle: const Text(
-              'Unaweza kubadilisha hii kwenye Mipangilio.',
+              'Sio matangazo ya ndani ya app / Not in-app ads',
               style: TextStyle(fontSize: 11),
             ),
             onChanged: (value) {
@@ -84,8 +70,44 @@ class _AuthConsentsState extends State<AuthConsents> {
               _emit();
             },
           ),
+          const LegalLinks(),
         ],
       ),
+    );
+  }
+}
+
+/// Compact Terms and Privacy links shared by the auth screens.
+class LegalLinks extends StatelessWidget {
+  const LegalLinks({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 2,
+      children: [
+        TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const TermsScreen()),
+          ),
+          child: const Text(
+            'Vigezo na Masharti / Terms',
+            style: TextStyle(fontSize: 11.5),
+          ),
+        ),
+        TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PrivacyScreen()),
+          ),
+          child: const Text(
+            'Sera ya Faragha / Privacy',
+            style: TextStyle(fontSize: 11.5),
+          ),
+        ),
+      ],
     );
   }
 }

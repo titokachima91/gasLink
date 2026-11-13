@@ -8,6 +8,7 @@
 class AppConstants {
   static const String appName = 'GasLink';
   static const String appNameSw = 'GasLink';
+  static const String appVersion = '1.0.0';
 
   /// Canonical brand list — vendors pick from this, never invent brands.
   static const List<String> gasBrands = [

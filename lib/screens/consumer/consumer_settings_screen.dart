@@ -8,11 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/constants.dart';
 import '../../core/session_gate.dart';
 import '../../core/theme_controller.dart';
 import '../../core/theme_ext.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_ui.dart';
+import '../about_screen.dart';
 import '../auth/landing_screen.dart';
 import '../legal/legal_screens.dart';
 import 'gas_plan_screen.dart';
@@ -32,7 +34,6 @@ class _ConsumerSettingsScreenState
   static const _notificationsPref = 'consumer_notifications_enabled';
 
   bool _notificationsEnabled = true;
-  bool? _adsConsent;
 
   String get _uid => AuthService.instance.currentUserId ?? '';
 
@@ -44,23 +45,9 @@ class _ConsumerSettingsScreenState
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    bool? adsConsent;
-    if (_uid.isNotEmpty) {
-      try {
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(_uid)
-            .get();
-        final stored = doc.data()?['adsConsent'];
-        if (stored is bool) adsConsent = stored;
-      } catch (e) {
-        debugPrint('Ads consent load warning: $e');
-      }
-    }
     if (!mounted) return;
     setState(() {
       _notificationsEnabled = prefs.getBool(_notificationsPref) ?? true;
-      _adsConsent = adsConsent;
     });
   }
 
@@ -68,11 +55,6 @@ class _ConsumerSettingsScreenState
     setState(() => _notificationsEnabled = value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_notificationsPref, value);
-  }
-
-  Future<void> _setAdsConsent(bool value) async {
-    setState(() => _adsConsent = value);
-    await AuthService.instance.saveAdsConsent(_uid, value);
   }
 
   Future<void> _editName(BuildContext context) async {
@@ -302,18 +284,6 @@ class _ConsumerSettingsScreenState
                     icon: Icons.check,
                   ),
                 ),
-                const Divider(height: 1),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.campaign_outlined,
-                    color: context.colors.primary,
-                  ),
-                  title: const Text('Matangazo / Ads'),
-                  subtitle: const Text('Ruhusu matangazo na ofa'),
-                  value: _adsConsent ?? true,
-                  activeColor: context.colors.primary,
-                  onChanged: _setAdsConsent,
-                ),
               ],
             ),
           ),
@@ -357,10 +327,10 @@ class _ConsumerSettingsScreenState
           ),
           const SizedBox(height: 20),
 
-          // ── LEGAL ──────────────────────────────────────────────────
+          // ── ABOUT ──────────────────────────────────────────────────
           const AppSectionHeader(
-            title: 'Sera / Legal',
-            icon: Icons.gavel_outlined,
+            title: 'Kuhusu / About',
+            icon: Icons.info_outline,
           ),
           const SizedBox(height: 10),
           AppCard(
@@ -369,14 +339,17 @@ class _ConsumerSettingsScreenState
               children: [
                 ListTile(
                   leading: Icon(
-                    Icons.description_outlined,
+                    Icons.info_outline,
                     color: context.colors.primary,
                   ),
-                  title: const Text('Vigezo na Masharti'),
+                  title: const Text('Kuhusu GasLink'),
+                  subtitle: const Text(
+                    'Toleo / Version ${AppConstants.appVersion}',
+                  ),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const TermsScreen()),
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
                   ),
                 ),
                 const Divider(height: 1),
@@ -391,12 +364,6 @@ class _ConsumerSettingsScreenState
                     context,
                     MaterialPageRoute(builder: (_) => const PrivacyScreen()),
                   ),
-                ),
-                const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('GasLink'),
-                  subtitle: Text('Toleo / Version 1.0.0'),
                 ),
               ],
             ),

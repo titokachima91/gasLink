@@ -37,9 +37,11 @@ class TermsScreen extends StatelessWidget {
               'Ripoti matatizo yoyote kupitia msaada kwa wateja.'
         ),
         (
-          '5. Matangazo',
-          'Tunaweza kukuonyesha matangazo yanayofaa. Unaweza kuzima kupitia '
-              'Mipangilio.'
+          '5. Matangazo na ujumbe',
+          'Tunaweza kukuonyesha matangazo ndani ya app. Ujumbe wa push, '
+              'vidokezo na ofa hutumwa tu ikiwa ulikubali wakati wa usajili. '
+              'Unaweza kuacha kupokea ujumbe kupitia mipangilio ya simu au '
+              'msaada kwa wateja.'
         ),
       ],
     );

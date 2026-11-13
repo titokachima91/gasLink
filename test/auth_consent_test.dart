@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gaslink_app/core/theme.dart';
+import 'package:gaslink_app/screens/auth/landing_screen.dart';
 import 'package:gaslink_app/screens/auth/login_screen.dart';
+import 'package:gaslink_app/screens/auth/register_screen.dart';
 import 'package:gaslink_app/screens/auth/widgets/auth_widgets.dart';
 import 'package:gaslink_app/screens/legal/legal_screens.dart';
 
@@ -17,37 +19,42 @@ Widget wrap(Brightness brightness, Widget child) {
 }
 
 void main() {
-  testWidgets('login button stays disabled until terms are accepted',
-      (tester) async {
+  testWidgets('login has no consent gate and stays enabled', (tester) async {
     await tester.pumpWidget(wrap(Brightness.light, const LoginScreen()));
     await tester.pump();
 
-    FilledButton loginButton() => tester.widget<FilledButton>(
-          find.widgetWithText(FilledButton, 'Ingia / Login'),
-        );
+    expect(find.byType(CheckboxListTile), findsNothing);
 
-    expect(loginButton().onPressed, isNull);
-
-    // Accept the terms checkbox (first CheckboxListTile).
-    await tester.tap(find.byType(CheckboxListTile).first);
-    await tester.pump();
-
-    expect(loginButton().onPressed, isNotNull);
+    final loginButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Ingia / Login'),
+    );
+    expect(loginButton.onPressed, isNotNull);
   });
 
-  testWidgets('terms link opens the terms page', (tester) async {
+  testWidgets('login terms link opens the terms page', (tester) async {
     await tester.pumpWidget(wrap(Brightness.light, const LoginScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Soma'));
+    await tester.tap(find.text('Vigezo na Masharti / Terms'));
     await tester.pumpAndSettle();
 
     expect(find.byType(TermsScreen), findsOneWidget);
     expect(find.textContaining('Vigezo na Masharti'), findsWidgets);
   });
 
-  testWidgets('ads consent defaults to accepted', (tester) async {
+  testWidgets('login back returns to the landing page', (tester) async {
     await tester.pumpWidget(wrap(Brightness.light, const LoginScreen()));
+    await tester.pump();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LandingScreen), findsOneWidget);
+  });
+
+  testWidgets('registration requires terms and marketing consent defaults off',
+      (tester) async {
+    await tester.pumpWidget(wrap(Brightness.light, const RegisterScreen()));
     await tester.pump();
 
     final checkboxes = tester
@@ -55,12 +62,26 @@ void main() {
         .toList();
     expect(checkboxes.length, 2);
     expect(checkboxes[0].value, isFalse); // terms
-    expect(checkboxes[1].value, isTrue); // ads
+    expect(checkboxes[1].value, isFalse); // marketing push consent
+
+    FilledButton createButton() => tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Fungua akaunti / Create account'),
+        );
+    expect(createButton().onPressed, isNull);
+
+    await tester.tap(find.byType(CheckboxListTile).first);
+    await tester.pump();
+
+    expect(createButton().onPressed, isNotNull);
+    final after = tester
+        .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+        .toList();
+    expect(after[1].value, isFalse);
   });
 
-  testWidgets('login screen renders in dark mode without exceptions',
+  testWidgets('register screen renders in dark mode without exceptions',
       (tester) async {
-    await tester.pumpWidget(wrap(Brightness.dark, const LoginScreen()));
+    await tester.pumpWidget(wrap(Brightness.dark, const RegisterScreen()));
     await tester.pump();
 
     expect(tester.takeException(), isNull);

@@ -13,6 +13,7 @@ import '../advertise_screen.dart';
 import '../role_router.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
+import 'widgets/auth_widgets.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
@@ -152,6 +153,7 @@ class LandingScreen extends StatelessWidget {
                       child: const Text('Tangaza nasi / Advertise with us'),
                     ),
                   ),
+                  const LegalLinks(),
                 ],
               ),
             ),
