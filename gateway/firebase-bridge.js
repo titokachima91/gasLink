@@ -497,8 +497,20 @@ function createFirebaseBridgeRouter(options = {}) {
 
       // Best-effort vendor ledger entry, matching the Flutter notification flow.
       try {
-        const fcmToken = (vendor.fcmToken || '').toString();
-        if (fcmToken) {
+        const vendorUserDoc = await firestore
+          .collection('users')
+          .doc(vendorId)
+          .get();
+        const vendorUser = vendorUserDoc.data() || {};
+        const channel = (vendorUser.notification_channel || 'both').toString();
+        const wantsPush = channel === 'push_only' || channel === 'both';
+        const fcmToken = (
+          vendor.fcmToken ||
+          vendorUser.fcmToken ||
+          vendorUser.fcm_token ||
+          ''
+        ).toString();
+        if (wantsPush && fcmToken) {
           await firestore.collection('notifications').add({
             userId: vendorId,
             fcmToken,
