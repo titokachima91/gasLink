@@ -176,67 +176,118 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                           final item = offers[index];
                           final vendor = item['vendor'] as Vendor;
                           final price = item['price'] as double;
+                          final weight = (item['weight'] ?? '').toString();
+                          final vendorName = vendor.businessName.trim().isNotEmpty
+                              ? vendor.businessName.trim()
+                              : 'Muuzaji';
+                          final vendorArea = vendor.area.trim().isNotEmpty
+                              ? vendor.area.trim()
+                              : 'Dar es Salaam';
 
                           return Card(
                             elevation: 0,
                             margin: const EdgeInsets.only(bottom: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: context.colors.outlineVariant),
+                              side: BorderSide(
+                                  color: context.colors.outlineVariant),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      color: context.colors.primaryContainer,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.storefront,
-                                        color: context.colors.primary),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _openOrderDialog(
+                                context,
+                                vendor,
+                                price,
+                                weight,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                vendor.businessName.isNotEmpty
-                                                    ? vendor.businessName
-                                                    : 'Muuzaji',
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14),
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: context
+                                                .colors.primaryContainer,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(Icons.storefront,
+                                              color: context.colors.primary),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      vendorName,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (vendor.verified) ...[
+                                                    const SizedBox(width: 4),
+                                                    const VerifiedBadge(
+                                                        compact: true),
+                                                  ],
+                                                ],
                                               ),
-                                            ),
-                                            if (vendor.verified) ...[
-                                              const SizedBox(width: 4),
-                                              const VerifiedBadge(
-                                                  compact: true),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '📍 $vendorArea',
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: context.colors
+                                                      .onSurfaceVariant,
+                                                ),
+                                              ),
                                             ],
-                                          ],
+                                          ),
                                         ),
-                                        Text(
-                                          '📍 ${vendor.area.isNotEmpty ? vendor.area : 'Dar es Salaam'}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              fontSize: 11, color: context.colors.onSurfaceVariant),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            weight.isEmpty
+                                                ? 'Bidhaa'
+                                                : '$weight · Refill',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: context
+                                                  .colors.onSurfaceVariant,
+                                            ),
+                                          ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        const SizedBox(width: 8),
                                         Text(
                                           'TZS ${price.toStringAsFixed(0)}',
                                           maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
@@ -245,45 +296,24 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      if (!await SessionGate.requireConsumer(
-                                          context)) {
-                                        return;
-                                      }
-                                      if (!context.mounted) return;
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(16)),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: FilledButton.icon(
+                                        onPressed: () => _openOrderDialog(
+                                          context,
+                                          vendor,
+                                          price,
+                                          weight,
                                         ),
-                                        builder: (context) =>
-                                            ConsumerOrderDialog(
-                                          vendorId: vendor.id,
-                                          brandName: widget.itemName,
-                                          cylinderSize: item['weight'] ?? '',
-                                          vendorName: vendor.businessName,
-                                          price: price,
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: context.colors.primary,
-                                      foregroundColor: context.colors.onPrimary,
-                                      visualDensity: VisualDensity.compact,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 10),
+                                        icon: const Icon(
+                                            Icons.shopping_cart_checkout,
+                                            size: 18),
+                                        label: const Text('Oda Sasa'),
+                                      ),
                                     ),
-                                    child: const Text('Oda Sasa',
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -291,6 +321,33 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                       ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _openOrderDialog(
+    BuildContext context,
+    Vendor vendor,
+    double price,
+    String weight,
+  ) async {
+    if (!await SessionGate.requireConsumer(context)) return;
+    if (!mounted || !context.mounted) return;
+    final vendorName = vendor.businessName.trim().isNotEmpty
+        ? vendor.businessName.trim()
+        : 'Muuzaji';
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => ConsumerOrderDialog(
+        vendorId: vendor.id,
+        brandName: widget.itemName,
+        cylinderSize: weight.isEmpty ? '15kg' : weight,
+        vendorName: vendorName,
+        price: price,
       ),
     );
   }
