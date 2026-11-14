@@ -23,9 +23,11 @@ const DEFAULT_PROJECT_ID = 'gaslink-app-4bfbb';
 
 const BRAND_COLORS = [
   { brand: 'Oryx Gas', match: /oryx/i, color: 'Red', aliases: ['red', 'nyekundu'] },
-  { brand: 'Manjis / Mihan Gas', match: /mihan|manjis/i, color: 'Yellow', aliases: ['yellow', 'njano'] },
-  { brand: 'Taifa Gas', match: /taifa/i, color: 'Blue', aliases: ['blue', 'bluu'] },
-  { brand: 'O-Lake / Lake Gas', match: /lake/i, color: 'Green', aliases: ['green', 'kijani'] },
+  { brand: 'Manjis Gas', match: /manjis/i, color: 'Grey', aliases: ['grey', 'gray', 'kijivu'] },
+  { brand: 'Mihan Gas', match: /mihan/i, color: 'Yellow', aliases: ['yellow', 'njano'] },
+  { brand: 'O-Gas', match: /^o[\s-]?gas$/i, color: 'Yellow', aliases: ['yellow', 'njano'] },
+  { brand: 'Taifa Gas', match: /taifa/i, color: 'Green', aliases: ['green', 'kijani'] },
+  { brand: 'O-Lake / Lake Gas', match: /lake/i, color: 'Blue', aliases: ['blue', 'bluu'] },
 ];
 
 function brandColor(brand) {
@@ -214,6 +216,15 @@ function createFirebaseBridgeRouter(options = {}) {
         area: (data.areaText || data.ward || data.district || '').toString(),
         verified: data.verified === true,
         status: status || 'active',
+        deliveryType: (data.deliveryType || data.delivery_type || '').toString(),
+        deliveryFee: data.deliveryFee ?? data.delivery_fee ?? null,
+        deliveryFeeModel: (data.deliveryFeeModel || data.delivery_fee_model || '').toString(),
+        deliveryRadiusKm: Number(data.deliveryRadiusKm ?? data.delivery_radius_km ?? 0),
+        openingHours: (data.openingHours || data.opening_hours || '').toString(),
+        hasOperationalScale: data.hasOperationalScale === true || data.has_operational_scale === true,
+        hasCertifiedScale: data.hasCertifiedScale === true || data.has_certified_scale === true,
+        acceptsCash: data.acceptsCash !== false,
+        acceptsMobileMoney: data.acceptsMobileMoney === true,
       });
     });
     return map;
@@ -333,6 +344,7 @@ function createFirebaseBridgeRouter(options = {}) {
         })),
         products,
         groups: Array.from(groups.values()),
+        vendors: Array.from(vendors.values()),
       });
     } catch (error) {
       return res.status(500).json({ error: 'Bridge error', message: error.message });

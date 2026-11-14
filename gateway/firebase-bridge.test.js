@@ -30,10 +30,11 @@ test('maps brand colours and Swahili aliases', () => {
     color: 'Red',
     aliases: ['red', 'nyekundu'],
   });
-  assert.equal(brandColor('Manjis Gas').color, 'Yellow');
+  assert.equal(brandColor('Manjis Gas').color, 'Grey');
   assert.equal(brandColor('Mihan Gas').color, 'Yellow');
-  assert.equal(brandColor('Taifa Gas').color, 'Blue');
-  assert.equal(brandColor('O-Lake Gas').color, 'Green');
+  assert.equal(brandColor('O-Gas').color, 'Yellow');
+  assert.equal(brandColor('Taifa Gas').color, 'Green');
+  assert.equal(brandColor('O-Lake Gas').color, 'Blue');
   assert.equal(brandColor('Unknown Gas').color, null);
 });
 

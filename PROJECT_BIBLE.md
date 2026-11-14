@@ -89,7 +89,7 @@ Never ship the hardcoded admin credentials to production. Phase 6 replaces them.
 | Phase 5E D3: vendor localization | **Open** |
 | Phase 5E D4: admin/remaining localization | **Open** |
 | Phase 5F: SMS/AI/OTP/bridge foundation | Implemented; live SMS + consumer FCM tested |
-| DeepSeek AI testing | **Verified** — live catalogue answers and real phone-to-TextBee SMS round trip; SMS ordering intentionally not wired |
+| DeepSeek AI testing | **Verified** — live catalogue, real phone-to-TextBee round trip, 43/43 evaluation; SMS ordering intentionally not wired |
 | OTP app wiring | Foundation only; `ENABLE_OTP_LOGIN=false` |
 | Phase 6: scale/security | **Parked** (Firebase Spark) |
 | Release signing | Debug key only |
@@ -614,7 +614,7 @@ Verified against live Sao Gas data:
 |---|---|
 | “How much is Oryx 6kg refill?” | **TZS 26,000**, in stock at Sao Gas Supply, Sinza |
 | “Gesi nyekundu 6kg ni shilingi ngapi?” | Maps red → Oryx; **TZS 26,000** |
-| “Oryx 13kg refill bei gani?” | Says 13kg is not in the catalogue; offers live 6kg/15kg |
+| “Oryx 13kg refill bei gani?” | Says 13kg is not offered in Tanzania; offers live 6kg/15kg |
 | “Full set ya Oryx 6kg ni ngapi?” | Says no full set is listed; does not invent a price |
 | “Delivery fee ni shilingi ngapi?” | Says fee depends on vendor/distance; does not quote 3,000 |
 | “Habari yako?” | `NO_REPLY` gate; nothing sent |
@@ -659,9 +659,31 @@ Full pipeline, environment and troubleshooting details:
 | `POST /orders` | create `placed` SMS order with idempotency |
 | `GET /health` | liveness |
 
-Brand colours: Oryx Red, Manjis/Mihan Yellow, Taifa Blue, Lake Green.
+Brand colours (live bridge mapping, corrected 14 Nov 2026):
+
+| Brand | Colour | Swahili alias |
+|---|---|---|
+| Oryx Gas | Red | nyekundu |
+| Manjis Gas | Grey | kijivu |
+| Mihan Gas | Yellow | njano |
+| O-Gas | Yellow | njano |
+| Taifa Gas | Green | kijani |
+| O-Lake / Lake Gas | Blue | bluu |
+
+Mihan Gas and Taifa Gas are the same company; Mihan is the former name, now
+Taifa. **13kg is not offered in Tanzania** and must never be quoted or offered.
+
+Household size words: **ndogo = 6kg**, **kubwa = 15kg**. For restaurants,
+hotels, mgahawa, biashara or commercial use, the AI asks for the exact size
+instead of assuming.
+
 The bridge returns both `registered/found` and `aiEnabled` for the subscriber
 gate. Orders mirror the Flutter dual-key schema and `source: sms_ai`.
+The `/catalog` response also includes a `vendors` array with the profile terms
+the AI uses for delivery, scale, payment, hours and comparison:
+`deliveryType`, `deliveryFee`, `deliveryFeeModel`, `deliveryRadiusKm`,
+`openingHours`, `hasOperationalScale`, `hasCertifiedScale`, `acceptsCash`,
+`acceptsMobileMoney`, `verified`.
 
 ### OTP in the app
 
@@ -857,17 +879,15 @@ Not covered / manual:
 ### Immediate (after current UI build verification)
 
 1. Verify the four-category build, shop layout, gestures and order flow.
-2. **AI testing**:
-   - Configure DeepSeek in dashboard.
-   - Test simulator: “How much is Oryx 6kg refill?”
-   - Test subscriber gate allow/deny.
-   - Test real inbound SMS via TextBee webhook.
-   - Validate Swahili/English, 160-char cap, no invented prices.
-3. **D3 vendor localization**
-4. **D4 remaining localization**
-5. **OTP wiring**
+2. **AI Phase A (done 14 Nov 2026)**: persona rewritten, sandbox ledger removed,
+   vendor profile terms exposed, brand colours corrected, 13kg rule added,
+   household size words added, 43/43 evaluation passing.
+3. **AI Phase B**: onboarding data, order-status lookup, safety hub, app link.
+4. **D3 vendor localization**
+5. **D4 remaining localization**
+6. **OTP wiring**
    - Enable flag, route screen, link verified phone to user/session.
-6. **Phase 6**
+7. **Phase 6**
    - Blaze, 6A custom-token identity bridge, 6B rules, 6C storage, 6D admin
      functions/audit, 6E pagination, 6F analytics rollups, 6G billing design.
 

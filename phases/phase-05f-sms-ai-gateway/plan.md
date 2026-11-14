@@ -54,6 +54,9 @@ PIN remains the only active login path.
 | `GET` | `/v1/bridge/health` | liveness |
 
 Brand colours: Oryx = Red, Manjis/Mihan = Yellow, Taifa = Blue, Lake = Green.
+
+> **Correction (14 Nov 2026):** the live mapping is Oryx Red, Manjis Grey,
+> Mihan/O-Gas Yellow, Taifa Green, Lake Blue. See `PROJECT_BIBLE.md`.
 Orders use the same dual snake_case/camelCase keys as Flutter and support an
 optional `idempotencyKey`. The customer must exist and have
 `ai_assistant_enabled: true`.

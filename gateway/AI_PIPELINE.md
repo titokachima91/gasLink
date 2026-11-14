@@ -63,16 +63,18 @@ Key properties:
   `await` it.
 - Every reply pulls a fresh catalogue. Nothing is cached.
 - The snapshot contains refill and full-set groups, accessories/services if
-  listed, brand colours/aliases, vendor names/areas/verification, stock state,
-  and the live SMS traffic counters.
+  listed, brand colours/aliases, vendor names/areas/verification, vendor
+  delivery/scale/payment/hours terms, stock state and product notes. It no
+  longer contains sandbox transactions, ledger balances or clearing data.
 - **No sample fallback.** If the bridge call fails, the context says:
 
   > LIVE CATALOG: UNAVAILABLE. Do NOT quote any price, stock level or delivery
   > fee. Tell the customer you will confirm the current price…
 
   The model cannot fall back to remembered or sample prices.
-- Delivery fees are never quoted from the sample data; the live bridge does not
-  expose a per-order fee, so the AI says the fee is confirmed when ordering.
+- Delivery terms come from the vendor profile (`deliveryType`, `deliveryFee`,
+  `deliveryFeeModel`, radius, hours). Free means free; if a fee/ETA is absent,
+  it is confirmed at ordering. The AI never calculates distance.
 
 ### Verified answers (14 Nov 2026, live Sao Gas data)
 
@@ -80,11 +82,38 @@ Key properties:
 |---|---|
 | How much is Oryx 6kg refill? | Oryx Gas 6kg refill **TZS 26,000**, in stock at Sao Gas Supply, Sinza |
 | Gesi nyekundu 6kg ni shilingi ngapi? | Red → Oryx; **TZS 26,000** |
-| Oryx 13kg refill bei gani? | 13kg is not in the catalogue; offers live 6kg/15kg |
+| Oryx 13kg refill bei gani? | 13kg is not offered in Tanzania; offers live 6kg/15kg |
 | Full set ya Oryx 6kg ni ngapi? | No full set listed; does not invent a price |
-| Delivery fee ni shilingi ngapi? | Depends on vendor/distance; confirmed when ordering |
+| Sao Gas delivery? | Free, read from the vendor profile |
+| “Manjis ni rangi gani?” | Grey / kijivu |
+| “Gesi ya bluu ni brand gani?” | O-Lake / Lake Gas |
+| “Gesi ya kijani ni brand gani?” | Taifa Gas |
+| “Gesi ya njano ni brand gani?” | Mihan / O-Gas; Mihan is the former name of Taifa |
+| “Nataka Oryx mdogo” | Oryx 6kg, TZS 26,000 |
+| “Nataka mtungi mkubwa kwa mgahawa” | Asks for the exact size instead of assuming 15kg |
 | Habari yako? | `NO_REPLY`; nothing sent |
 | Unknown phone | Subscriber gate blocks before DeepSeek |
+
+**Evaluation:** 43/43 cases passed on 14 Nov 2026 after Phase A. The run covers
+live prices, brand colours, 13kg, full-set/complete, fullness/weight, delivery,
+vendor-number policy, support number, order-status refusal, safety, NO_REPLY,
+language mirroring and household size words. Results are in
+`data/ai-eval-latest.json` on the gateway machine.
+
+### Phase A changes (14 Nov 2026)
+
+- Rewrote the dashboard persona: no detail dumps, no unbacked promises, no
+  vendor number before confirmation, support `0767304776`, mirror language.
+- Removed sandbox transactions/ledger/clearing data from the GasLink context.
+- Added `SMS ORDERING: DISABLED`, `SUPPORT` and optional `APP LINK` lines.
+- Extended `/v1/bridge/catalog` with a `vendors` array carrying delivery,
+  scale, payment, hours and verification terms.
+- Corrected brand colours: Oryx Red, Manjis Grey, Mihan/O-Gas Yellow, Taifa
+  Green, Lake Blue.
+- Added the Mihan/Taifa relationship and the 13kg prohibition.
+- Added household size mapping: ndogo = 6kg, kubwa = 15kg; commercial use asks
+  for the exact size.
+- Replaced hard 160-character cuts with sentence-boundary trimming.
 
 ## 2. Inbound SMS transport
 

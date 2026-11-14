@@ -37,9 +37,11 @@ When they disagree with `PROJECT_BIBLE.md`, the Bible wins.
 - Phase 1–5D complete
 - Phase 5E: D1 (localization infrastructure) and D2 (consumer localization)
   complete; **D3 vendor localization and D4 remaining surfaces are still open**
-- Phase 5F SMS/AI gateway foundation implemented; outbound SMS tested
-- DeepSeek configuration is available through the gateway dashboard; AI testing
-  is the next workstream
+- Phase 5F SMS/AI gateway foundation implemented; outbound SMS and real inbound
+  phone round trip tested
+- DeepSeek AI Phase A complete: live Firestore catalogue, corrected brand
+  colours, 13kg rule, delivery/scale terms from vendor profiles, 43/43
+  evaluation. SMS ordering is still not wired.
 - OTP service/screen exist behind `ENABLE_OTP_LOGIN=false`; wiring is a later
   workstream
 - Phase 6 (Blaze, rules, custom-token auth, production notifications) is parked

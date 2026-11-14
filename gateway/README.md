@@ -35,9 +35,14 @@ never returns PIN hashes or other credentials.
 | Brand | Colour | Swahili alias |
 | --- | --- | --- |
 | Oryx Gas | Red | nyekundu |
-| Manjis / Mihan Gas | Yellow | njano |
-| Taifa Gas | Blue | bluu |
-| O-Lake / Lake Gas | Green | kijani |
+| Manjis Gas | Grey | kijivu |
+| Mihan Gas | Yellow | njano |
+| O-Gas | Yellow | njano |
+| Taifa Gas | Green | kijani |
+| O-Lake / Lake Gas | Blue | bluu |
+
+Mihan Gas and Taifa Gas are the same company; Mihan is the former name, now
+Taifa. 13kg is not offered in Tanzania.
 
 ## Mount into the existing gateway
 
