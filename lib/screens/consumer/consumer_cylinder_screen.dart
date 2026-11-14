@@ -597,7 +597,7 @@ class _ConsumerCylinderScreenState extends State<ConsumerCylinderScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSectionHeader(
               title: l10n.cylinderHubTitle,

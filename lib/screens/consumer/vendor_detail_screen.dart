@@ -612,16 +612,19 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: brandGrouped.entries.map((entry) {
         final brandName = entry.key;
         final brandItems = entry.value;
 
-        return AppCard(
-          margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        return SizedBox(
+          width: double.infinity,
+          child: AppCard(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Row(
                 children: [
                   Container(
@@ -662,7 +665,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               ],
             ],
           ),
-        );
+        ),
+      );
       }).toList(),
     );
   }
