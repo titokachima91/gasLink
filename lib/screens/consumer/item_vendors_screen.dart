@@ -1,6 +1,7 @@
 // lib/screens/consumer/item_vendors_screen.dart
 //This screen displays a list of vendors offering a specific item (brand or accessory/service) in a given category (refill, full set, accessories, services). Users can sort the vendors by price and select a vendor to place an order.
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/session_data.dart';
 import '../../core/session_gate.dart';
 import '../../widgets/verified_badge.dart';
@@ -91,6 +92,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
   @override
   Widget build(BuildContext context) {
     final offers = _matchingOffers;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -307,7 +309,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
                                       icon: const Icon(
                                           Icons.shopping_cart_checkout,
                                           size: 18),
-                                      label: const Text('Oda Sasa'),
+                                      label: Text(l10n.orderNow),
                                     ),
                                   ),
                                 ],

@@ -635,6 +635,11 @@ webhook at `/v1/inbound-sms` and set `TEXTBEE_INBOUND_SECRET`. The route has a
 200/ignored guard for `MESSAGE_SENT`, `MESSAGE_DELIVERED` and `MESSAGE_FAILED`
 events so status callbacks can never trigger an AI reply.
 
+**SMS ordering is not wired yet.** The bridge has `POST /v1/bridge/orders`, but
+the assistant only answers questions. It is explicitly instructed never to
+accept or confirm an SMS order; customers are told to order in the app. Do not
+claim “order by SMS” until a confirm-then-create flow exists.
+
 Full pipeline, environment and troubleshooting details:
 **[`gateway/AI_PIPELINE.md`](gateway/AI_PIPELINE.md)**.
 
@@ -765,6 +770,7 @@ Not covered / manual:
 - **D3/D4 localization incomplete** — vendor/admin bilingual labels remain.
 - **Vendor FCM token** may be web/stale; consumer Android push verified.
 - **AI physical round trip pending** — DeepSeek and live catalogue are verified through the simulator and inbound pipeline; confirm a real phone reply through the TextBee poller.
+- **SMS ordering not user-facing** — the bridge order endpoint exists, but the AI does not create orders. The app is the only live ordering path; the assistant refuses SMS order requests.
 - **OTP not wired into app** — flag false; user/session linking missing.
 - **DHCP IP** — APK embeds gateway URL; rebuild on change.
 - **Spark plan** — no Cloud Functions; Python dispatcher/local bridge required.

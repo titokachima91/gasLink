@@ -220,3 +220,36 @@ Expected: `{"success":true,"ai":{...},"replySent":true}` and a matching
 - A public webhook must set `TEXTBEE_INBOUND_SECRET`; without it the inbound
   route accepts unauthenticated posts by design for sandbox use.
 - Never expose port 8080 publicly without HTTPS and the webhook secret.
+
+## 8. Ordering by SMS — current status
+
+The bridge endpoint `POST /v1/bridge/orders` exists and can create a `placed`
+order with `source: sms_ai`, but **the AI assistant does not call it**. There is
+no order parser, address capture, confirmation step or idempotency key in the
+inbound pipeline, so a text such as “Nataka Oryx 6kg mbili” must not be treated
+as an order.
+
+Current behaviour:
+
+- The AI answers price, stock, delivery-policy and product questions.
+- System prompt rule 6 forbids accepting, confirming or claiming to place an
+  order by SMS. It tells the customer to order in the GasLink app.
+- The settings subtitle is now:
+  - EN: “Ask about live prices, stock and delivery by SMS. Order in the app.”
+  - SW: “Uliza bei, stock na delivery kwa SMS. Agiza kupitia app.”
+- The old “Order by SMS in Swahili. Coming soon.” string was removed.
+
+To enable SMS ordering safely later:
+
+1. Detect an explicit order intent and resolve brand/size/quantity against the
+   live catalogue (never a model-invented vendor or price).
+2. Collect or confirm the delivery address.
+3. Send a “Reply YES to confirm …” message and keep pending state per phone.
+4. On YES, call `/v1/bridge/orders` with an idempotency key derived from the
+   phone and pending-order ID.
+5. Re-check stock and price immediately before creating the order.
+6. Send the order-placed SMS and let the existing notification pipeline take
+   over.
+
+Do not give the model an unrestricted order-creation tool; a wrong address or
+duplicate confirmation creates a real dispatch.

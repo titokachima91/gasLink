@@ -573,7 +573,7 @@
   "notificationChannelBoth": "Push and SMS",
   "notificationChannelNone": "None",
   "aiAssistantTitle": "AI SMS assistant",
-  "aiAssistantSubtitle": "Order by SMS in Swahili. Coming soon.",
+  "aiAssistantSubtitle": "Ask about live prices, stock and delivery by SMS. Order in the app.",
   "preferenceSaved": "Preferences saved.",
   "preferenceSaveFailed": "Could not save preferences. Try again.",
   "orderPlacedNotificationTitle": "Order received",
@@ -675,6 +675,5 @@
   "otpDisabled": "SMS login is not available yet.",
   "otpSendFailed": "Could not send the code. Try again.",
   "otpInvalid": "The code is incorrect.",
-  "orderNow": "Order Now",
-  "noProductsToOrder": "This vendor has no products yet."
+  "orderNow": "Order Now"
 }

@@ -477,7 +477,7 @@ GasLink is looking for pilot partners who can help prove the loop:
 - “Track the gas from the shop to your kitchen.”
 - “Know how much gas is left — across every cylinder.”
 - “One order, one notification, one updated kitchen.”
-- “If you can send an SMS, you can order gas.”
+- “If you can send an SMS, you can check the price of gas.”
 
 ### Elevator pitch
 
@@ -502,7 +502,7 @@ ngapi?” and get a live, brand-aware answer.
 | FIFO cylinders | Implemented and tested |
 | Consumer push | Verified with Android token |
 | SMS outbound | Verified via TextBee |
-| AI SMS | DeepSeek live-catalogue replies verified in simulator/inbound pipeline; physical phone round trip under test |
+| AI SMS | Live-catalogue Q&A verified; physical phone round trip under test; SMS ordering is not wired yet (app ordering only) |
 | OTP | Foundation/feature-flagged; app wiring pending |
 | Localization | D1/D2 complete; D3/D4 open |
 | Payments | Not integrated |

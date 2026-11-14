@@ -580,7 +580,7 @@
   "notificationChannelBoth": "Push na SMS",
   "notificationChannelNone": "Hakuna",
   "aiAssistantTitle": "Msaidizi wa AI kwa SMS",
-  "aiAssistantSubtitle": "Agiza kwa SMS kwa Kiswahili. Inakuja hivi karibuni.",
+  "aiAssistantSubtitle": "Uliza bei, stock na delivery kwa SMS. Agiza kupitia app.",
   "preferenceSaved": "Mapendeleo yamehifadhiwa.",
   "preferenceSaveFailed": "Imeshindikana kuhifadhi mapendeleo. Jaribu tena.",
   "orderPlacedNotificationTitle": "Oda Imepokelewa",
@@ -682,6 +682,5 @@
   "otpDisabled": "Kuingia kwa SMS bado hakujaanza.",
   "otpSendFailed": "Imeshindikana kutuma msimbo. Jaribu tena.",
   "otpInvalid": "Msimbo si sahihi.",
-  "orderNow": "Oda Sasa",
-  "noProductsToOrder": "Muuzaji hajaweka bidhaa bado."
+  "orderNow": "Oda Sasa"
 }
