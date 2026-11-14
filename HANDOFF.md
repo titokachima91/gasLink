@@ -157,14 +157,21 @@ Reference: `gateway/MOUNTED.md`.
 - **Servers:** APK download server on `8090` is running for UI inspection.
   Gateway `8080` and FCM are intentionally **off**; UI browsing still reads
   Firestore, but SMS/push will not fire until they are started.
-- **Last successful APK:** 14 Nov 01:16, SHA
-  `237ee61283d83aa3c92cc337ee1d40950c92886e99864e5a9848436cd0776eea`
-  (59,310,141 bytes), embeds `192.168.1.11:8080`.
+- **Last successful APK:** 14 Nov 07:20, SHA
+  `5ece834fa77068b926733160d4ac30547c7a84548bd8f7b5026044c418ff890c`
+  (59,310,155 bytes), embeds `192.168.1.11:8080`.
   Download: `http://192.168.1.11:8090/gaslink-latest.apk`
-- **Build:** clean (`flutter clean` → `pub get` → `gen-l10n` → `analyze` →
-  release). Log: `build_logs/clean_build.log`.
-- **Last commits:** `7295ff0` brand-header constraint, `8122297` product/vendor
-  card text sweep, `c4ae9eb` shop fallback.
+- **Build:** incremental after the earlier clean build. Log:
+  `build_logs/shop_width_build.log`.
+- **Last commits:** `506bbf9` force full-width shop/cylinder cards,
+  `7295ff0` brand-header constraint, `8122297` product/vendor card text sweep,
+  `c4ae9eb` shop fallback.
+- **Root cause of the Shop Details bug:** the product AppCards were nested in
+  a Column with the default `center` cross-axis, so each card shrink-wrapped
+  to a narrow intrinsic width. The top card was a direct ListView child and
+  looked fine. `_buildCylindersSection` now uses
+  `CrossAxisAlignment.stretch` and each product card is `width: double.infinity`.
+  The 01:16 APK predates this specific fix; the 07:20 APK includes it.
 - **Working tree:** clean.
 - **Install:** uninstall the old GasLink app first, then install the new APK.
   The previous 00:41 download had a connection reset; a stale install is the

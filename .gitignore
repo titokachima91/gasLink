@@ -52,3 +52,6 @@ serviceAccountKey.json
 # Local gateway credentials for --dart-define-from-file. Never commit.
 env.local.json
 dart_defines.local.json
+
+# Local build logs
+build_logs/
