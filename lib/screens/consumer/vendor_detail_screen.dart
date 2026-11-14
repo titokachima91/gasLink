@@ -100,6 +100,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   // Category switch: 0 = Mitungi ya Gesi (Cylinders), 1 = Vifaa & Aksesari (Accessories)
   int _selectedCategoryIndex = 0;
 
+  // Selected weight per brand, e.g. {'Oryx Gas': '15kg'}
+  final Map<String, String> _selectedWeightPerBrand = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -582,7 +585,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     );
   }
 
-  /// Brand-Grouped Cylinders with Interactive Weight Selection
+  /// Last known-good storefront product card: brand, weight chips, one active
+  /// offer, and a full-width order button. Keeping the summary vertical means
+  /// the text can never be squeezed by an action widget.
   Widget _buildCylindersSection(List<Map<String, dynamic>> cylinders) {
     if (cylinders.isEmpty) {
       return Center(
@@ -604,10 +609,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
       );
     }
 
-    // Group cylinder documents by brand
     final Map<String, List<Map<String, dynamic>>> brandGrouped = {};
     for (final item in cylinders) {
-      final brand = (item['brand'] ?? 'Gas') as String;
+      final brand = (item['brand'] ?? 'Gas').toString();
       brandGrouped.putIfAbsent(brand, () => []).add(item);
     }
 
@@ -616,6 +620,20 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
       children: brandGrouped.entries.map((entry) {
         final brandName = entry.key;
         final brandItems = entry.value;
+        final defaultWeight =
+            (brandItems.first['weight'] ?? brandItems.first['size'] ?? '')
+                .toString();
+        final activeWeight =
+            _selectedWeightPerBrand[brandName] ?? defaultWeight;
+        final activeItem = brandItems.firstWhere(
+          (i) =>
+              (i['weight'] ?? i['size'] ?? '').toString() == activeWeight,
+          orElse: () => brandItems.first,
+        );
+        final price = (activeItem['price'] as num?)?.toDouble() ?? 0.0;
+        final inStock =
+            (activeItem['in_stock'] ?? activeItem['inStock'] ?? true) as bool;
+        final weightLabel = activeWeight.isEmpty ? 'Cylinder' : activeWeight;
 
         return SizedBox(
           width: double.infinity,
@@ -625,146 +643,132 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: context.colors.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        brandName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      Icons.propane_tank,
-                      color: context.colors.primary,
-                      size: 24,
+                    const SizedBox(width: 8),
+                    AppStatusPill(
+                      label: inStock ? 'Ipo' : 'Imeisha',
+                      icon: inStock
+                          ? Icons.check_circle_outline
+                          : Icons.remove_circle_outline,
+                      color: inStock
+                          ? context.gasColors.success
+                          : context.colors.error,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: brandItems.map((item) {
+                    final weight =
+                        (item['weight'] ?? item['size'] ?? '').toString();
+                    final isSelected = weight == activeWeight;
+                    return ChoiceChip(
+                      label: Text(weight),
+                      selected: isSelected,
+                      selectedColor: context.colors.primary,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? context.colors.onPrimary
+                            : context.colors.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _selectedWeightPerBrand[brandName] = weight;
+                          });
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+                const Divider(height: 20),
+                Text(
+                  '$brandName · $weightLabel Refill',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'TZS ${_formatPrice(price)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: context.gasColors.success,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 38,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: inStock
+                          ? context.colors.primary
+                          : context.colors.outlineVariant,
+                      foregroundColor: inStock
+                          ? context.colors.onPrimary
+                          : context.colors.onSurface,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: inStock
+                        ? () async {
+                            if (!await SessionGate.requireConsumer(context)) {
+                              return;
+                            }
+                            if (!mounted) return;
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => ConsumerOrderDialog(
+                                vendorId: widget.vendorId,
+                                brandName: brandName,
+                                cylinderWeight: activeWeight,
+                                vendorName: widget.businessName,
+                                price: price,
+                              ),
+                            );
+                          }
+                        : null,
                     child: Text(
-                      brandName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      inStock ? 'Oda Sasa' : 'Imeisha',
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  AppStatusPill(
-                    label: '${brandItems.length} saizi',
-                    icon: Icons.scale_outlined,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              for (var i = 0; i < brandItems.length; i++) ...[
-                if (i > 0) const Divider(height: 18),
-                _buildSizeRow(brandName, brandItems[i]),
+                ),
               ],
-            ],
+            ),
           ),
-        ),
-      );
+        );
       }).toList(),
-    );
-  }
-
-  /// One row per cylinder size: price, stock state, and its own order button.
-  Widget _buildSizeRow(String brandName, Map<String, dynamic> item) {
-    final weight = (item['weight'] ?? item['size'] ?? '').toString();
-    final price = (item['price'] as num?)?.toDouble() ?? 0.0;
-    final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  weight.isEmpty ? 'Cylinder' : '$weight · Refill',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              AppStatusPill(
-                label: inStock ? 'Ipo' : 'Imeisha',
-                icon: inStock
-                    ? Icons.check_circle_outline
-                    : Icons.remove_circle_outline,
-                color: inStock
-                    ? context.gasColors.success
-                    : context.colors.error,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'TZS ${_formatPrice(price)}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: context.gasColors.success,
-              fontWeight: FontWeight.w800,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 36,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: inStock
-                    ? context.colors.primary
-                    : context.colors.outlineVariant,
-                foregroundColor: inStock
-                    ? context.colors.onPrimary
-                    : context.colors.onSurface,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: inStock
-                  ? () async {
-                      if (!await SessionGate.requireConsumer(context)) {
-                        return;
-                      }
-                      if (!mounted) return;
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => ConsumerOrderDialog(
-                          vendorId: widget.vendorId,
-                          brandName: brandName,
-                          cylinderWeight: weight,
-                          vendorName: widget.businessName,
-                          price: price,
-                        ),
-                      );
-                    }
-                  : null,
-              child: Text(
-                inStock ? 'Oda Sasa' : 'Imeisha',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
