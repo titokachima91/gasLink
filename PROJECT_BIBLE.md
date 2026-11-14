@@ -89,7 +89,7 @@ Never ship the hardcoded admin credentials to production. Phase 6 replaces them.
 | Phase 5E D3: vendor localization | **Open** |
 | Phase 5E D4: admin/remaining localization | **Open** |
 | Phase 5F: SMS/AI/OTP/bridge foundation | Implemented; live SMS + consumer FCM tested |
-| DeepSeek AI testing | **Next workstream** |
+| DeepSeek AI testing | **In progress** — live catalogue answers verified; physical SMS round trip under test |
 | OTP app wiring | Foundation only; `ENABLE_OTP_LOGIN=false` |
 | Phase 6: scale/security | **Parked** (Firebase Spark) |
 | Release signing | Debug key only |
@@ -593,12 +593,50 @@ AI pipeline:
 1. Inbound SMS logged.
 2. Subscriber gate: `GASLINK_SUBSCRIBER_CHECK_URL` POSTs `{phone}` to the
    bridge; requires `ai_assistant_enabled: true`.
-3. App context is rebuilt from the catalog/live state.
+3. App context is rebuilt from the **live Firestore catalogue** through
+   `GET /v1/bridge/catalog` on every message. `services/app-context.js` is
+   async and no longer reads the sample `data/gaslink-catalog.json`.
 4. DeepSeek call.
 5. `NO_REPLY` gate; otherwise SMS reply.
 
-Current AI state: **not yet configured/tested** as of this document. Do not
-promise inbound AI until it is configured and tested.
+If the bridge catalogue is unreachable, the context explicitly orders the
+model **not** to quote any price, stock level or delivery fee; it must say it
+will confirm instead. There is no sample-price fallback.
+
+Verified on 14 Nov 2026 against live Sao Gas data:
+
+| Question | Reply behaviour |
+|---|---|
+| “How much is Oryx 6kg refill?” | **TZS 26,000**, in stock at Sao Gas Supply, Sinza |
+| “Gesi nyekundu 6kg ni shilingi ngapi?” | Maps red → Oryx; **TZS 26,000** |
+| “Oryx 13kg refill bei gani?” | Says 13kg is not in the catalogue; offers live 6kg/15kg |
+| “Full set ya Oryx 6kg ni ngapi?” | Says no full set is listed; does not invent a price |
+| “Delivery fee ni shilingi ngapi?” | Says fee depends on vendor/distance; does not quote 3,000 |
+| “Habari yako?” | `NO_REPLY` gate; nothing sent |
+| Unknown phone | Subscriber gate blocks before any DeepSeek call |
+
+### TextBee inbound: polling vs webhook
+
+TextBee’s webhook requires a **public HTTPS** URL. The gateway is on the LAN,
+so it cannot receive TextBee’s cloud webhook directly. The gateway therefore
+ships a local poller:
+
+- `services/textbee-inbound-poller.js`
+- Enabled with `TEXTBEE_POLL_ENABLED=true` (10s interval by default).
+- It anchors a cursor at the newest existing SMS on first run, so old messages
+  are never replayed.
+- New received messages are checked against the subscriber gate. Only
+  AI-enabled senders are forwarded to `/v1/inbound-sms`; personal SMS on the
+  TextBee phone is skipped silently (no log, no AI credit, no reply).
+- Cursor: `data/textbee-inbound-cursor.json`.
+
+If a public HTTPS tunnel is added later, point TextBee’s `MESSAGE_RECEIVED`
+webhook at `/v1/inbound-sms` and set `TEXTBEE_INBOUND_SECRET`. The route has a
+200/ignored guard for `MESSAGE_SENT`, `MESSAGE_DELIVERED` and `MESSAGE_FAILED`
+events so status callbacks can never trigger an AI reply.
+
+Full pipeline, environment and troubleshooting details:
+**[`gateway/AI_PIPELINE.md`](gateway/AI_PIPELINE.md)**.
 
 ### Bridge
 
@@ -699,7 +737,7 @@ Not covered / manual:
 
 - No device integration/e2e automation (order → vendor → delivery → cylinder).
 - No Firestore rules tests (rules don’t exist yet).
-- AI pipeline not configured/tested.
+- AI live catalogue answers verified via simulator and inbound POST; a physical phone-to-TextBee round trip is the remaining check.
 - Shop layout has a history of zero-width card bugs; verify screenshots on a
   device before handing an APK over.
 - Visual QA for light/dark and small screens is manual.
@@ -726,7 +764,7 @@ Not covered / manual:
 - **Debug-signed APK** — real keystore pending.
 - **D3/D4 localization incomplete** — vendor/admin bilingual labels remain.
 - **Vendor FCM token** may be web/stale; consumer Android push verified.
-- **AI not configured/tested** — DeepSeek key and pipeline pending.
+- **AI physical round trip pending** — DeepSeek and live catalogue are verified through the simulator and inbound pipeline; confirm a real phone reply through the TextBee poller.
 - **OTP not wired into app** — flag false; user/session linking missing.
 - **DHCP IP** — APK embeds gateway URL; rebuild on change.
 - **Spark plan** — no Cloud Functions; Python dispatcher/local bridge required.

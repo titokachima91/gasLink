@@ -160,9 +160,10 @@ Reference: `gateway/MOUNTED.md`.
 - **LAN IP:** `192.168.1.11`.
 - **Source HEAD:** `885f828` — four vendor categories + split vendor-card
   actions.
-- **Servers:** gateway `8080` is running (dashboard 200); APK download server
-  `8090` is running; FCM dispatcher is off until notification monitoring is
-  needed.
+- **Servers:** gateway `8080` is running (dashboard 200) with the AI live
+  catalogue wiring and the TextBee inbound poller; APK download server `8090`
+  is running; FCM dispatcher is off until notification monitoring is needed.
+  Gateway log: `/Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox/gateway.log`.
 - **Build:** four-category build **verified**.
 - **Latest verified APK:** 14 Nov 09:58, SHA
   `7b2c28fa073afda704730bfd352436ef6ed6f3c42b34c908fa6ea8b0210b658f`
@@ -177,8 +178,20 @@ Reference: `gateway/MOUNTED.md`.
   `SHOP v4` marker removed.
 - **Vendor card gestures:** shop header → storefront; `Oda Sasa` → checkout;
   empty card background → no action.
+- **AI live data:** `services/app-context.js` now fetches
+  `/v1/bridge/catalog` on every message. The sample catalogue is no longer
+  injected. Verified: Oryx 6kg = **TZS 26,000**, brand-colour mapping, 13kg /
+  full-set / delivery-fee questions all refuse to invent data.
+- **AI inbound:** `/v1/inbound-sms` verified through the real pipeline, and a
+  real SMS reply was delivered to `+255716546732`. TextBee webhooks need public
+  HTTPS, so `services/textbee-inbound-poller.js` polls TextBee locally every
+  10s, forwards only AI-enabled subscribers, and skips personal SMS silently.
+  Cursor: `data/textbee-inbound-cursor.json`.
+- **AI test pending:** the physical phone-to-TextBee reply round trip. Reply to
+  the SMS sent to `+255716546732`; the poller should answer within ~10–20s.
 - **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
-  this update). Check `git status` before building.
+  this update). Gateway changes are outside this repo. Check `git status`
+  before building.
 - **Install:** uninstall the old GasLink app first, then install the verified
   APK. Stale installs have repeatedly shown the old layout.
 
@@ -188,8 +201,10 @@ Reference: `gateway/MOUNTED.md`.
 - The vendor FCM token can be stale/web and logs
   `Permission denied by the third party webpush service`. Consumer Android push
   was verified; do not chase web push during a mobile demo.
-- DeepSeek/AI is configured through the dashboard but has not yet been tested
-  end to end.
+- DeepSeek/AI live-catalogue answers are verified; the physical phone round
+  trip through the TextBee poller is still pending. TextBee webhooks cannot
+  reach a LAN gateway, so do not delete the poller unless a public HTTPS tunnel
+  is added.
 - OTP is feature-flagged off; app user/session linking is not wired.
 - Firebase rules are still open (no `firestore.rules`); do not enable
   auth-required rules before Phase 6A.
@@ -200,7 +215,7 @@ Reference: `gateway/MOUNTED.md`.
 ### Next plan
 
 1. Verify the four-category build and shop UI on a device.
-2. AI testing through the dashboard simulator and inbound SMS.
+2. Finish the AI physical round trip.
 3. D3 vendor localization, then D4 remaining surfaces.
 4. Wire OTP login.
 5. Phase 6 security/scale after Blaze.

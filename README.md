@@ -157,7 +157,7 @@ UI changes after that suite must be re-tested before a release claim.
 | `lib/core/` | constants, theme, locale, session, gateway config, FIFO-adjacent state |
 | `lib/utils/cylinder_fifo.dart` | shared FIFO depletion model |
 | `lib/l10n/` | Swahili/English ARB files and error mapping |
-| `gateway/` | Firebase bridge module, standalone runner, Node tests, docs |
+| `gateway/` | Firebase bridge module, standalone runner, Node tests, docs; `AI_PIPELINE.md` explains live AI context and TextBee polling |
 | `functions/` | legacy Cloud Functions source; not deployed on Spark |
 | `phases/` | historical phase plans and implementation records |
 | `test/` | Flutter test suite |
@@ -171,7 +171,7 @@ UI changes after that suite must be re-tested before a release claim.
 - Firebase project is on Spark; Cloud Functions cannot be deployed.
 - APK is debug-signed; production keystore is pending.
 - The APK embeds the LAN gateway URL, so a DHCP IP change requires a rebuild.
-- AI inbound is not configured/tested yet.
+- AI live-catalogue answers are verified; the physical TextBee phone round trip is the remaining check. TextBee webhooks need public HTTPS, so the gateway polls TextBee locally.
 - Vendor FCM token can be stale/web; consumer Android push was verified.
 - Current Sao Gas catalogue is refill-only; Full Set/Vifaa/Huduma tabs will be
   empty until products are seeded.
