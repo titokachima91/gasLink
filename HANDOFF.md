@@ -187,8 +187,9 @@ Reference: `gateway/MOUNTED.md`.
   HTTPS, so `services/textbee-inbound-poller.js` polls TextBee locally every
   10s, forwards only AI-enabled subscribers, and skips personal SMS silently.
   Cursor: `data/textbee-inbound-cursor.json`.
-- **AI test pending:** the physical phone-to-TextBee reply round trip. Reply to
-  the SMS sent to `+255716546732`; the poller should answer within ~10–20s.
+- **AI physical round trip verified:** real SMS from `+255745123046` was polled
+  from TextBee and answered through DeepSeek. The assistant quoted live prices,
+  refused SMS ordering, and directed the customer to the app.
 - **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
   this update). Gateway changes are outside this repo. Check `git status`
   before building.
@@ -201,10 +202,10 @@ Reference: `gateway/MOUNTED.md`.
 - The vendor FCM token can be stale/web and logs
   `Permission denied by the third party webpush service`. Consumer Android push
   was verified; do not chase web push during a mobile demo.
-- DeepSeek/AI live-catalogue answers are verified; the physical phone round
-  trip through the TextBee poller is still pending. TextBee webhooks cannot
-  reach a LAN gateway, so do not delete the poller unless a public HTTPS tunnel
-  is added.
+- DeepSeek/AI live-catalogue answers and the physical phone round trip are
+  verified. SMS order creation is not wired; the assistant must keep refusing
+  it. TextBee webhooks cannot reach a LAN gateway, so do not delete the poller
+  unless a public HTTPS tunnel is added.
 - OTP is feature-flagged off; app user/session linking is not wired.
 - Firebase rules are still open (no `firestore.rules`); do not enable
   auth-required rules before Phase 6A.
@@ -215,7 +216,7 @@ Reference: `gateway/MOUNTED.md`.
 ### Next plan
 
 1. Verify the four-category build and shop UI on a device.
-2. Finish the AI physical round trip.
+2. Keep the AI SMS assistant stable; SMS ordering is a separate feature.
 3. D3 vendor localization, then D4 remaining surfaces.
 4. Wire OTP login.
 5. Phase 6 security/scale after Blaze.

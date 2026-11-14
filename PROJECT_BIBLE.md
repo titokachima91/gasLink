@@ -89,7 +89,7 @@ Never ship the hardcoded admin credentials to production. Phase 6 replaces them.
 | Phase 5E D3: vendor localization | **Open** |
 | Phase 5E D4: admin/remaining localization | **Open** |
 | Phase 5F: SMS/AI/OTP/bridge foundation | Implemented; live SMS + consumer FCM tested |
-| DeepSeek AI testing | **In progress** — live catalogue answers verified; physical SMS round trip under test |
+| DeepSeek AI testing | **Verified** — live catalogue answers and real phone-to-TextBee SMS round trip; SMS ordering intentionally not wired |
 | OTP app wiring | Foundation only; `ENABLE_OTP_LOGIN=false` |
 | Phase 6: scale/security | **Parked** (Firebase Spark) |
 | Release signing | Debug key only |
@@ -603,7 +603,12 @@ If the bridge catalogue is unreachable, the context explicitly orders the
 model **not** to quote any price, stock level or delivery fee; it must say it
 will confirm instead. There is no sample-price fallback.
 
-Verified on 14 Nov 2026 against live Sao Gas data:
+Physical round trip verified on 14 Nov 2026 from `+255745123046` through the
+TextBee poller: price/stock, delivery-policy, cylinder-weight and “order by
+SMS” questions all received real SMS replies. The assistant correctly refused
+an SMS order and directed the customer to the app.
+
+Verified against live Sao Gas data:
 
 | Question | Reply behaviour |
 |---|---|
@@ -742,7 +747,7 @@ Not covered / manual:
 
 - No device integration/e2e automation (order → vendor → delivery → cylinder).
 - No Firestore rules tests (rules don’t exist yet).
-- AI live catalogue answers verified via simulator and inbound POST; a physical phone-to-TextBee round trip is the remaining check.
+- AI live catalogue answers and a real phone-to-TextBee round trip are verified. SMS order creation is intentionally not wired; the assistant refuses it and points to the app.
 - Shop layout has a history of zero-width card bugs; verify screenshots on a
   device before handing an APK over.
 - Visual QA for light/dark and small screens is manual.
@@ -769,7 +774,7 @@ Not covered / manual:
 - **Debug-signed APK** — real keystore pending.
 - **D3/D4 localization incomplete** — vendor/admin bilingual labels remain.
 - **Vendor FCM token** may be web/stale; consumer Android push verified.
-- **AI physical round trip pending** — DeepSeek and live catalogue are verified through the simulator and inbound pipeline; confirm a real phone reply through the TextBee poller.
+- **AI physical round trip verified** — real inbound SMS from `+255745123046` was polled from TextBee and answered through DeepSeek.
 - **SMS ordering not user-facing** — the bridge order endpoint exists, but the AI does not create orders. The app is the only live ordering path; the assistant refuses SMS order requests.
 - **OTP not wired into app** — flag false; user/session linking missing.
 - **DHCP IP** — APK embeds gateway URL; rebuild on change.

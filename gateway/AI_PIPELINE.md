@@ -198,6 +198,17 @@ Expected: `{"success":true,"ai":{...},"replySent":true}` and a matching
 3. Check `tail gateway.log` and `data/sms-log.json` for an `inbound` entry with
    `channel: "textbee-poll"` and an `ai-reply` outbound entry.
 
+### Physical round trip (verified 14 Nov 2026)
+
+Real inbound SMS from `+255745123046` was picked up by the poller and answered:
+
+- “Mnapatikana wapi” → Sinza, Mori; ordering via the app.
+- “Mimi nipo mburahati nataka mtungi mkubwa mwekundu” → Oryx 15kg TZS 62,000.
+- “Unaweza kuniagizia aniletee sasa hivi” → refused: SMS ordering not started;
+  use the app.
+- “Je huyo sao gas anachaji bei gani usafiri” → fee confirmed at ordering.
+- “Gesi imeisha” → Oryx 15kg TZS 62,000, order in the app.
+
 ## 6. Troubleshooting
 
 | Symptom | Check |

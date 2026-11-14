@@ -171,7 +171,7 @@ UI changes after that suite must be re-tested before a release claim.
 - Firebase project is on Spark; Cloud Functions cannot be deployed.
 - APK is debug-signed; production keystore is pending.
 - The APK embeds the LAN gateway URL, so a DHCP IP change requires a rebuild.
-- AI live-catalogue answers are verified; the physical TextBee phone round trip is the remaining check. TextBee webhooks need public HTTPS, so the gateway polls TextBee locally.
+- AI live-catalogue answers and a real phone-to-TextBee SMS round trip are verified. TextBee webhooks need public HTTPS, so the gateway polls TextBee locally.
 - SMS ordering is **not wired** yet: the bridge endpoint exists, but the AI only answers questions and tells customers to order in the app.
 - Vendor FCM token can be stale/web; consumer Android push was verified.
 - Current Sao Gas catalogue is refill-only; Full Set/Vifaa/Huduma tabs will be

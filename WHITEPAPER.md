@@ -502,7 +502,7 @@ ngapi?” and get a live, brand-aware answer.
 | FIFO cylinders | Implemented and tested |
 | Consumer push | Verified with Android token |
 | SMS outbound | Verified via TextBee |
-| AI SMS | Live-catalogue Q&A verified; physical phone round trip under test; SMS ordering is not wired yet (app ordering only) |
+| AI SMS | Live-catalogue Q&A and real phone-to-TextBee round trip verified; SMS ordering is not wired yet (app ordering only) |
 | OTP | Foundation/feature-flagged; app wiring pending |
 | Localization | D1/D2 complete; D3/D4 open |
 | Payments | Not integrated |
@@ -530,7 +530,7 @@ SMS gateway, and an AI/subscriber-gate foundation.
 The next milestones are execution, not invention:
 
 1. Prove the order → notification → kitchen → monitor loop on real devices.
-2. Finish the physical phone round trip for the AI SMS assistant.
+2. Keep the AI SMS assistant stable; wire SMS ordering only with a confirm-then-create flow.
 3. Finish localization.
 4. Wire OTP.
 5. Harden identity, rules and release operations in Phase 6.
