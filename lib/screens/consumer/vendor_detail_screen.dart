@@ -52,7 +52,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'consumer_order_dialog.dart';
 
 import '../../core/session_gate.dart';
@@ -151,38 +150,21 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 }
               }
 
-              return Column(
+              return ListView(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        // 1. Vendor Profile Summary Card
-                        _buildVendorHeaderCard(vendorData),
-                        const SizedBox(height: 16),
+                  // 1. Vendor Profile Summary Card
+                  _buildVendorHeaderCard(vendorData),
+                  const SizedBox(height: 16),
 
-                        // 2. Category Switcher Bar
-                        _buildCategoryToggle(),
-                        const SizedBox(height: 16),
+                  // 2. Category Switcher Bar
+                  _buildCategoryToggle(),
+                  const SizedBox(height: 16),
 
-                        // 3. Active Tab Content
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            'SHOP v4 · ${_selectedCategoryIndex == 0 ? cylinders.length : accessories.length} bidhaa',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: context.colors.outline,
-                            ),
-                          ),
-                        ),
-                        ...(_selectedCategoryIndex == 0
-                            ? _buildCylinderTiles(cylinders)
-                            : _buildAccessoryTiles(accessories)),
-                      ],
-                    ),
-                  ),
-                  _buildOrderNowBar(cylinders, accessories),
+                  // 3. Product list: each row owns its order button.
+                  ...(_selectedCategoryIndex == 0
+                      ? _buildCylinderTiles(cylinders)
+                      : _buildAccessoryTiles(accessories)),
                 ],
               );
             },
@@ -479,118 +461,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
   /// Always-visible checkout CTA so a consumer can order without hunting for
   /// the per-row button below the vendor header.
-  Widget _buildOrderNowBar(
-    List<Map<String, dynamic>> cylinders,
-    List<Map<String, dynamic>> accessories,
-  ) {
-    final l10n = AppLocalizations.of(context);
-
-    Map<String, dynamic>? selected;
-    String? brandName;
-    String? cylinderWeight;
-    double price = 0;
-
-    for (final item in cylinders) {
-      final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
-      if (!inStock) continue;
-      selected = item;
-      brandName = (item['brand'] ?? 'Gesi').toString();
-      cylinderWeight =
-          (item['size'] ?? item['weight'] ?? '15kg').toString();
-      price = (item['price'] as num?)?.toDouble() ?? 0;
-      break;
-    }
-
-    if (selected == null && accessories.isNotEmpty) {
-      final item = accessories.first;
-      final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
-      if (inStock) {
-        selected = item;
-        brandName = (item['name'] ?? item['title'] ?? 'Kifaa').toString();
-        cylinderWeight = '1pc';
-        price = (item['price'] as num?)?.toDouble() ?? 0;
-      }
-    }
-
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          border: Border(
-            top: BorderSide(color: context.colors.outlineVariant),
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: selected == null
-                  ? Text(
-                      l10n.noProductsToOrder,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.colors.onSurfaceVariant,
-                      ),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$brandName ${cylinderWeight ?? ''}'.trim(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          'TZS ${_formatPrice(price)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            color: context.gasColors.success,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton.icon(
-              onPressed: selected == null
-                  ? null
-                  : () async {
-                      if (!await SessionGate.requireConsumer(context)) return;
-                      if (!mounted) return;
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(16)),
-                        ),
-                        builder: (context) => ConsumerOrderDialog(
-                          vendorId: widget.vendorId,
-                          brandName: brandName!,
-                          cylinderWeight: cylinderWeight!,
-                          vendorName: widget.businessName,
-                          price: price,
-                        ),
-                      );
-                    },
-              icon: const Icon(Icons.shopping_cart_checkout, size: 18),
-              label: Text(l10n.orderNow),
-              style: FilledButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   List<Widget> _buildCylinderTiles(List<Map<String, dynamic>> cylinders) {
     if (cylinders.isEmpty) {
       return [
