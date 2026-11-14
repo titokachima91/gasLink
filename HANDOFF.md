@@ -163,11 +163,12 @@ Reference: `gateway/MOUNTED.md`.
 - **Servers:** gateway `8080` is running (dashboard 200); APK download server
   `8090` is running; FCM dispatcher is off until notification monitoring is
   needed.
-- **Build:** a four-category build is pending verification. Do not hand over an
-  APK until timestamp, embedded IP, SHA and download are verified.
-- **Last verified APK:** V4 14 Nov 08:46, SHA
-  `7d27a2c4127bc8b730d4b068c8092bab70bbaab75b61f214ff4a86b359bbfd65`.
-  It predates the four-category/gesture changes.
+- **Build:** four-category build **verified**.
+- **Latest verified APK:** 14 Nov 09:58, SHA
+  `7b2c28fa073afda704730bfd352436ef6ed6f3c42b34c908fa6ea8b0210b658f`
+  (59,310,032 bytes), embeds `192.168.1.11:8080`; includes four categories,
+  split vendor-card gestures, flat ListTile storefront, and no `SHOP v4` marker.
+  Download: `http://192.168.1.11:8090/gaslink-latest.apk`.
 - **Latest commits:** `885f828` four categories + gestures, `525e137` remove
   bottom bar/marker and refine gestures, `03fa3d0` flat ListTile storefront,
   `5c221e7` restore pre-restyle storefront, `506bbf9` full-width cards.

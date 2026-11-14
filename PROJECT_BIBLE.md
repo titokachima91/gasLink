@@ -95,11 +95,14 @@ Never ship the hardcoded admin credentials to production. Phase 6 replaces them.
 | Release signing | Debug key only |
 | Firestore rules | **None/open** — pilot only |
 
-Last verified APK before the four-category UI change:
+Latest verified APK:
 
-- V4 build, 14 Nov 08:46, SHA
-  `7d27a2c4127bc8b730d4b068c8092bab70bbaab75b61f214ff4a86b359bbfd65`.
-- It predates the four-category/gesture changes. Always verify the current APK.
+- Four-category build, 14 Nov 09:58, SHA
+  `7b2c28fa073afda704730bfd352436ef6ed6f3c42b34c908fa6ea8b0210b658f`
+  (59,310,032 bytes), embeds `192.168.1.11:8080`.
+- Includes four categories, split vendor-card gestures, flat `Card + ListTile`
+  storefront, and the diagnostic marker removed.
+- Always re-verify timestamp, embedded IP, SHA and download before handoff.
 
 Verification status:
 
