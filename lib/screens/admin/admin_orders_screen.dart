@@ -254,6 +254,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         return 'Pending';
       case 'delivered':
         return 'Delivered';
+      case 'disputed':
+        return 'Disputed';
       case 'cancelled':
         return 'Cancelled';
       default:

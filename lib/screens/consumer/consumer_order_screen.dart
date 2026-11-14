@@ -1,7 +1,10 @@
 // ============================================================================
 // FILE PATH: lib/screens/consumer/consumer_order_screen.dart
-// ROLE: Live order tracking screen and post-order service review modal for LPG consumers.
-// Enforces reinforced consumer master handshake validation and automatic 10-minute expirations.
+// ROLE: Live order tracking and receipt confirmation for LPG consumers.
+//
+// The buyer sees two first-step substeps (sent / vendor opened), the vendor
+// number only after confirmation, the ETA only after the journey starts, and
+// a 10-minute receipt window once the vendor marks the order arrived.
 // ============================================================================
 
 import 'dart:async';
@@ -10,9 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../l10n/localized_messages.dart';
-import '../../services/notification_dispatcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/order_lifecycle.dart';
 import '../../services/order_service.dart';
 
 import '../../core/theme_ext.dart';
@@ -60,99 +62,41 @@ class ConsumerOrderScreen extends StatefulWidget {
 class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
   String? _activeOrderId;
   bool _isCreatingOrder = true;
+  bool _busy = false;
+  Timer? _clock;
 
   List<Map<String, String>> _orderSteps(AppLocalizations l10n) => [
-    {
-      'title': l10n.orderStepPlaced,
-      'subtitle': l10n.orderStepPlacedBody
-    },
-    {
-      'title': l10n.orderStepConfirmed,
-      'subtitle': l10n.orderStepConfirmedBody
-    },
-    {
-      'title': l10n.orderStepDispatched,
-      'subtitle': l10n.orderStepDispatchedBody
-    },
-    {
-      'title': l10n.orderStepDelivered,
-      'subtitle': l10n.orderStepDeliveredBody
-    },
-  ];
-
-  /// 🌟 PERSISTENT REVIEW CARD
-  Widget _buildPersistentReviewCard(Map<String, dynamic> data) {
-    final l10n = AppLocalizations.of(context);
-    final String currentStatus =
-        (data['status'] as String? ?? '').toLowerCase().trim();
-    final bool isDelivered =
-        currentStatus == 'delivered' || currentStatus == 'completed';
-    final bool isReviewed =
-        data['is_reviewed'] == true || data['rated'] == true;
-
-    if (!isDelivered || isReviewed) {
-      return const SizedBox.shrink();
-    }
-
-    return Card(
-      elevation: 0,
-      color: context.gasColors.warningContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: context.gasColors.warning, width: 1.5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.star_rate_rounded,
-                    color: context.gasColors.warning, size: 26),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.reviewPromptTitle,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l10n.reviewPromptBody,
-              style: TextStyle(fontSize: 12, color: context.colors.onSurface),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.gasColors.warning,
-                  foregroundColor: context.gasColors.onWarning,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(Icons.rate_review, size: 16),
-                label: Text(l10n.reviewNow,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                onPressed: () => _showReviewSheet(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+        {
+          'title': l10n.orderStepPlaced,
+          'subtitle': l10n.orderStepPlacedBody,
+        },
+        {
+          'title': l10n.orderStepConfirmed,
+          'subtitle': l10n.orderStepConfirmedBody,
+        },
+        {
+          'title': l10n.orderStepDispatched,
+          'subtitle': l10n.orderStepDispatchedBody,
+        },
+        {
+          'title': l10n.orderStepDelivered,
+          'subtitle': l10n.orderStepDeliveredBody,
+        },
+      ];
 
   @override
   void initState() {
     super.initState();
+    _clock = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted && _activeOrderId != null) setState(() {});
+    });
     _initializeOrder();
+  }
+
+  @override
+  void dispose() {
+    _clock?.cancel();
+    super.dispose();
   }
 
   Future<void> _initializeOrder() async {
@@ -164,6 +108,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       return;
     }
 
+    // Legacy navigation fallback. Checkout uses OrderService.placeOrder, but
+    // this keeps old deep links from silently dropping the vendor alert.
     try {
       final docRef = await FirebaseFirestore.instance.collection('orders').add({
         'consumer_uid': FirebaseAuth.instance.currentUser?.uid ?? '',
@@ -189,7 +135,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
         'contact_phone': widget.contactPhone,
         'consumerPhone': widget.contactPhone,
         'payment_method': widget.paymentMethod,
-        'status': 'placed',
+        'status': OrderLifecycle.placed,
         'created_at': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -201,71 +147,29 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
         });
       }
 
-      // Do not block tracking on push/SMS delivery.
-      unawaited(_notifyOrderCreated(docRef.id));
+      unawaited(OrderService.instance.notifyVendorNewOrder(
+        orderId: docRef.id,
+        vendorId: widget.vendorId,
+        brand: widget.brandName,
+        size: widget.cylinderWeight,
+      ));
     } catch (e) {
+      debugPrint('Could not create fallback order: $e');
       if (mounted) setState(() => _isCreatingOrder = false);
     }
   }
 
-  Future<void> _notifyOrderCreated(String orderId) async {
-    final l10n = await loadLocalizedMessages();
-    final consumerUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-
-    try {
-      await NotificationDispatcher.instance.dispatchToUser(
-        userId: widget.vendorId,
-        title: l10n.newOrderNotificationTitle,
-        body: l10n.newOrderNotificationBody(
-            widget.brandName, widget.cylinderWeight),
-        smsMessage: l10n.smsOrderPlacedVendor(
-            widget.brandName, widget.cylinderWeight),
-        data: {
-          'orderId': orderId,
-          'type': 'new_order',
-        },
-      );
-    } catch (e) {
-      debugPrint('Failed to send vendor notification: $e');
-    }
-
-    if (consumerUid.isEmpty) return;
-    try {
-      await NotificationDispatcher.instance.dispatchToUser(
-        userId: consumerUid,
-        title: l10n.orderPlacedNotificationTitle,
-        body: l10n.orderPlacedNotificationBody(
-            widget.brandName, widget.cylinderWeight),
-        smsMessage: l10n.smsOrderPlacedCustomer(
-            widget.brandName, widget.cylinderWeight),
-        data: {
-          'orderId': orderId,
-          'type': 'order_created',
-          'status': 'placed',
-        },
-      );
-    } catch (e) {
-      debugPrint('Failed to send customer notification: $e');
-    }
-  }
-
   int _mapStatusToStep(String status) {
-    switch (status.toLowerCase().trim()) {
-      case 'accepted':
-      case 'confirmed':
-      case 'preparing':
+    switch (OrderLifecycle.canonical(status)) {
+      case OrderLifecycle.confirmed:
         return 1;
-      case 'on_the_way':
-      case 'dispatched':
-      case 'in_transit':
-      case 'delivered_pending':
+      case OrderLifecycle.onTheWay:
+      case OrderLifecycle.deliveredPending:
         return 2;
-      case 'delivered':
-      case 'completed':
+      case OrderLifecycle.delivered:
         return 3;
-      case 'seen':
-      case 'placed':
-      case 'pending':
+      case OrderLifecycle.placed:
+      case OrderLifecycle.seen:
       default:
         return 0;
     }
@@ -273,20 +177,15 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
 
   String _getStepSubtitle(
       int index, String status, AppLocalizations l10n) {
-    final String cleanStatus = status.toLowerCase().trim();
+    final cleanStatus = OrderLifecycle.canonical(status);
     if (index == 0) {
-      if (cleanStatus == 'seen') return l10n.orderSeenSubtitle;
+      if (cleanStatus == OrderLifecycle.seen) return l10n.orderSeenSubtitle;
       return l10n.orderPlacedSubtitle;
     }
-    if (index == 1) {
-      if (cleanStatus == 'accepted') return l10n.orderAcceptedSubtitle;
-    }
-    if (index == 2) {
-      if (cleanStatus == 'on_the_way' ||
-          cleanStatus == 'in_transit' ||
-          cleanStatus == 'delivered_pending') {
-        return l10n.orderOnTheWaySubtitle;
-      }
+    if (index == 2 &&
+        (cleanStatus == OrderLifecycle.onTheWay ||
+            cleanStatus == OrderLifecycle.deliveredPending)) {
+      return l10n.orderOnTheWaySubtitle;
     }
     return _orderSteps(l10n)[index]['subtitle']!;
   }
@@ -299,10 +198,152 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                AppLocalizations.of(context).callFailed(phoneNumber))),
+            content:
+                Text(AppLocalizations.of(context).callFailed(phoneNumber))),
       );
     }
+  }
+
+  Future<void> _runAction(
+    Future<OrderTransitionResult> Function() action, {
+    required String successMessage,
+  }) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final result = await action();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.success ? successMessage : result.message),
+          backgroundColor: result.success
+              ? context.gasColors.success
+              : context.colors.error,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hitilafu: $e'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirmReceipt() async {
+    if (_activeOrderId == null) return;
+    final result = await OrderService.instance.confirmReceipt(_activeOrderId!);
+    if (!mounted) return;
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).orderStepDeliveredBody),
+          backgroundColor: context.gasColors.success,
+        ),
+      );
+      _showReviewSheet();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _denyReceipt() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hukupokea mtungi?'),
+        content: const Text(
+          'GasLink support atashughulikia oda hii. Muuzaji atajulishwa na tutakupigia.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Ghairi'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Ndio, sikupokea'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || _activeOrderId == null) return;
+    await _runAction(
+      () => OrderService.instance.denyReceipt(_activeOrderId!),
+      successMessage: 'Taarifa imepokelewa. GasLink support atakupigia.',
+    );
+  }
+
+  Future<void> _cancelOrder() async {
+    if (_activeOrderId == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sitisha oda?'),
+        content: const Text('Muuzaji atajulishwa kuwa oda imesitishwa.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Ghairi'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Sitisha oda'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _runAction(
+      () => OrderService.instance.cancelOrder(
+        orderId: _activeOrderId!,
+        actor: OrderLifecycle.actorConsumer,
+        reason: 'consumer_cancelled',
+      ),
+      successMessage: 'Oda imesitishwa.',
+    );
+  }
+
+  int? _remainingConfirmSeconds(Map<String, dynamic> data) {
+    final int deliveredAtMs = (data['_delivered_at_ms'] as num?)?.toInt() ?? 0;
+    DateTime? start;
+    if (deliveredAtMs > 0) {
+      start = DateTime.fromMillisecondsSinceEpoch(deliveredAtMs);
+    } else if (data['delivered_pending_at'] is Timestamp) {
+      start = (data['delivered_pending_at'] as Timestamp).toDate();
+    }
+    if (start == null) return null;
+    final remaining = 600 - DateTime.now().difference(start).inSeconds;
+    return remaining.clamp(0, 600);
+  }
+
+  String _etaText(
+    AppLocalizations l10n,
+    String status,
+    int? etaMinutes,
+    int? remainingSeconds,
+  ) {
+    if (status == OrderLifecycle.cancelled) return l10n.etaCancelled;
+    if (status == OrderLifecycle.disputed) return l10n.orderDisputeTitle;
+    if (status == OrderLifecycle.delivered) return l10n.etaDelivered;
+    if (status == OrderLifecycle.deliveredPending) {
+      final minutes = ((remainingSeconds ?? 600) / 60).ceil();
+      return l10n.confirmWithinMinutes(minutes);
+    }
+    if (status == OrderLifecycle.onTheWay && etaMinutes != null) {
+      return l10n.minutesShort(etaMinutes);
+    }
+    if (status == OrderLifecycle.confirmed) return l10n.etaPreparing;
+    return l10n.etaWaiting;
   }
 
   @override
@@ -310,7 +351,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
     final l10n = AppLocalizations.of(context);
     final steps = _orderSteps(l10n);
     final displayId = _activeOrderId != null
-        ? '#GL-${_activeOrderId!.substring(0, _activeOrderId!.length > 6 ? 6 : _activeOrderId!.length).toUpperCase()}'
+        ? '#GL-${OrderLifecycle.orderCode(_activeOrderId!)}'
         : '...';
 
     return Scaffold(
@@ -330,7 +371,7 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: context.colors.primary),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(l10n.creatingOrder,
                       style: TextStyle(color: context.colors.onSurfaceVariant)),
                 ],
@@ -346,36 +387,29 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data?.data() == null) {
                   return Center(
-                      child: CircularProgressIndicator(color: context.colors.primary));
+                      child: CircularProgressIndicator(
+                          color: context.colors.primary));
                 }
 
                 final data = snapshot.data!.data()!;
-                final currentStatus = (data['status'] as String? ?? 'placed')
-                    .toLowerCase()
-                    .trim();
+                final currentStatus =
+                    OrderLifecycle.canonical(data['status']?.toString());
                 final currentStep = _mapStatusToStep(currentStatus);
-                final isCancelled =
-                    currentStatus == 'cancelled' || currentStatus == 'rejected';
-                final etaMinutes = (data['eta_minutes'] as num?)?.toInt() ?? 20;
-
-                // ⏳ REINFORCED 10-MINUTE EXPIRY AUTO-APPROVAL SYSTEM LOGIC
-                if (currentStatus == 'delivered_pending') {
-                  final int deliveredAtMs =
-                      data['_delivered_at_ms'] as int? ?? 0;
-                  if (deliveredAtMs > 0) {
-                    final int elapsedMins =
-                        (DateTime.now().millisecondsSinceEpoch -
-                                deliveredAtMs) ~/
-                            60000;
-                    if (elapsedMins >= 10) {
-                      // Use OrderService so cylinder registration also runs
-                      OrderService.instance.updateStatus(
-                        _activeOrderId!,
-                        'delivered',
-                      );
-                    }
-                  }
-                }
+                final isCancelled = currentStatus == OrderLifecycle.cancelled;
+                final isDisputed = currentStatus == OrderLifecycle.disputed;
+                final etaMinutes = (data['eta_minutes'] as num?)?.toInt();
+                final remainingSeconds = _remainingConfirmSeconds(data);
+                final vendorPhone =
+                    (data['vendor_phone'] ?? data['vendorPhone'] ?? '')
+                        .toString();
+                final driverPhone =
+                    (data['driver_phone'] ?? data['driverPhone'] ?? '')
+                        .toString();
+                final canSeeVendorPhone = currentStatus ==
+                        OrderLifecycle.confirmed ||
+                    currentStatus == OrderLifecycle.onTheWay ||
+                    currentStatus == OrderLifecycle.deliveredPending ||
+                    currentStatus == OrderLifecycle.delivered;
 
                 return ListView(
                   padding: const EdgeInsets.all(16.0),
@@ -386,7 +420,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                         color: context.colors.errorContainer,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: context.colors.errorContainer)),
+                            side: BorderSide(
+                                color: context.colors.errorContainer)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -400,11 +435,11 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                       fontSize: 14,
                                       color: context.colors.error)),
                               const SizedBox(height: 4),
-                              Text(
-                                  l10n.orderCancelledBody,
+                              Text(l10n.orderCancelledBody,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 12, color: context.colors.onSurface)),
+                                      fontSize: 12,
+                                      color: context.colors.onSurface)),
                               const SizedBox(height: 12),
                               SizedBox(
                                 width: double.infinity,
@@ -423,8 +458,51 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                           ),
                         ),
                       ),
-// Persistent review card – stays until the user submits a review
                       _buildPersistentReviewCard(data),
+                      const SizedBox(height: 16),
+                    ],
+
+                    if (isDisputed) ...[
+                      Card(
+                        elevation: 0,
+                        color: context.colors.errorContainer,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: context.colors.error)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Icon(Icons.gavel,
+                                  color: context.colors.error, size: 36),
+                              const SizedBox(height: 8),
+                              Text(l10n.orderDisputeTitle,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: context.colors.error)),
+                              const SizedBox(height: 4),
+                              Text(l10n.orderDisputeBody,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: context.colors.onSurface)),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  onPressed: () =>
+                                      _makePhoneCall('0767304776'),
+                                  icon: const Icon(Icons.support_agent,
+                                      size: 16),
+                                  label: const Text('Piga GasLink: 0767304776'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 16),
                     ],
 
@@ -433,7 +511,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       color: context.colors.primaryContainer,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: context.colors.primaryContainer)),
+                          side: BorderSide(
+                              color: context.colors.primaryContainer)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
@@ -447,16 +526,13 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                 children: [
                                   Text(l10n.etaLabel,
                                       style: TextStyle(
-                                          fontSize: 11, color: context.colors.onSurfaceVariant)),
+                                          fontSize: 11,
+                                          color: context
+                                              .colors.onSurfaceVariant)),
                                   const SizedBox(height: 2),
                                   Text(
-                                    isCancelled
-                                        ? l10n.etaCancelled
-                                        : (currentStep >= 3
-                                            ? l10n.etaDelivered
-                                            : (currentStep == 0
-                                                ? l10n.etaWaiting
-                                                : l10n.minutesShort(etaMinutes))),
+                                    _etaText(l10n, currentStatus, etaMinutes,
+                                        remainingSeconds),
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -471,8 +547,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 🏁 REINFORCED INTERACTIVE CONFIRMATION PANEL MATRIX
-                    if (currentStatus == 'delivered_pending') ...[
+                    // Receipt confirmation panel: 10-minute window.
+                    if (currentStatus == OrderLifecycle.deliveredPending) ...[
                       Card(
                         elevation: 0,
                         color: context.gasColors.infoContainer,
@@ -487,34 +563,38 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                               Icon(Icons.verified_user_outlined,
                                   color: context.gasColors.info, size: 36),
                               const SizedBox(height: 8),
-                              Text(
-                                  l10n.confirmDeliveryTitle,
+                              Text(l10n.confirmDeliveryTitle,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       color: context.colors.onSurface)),
                               const SizedBox(height: 4),
-                              Text(
-                                  l10n.confirmDeliveryBody,
+                              Text(l10n.confirmDeliveryBody,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 11, color: context.colors.onSurfaceVariant)),
+                                      fontSize: 11,
+                                      color: context
+                                          .colors.onSurfaceVariant)),
+                              if (remainingSeconds != null) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  l10n.confirmWithinMinutes(
+                                      (remainingSeconds / 60).ceil()),
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.gasColors.info),
+                                ),
+                              ],
                               const SizedBox(height: 12),
                               Row(
                                 children: [
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed: () async {
-                                        await FirebaseFirestore.instance
-                                            .collection('orders')
-                                            .doc(_activeOrderId)
-                                            .update({
-                                          'status': 'on_the_way',
-                                          'fraud_alert_flag': true,
-                                        });
-                                      },
+                                      onPressed: _busy ? null : _denyReceipt,
                                       style: OutlinedButton.styleFrom(
-                                          foregroundColor: context.colors.error,
+                                          foregroundColor:
+                                              context.colors.error,
                                           side: BorderSide(
                                               color: context.colors.error)),
                                       child: Text(l10n.notReceived,
@@ -526,40 +606,19 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        if (_activeOrderId == null ||
-                                            _activeOrderId!.isEmpty) return;
-
-                                        try {
-                                          // 1. Update status to 'delivered' in Firestore
-                                          // (This automatically fires handleOrderCompletion & metadata wiring safely in background)
-                                          await OrderService.instance
-                                              .updateStatus(
-                                            _activeOrderId!,
-                                            'delivered',
-                                          );
-                                          // 2. Pop the current tracking screen safely to prevent timer trapping
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-
-                                            // 3. Open review & rating sheet cleanly on top of home screen
-                                            _showReviewSheet();
-                                          }
-                                        } catch (e) {
-                                          debugPrint(
-                                              'Error completing order on Nimepokea tap: $e');
-                                        }
-                                      },
+                                      onPressed:
+                                          _busy ? null : _confirmReceipt,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: context.gasColors.success,
-                                        foregroundColor: context.gasColors.onSuccess,
+                                        backgroundColor:
+                                            context.gasColors.success,
+                                        foregroundColor:
+                                            context.gasColors.onSuccess,
                                       ),
                                       child: Text(
                                         l10n.received,
                                         style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -572,10 +631,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       const SizedBox(height: 16),
                     ],
 
-                    // 🏁 CONSUMER FIRST ACCESS CLOSURE FOR ACTIVE STEPS
-                    if ((currentStatus == 'on_the_way' ||
-                            currentStatus == 'in_transit') &&
-                        !isCancelled) ...[
+                    // Buyer may confirm before the vendor taps "arrived".
+                    if (currentStatus == OrderLifecycle.onTheWay) ...[
                       SizedBox(
                         width: double.infinity,
                         height: 44,
@@ -584,25 +641,10 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                               backgroundColor: context.gasColors.success,
                               foregroundColor: context.gasColors.onSuccess,
                               elevation: 0),
-                          onPressed: () async {
-                            if (_activeOrderId == null ||
-                                _activeOrderId!.isEmpty) return;
-                            try {
-                              await OrderService.instance.updateStatus(
-                                _activeOrderId!,
-                                'delivered',
-                              );
-                              if (mounted) {
-                                _showReviewSheet();
-                              }
-                            } catch (e) {
-                              debugPrint('Error confirming delivery: $e');
-                            }
-                          },
-                          icon:
-                              const Icon(Icons.check_circle_outline, size: 16),
-                          label: Text(
-                              l10n.confirmReceived,
+                          onPressed: _busy ? null : _confirmReceipt,
+                          icon: const Icon(Icons.check_circle_outline,
+                              size: 16),
+                          label: Text(l10n.confirmReceived,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
@@ -614,7 +656,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: context.colors.outlineVariant)),
+                          side:
+                              BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -622,13 +665,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                           children: [
                             Text(l10n.orderStatusSection,
                                 style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold)),
                             const SizedBox(height: 16),
                             ...List.generate(steps.length, (index) {
                               final isDone =
-                                  !isCancelled && index <= currentStep;
+                                  !isCancelled && !isDisputed && index <= currentStep;
                               final isCurrent =
-                                  !isCancelled && index == currentStep;
+                                  !isCancelled && !isDisputed && index == currentStep;
                               return Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -669,13 +713,28 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                                     : FontWeight.normal,
                                                 color: isDone
                                                     ? context.colors.onSurface
-                                                    : context.colors.onSurfaceVariant)),
+                                                    : context
+                                                        .colors.onSurfaceVariant)),
                                         Text(
                                             _getStepSubtitle(
                                                 index, currentStatus, l10n),
                                             style: TextStyle(
                                                 fontSize: 11,
-                                                color: context.colors.onSurfaceVariant)),
+                                                color: context
+                                                    .colors.onSurfaceVariant)),
+                                        if (index == 0) ...[
+                                          const SizedBox(height: 6),
+                                          _buildSubstep(
+                                            l10n.orderSubstepSent,
+                                            true,
+                                          ),
+                                          _buildSubstep(
+                                            l10n.orderSubstepSeen,
+                                            currentStatus ==
+                                                    OrderLifecycle.seen ||
+                                                currentStep >= 1,
+                                          ),
+                                        ],
                                         const SizedBox(height: 16),
                                       ],
                                     ),
@@ -693,7 +752,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: context.colors.outlineVariant)),
+                          side:
+                              BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
@@ -718,98 +778,98 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                       Text(l10n.orderVendorRole,
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: context.colors.onSurfaceVariant)),
+                                              color: context
+                                                  .colors.onSurfaceVariant)),
                                     ],
                                   ),
                                 ),
-                                ElevatedButton.icon(
-                                  onPressed: () =>
-                                      _makePhoneCall(widget.contactPhone),
-                                  icon: const Icon(Icons.phone, size: 12),
-                                  label: Text(l10n.callOffice,
-                                      style: const TextStyle(fontSize: 10)),
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: context.colors.primary,
-                                      foregroundColor: context.colors.onPrimary,
-                                      elevation: 0),
-                                ),
+                                if (canSeeVendorPhone && vendorPhone.isNotEmpty)
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _makePhoneCall(vendorPhone),
+                                    icon: const Icon(Icons.phone, size: 12),
+                                    label: Text(l10n.callOffice,
+                                        style:
+                                            const TextStyle(fontSize: 10)),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            context.colors.primary,
+                                        foregroundColor:
+                                            context.colors.onPrimary,
+                                        elevation: 0),
+                                  ),
                               ],
                             ),
-                            if (currentStatus == 'on_the_way' ||
-                                currentStatus == 'in_transit' ||
-                                currentStatus == 'delivered_pending') ...[
-                              Builder(
-                                builder: (context) {
-                                  final String driverPhone =
-                                      data['driver_phone'] as String? ?? '';
-                                  if (driverPhone.isEmpty)
-                                    return const SizedBox.shrink();
-                                  return Column(
-                                    children: [
-                                      const Divider(height: 16),
-                                      Row(
-                                        children: [
-                                          CircleAvatar(
-                                              backgroundColor:
-                                                  context.colors.tertiaryContainer,
-                                              child: Icon(
-                                                  Icons.delivery_dining,
-                                                  color: context.colors.tertiary,
-                                                  size: 18)),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(l10n.driverTitle,
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 13)),
-                                                Text(l10n.driverSubtitle,
-                                                    style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: context.colors.onSurfaceVariant)),
-                                              ],
-                                            ),
-                                          ),
-                                          ElevatedButton.icon(
-                                            onPressed: () =>
-                                                _makePhoneCall(driverPhone),
-                                            icon: const Icon(Icons.phone,
-                                                size: 12),
-                                            label: Text(l10n.callDriver,
-                                                style: const TextStyle(fontSize: 10)),
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor: context.gasColors.success,
-                                                foregroundColor: context.gasColors.onSuccess,
-                                                elevation: 0),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                },
+                            if (!canSeeVendorPhone) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n.vendorNumberAfterConfirmation,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                    color: context.colors.onSurfaceVariant),
                               ),
                             ],
-                            if (currentStep == 0 && !isCancelled) ...[
+                            if (driverPhone.isNotEmpty &&
+                                (currentStatus ==
+                                        OrderLifecycle.onTheWay ||
+                                    currentStatus ==
+                                        OrderLifecycle.deliveredPending)) ...[
+                              const Divider(height: 16),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                      backgroundColor:
+                                          context.colors.tertiaryContainer,
+                                      child: Icon(Icons.delivery_dining,
+                                          color: context.colors.tertiary,
+                                          size: 18)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(l10n.driverTitle,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13)),
+                                        Text(l10n.driverSubtitle,
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: context.colors
+                                                    .onSurfaceVariant)),
+                                      ],
+                                    ),
+                                  ),
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _makePhoneCall(driverPhone),
+                                    icon: const Icon(Icons.phone, size: 12),
+                                    label: Text(l10n.callDriver,
+                                        style:
+                                            const TextStyle(fontSize: 10)),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            context.gasColors.success,
+                                        foregroundColor:
+                                            context.gasColors.onSuccess,
+                                        elevation: 0),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            if ((currentStatus == OrderLifecycle.placed ||
+                                    currentStatus == OrderLifecycle.seen) &&
+                                !isCancelled) ...[
                               const Divider(height: 20),
                               SizedBox(
                                 width: double.infinity,
                                 child: TextButton.icon(
-                                  onPressed: () async {
-                                    if (_activeOrderId != null) {
-                                      await FirebaseFirestore.instance
-                                          .collection('orders')
-                                          .doc(_activeOrderId)
-                                          .update({'status': 'cancelled'});
-                                    }
-                                  },
+                                  onPressed: _busy ? null : _cancelOrder,
                                   icon: Icon(Icons.cancel_outlined,
                                       color: context.colors.error, size: 16),
-                                  label: Text(
-                                      l10n.cancelOrder,
+                                  label: Text(l10n.cancelOrder,
                                       style: TextStyle(
                                           color: context.colors.error,
                                           fontSize: 12,
@@ -827,7 +887,8 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: context.colors.outlineVariant)),
+                          side:
+                              BorderSide(color: context.colors.outlineVariant)),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -837,12 +898,14 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 13)),
                             const Divider(),
-                            _buildSummaryRow(l10n.summaryProduct,
+                            _buildSummaryRow(
+                                l10n.summaryProduct,
                                 '${widget.brandName} (${widget.cylinderWeight}) x${widget.quantity}'),
-                            _buildSummaryRow(l10n.summaryAddress, widget.deliveryAddress),
+                            _buildSummaryRow(
+                                l10n.summaryAddress, widget.deliveryAddress),
                             if (widget.contactPhone.isNotEmpty)
-                              _buildSummaryRow(
-                                  l10n.summaryConsumerPhone, widget.contactPhone),
+                              _buildSummaryRow(l10n.summaryConsumerPhone,
+                                  widget.contactPhone),
                             _buildSummaryRow(l10n.summaryTotal,
                                 'TZS ${widget.totalPrice.toStringAsFixed(0)}'),
                             _buildSummaryRow(
@@ -861,12 +924,107 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
     );
   }
 
+  Widget _buildSubstep(String label, bool done) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        children: [
+          Icon(
+            done ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 13,
+            color:
+                done ? context.gasColors.success : context.colors.outline,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.5,
+              color: done
+                  ? context.colors.onSurface
+                  : context.colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🌟 PERSISTENT REVIEW CARD
+  Widget _buildPersistentReviewCard(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context);
+    final String currentStatus =
+        OrderLifecycle.canonical(data['status']?.toString());
+    final bool isDelivered = currentStatus == OrderLifecycle.delivered;
+    final bool isReviewed =
+        data['is_reviewed'] == true || data['rated'] == true;
+
+    if (!isDelivered || isReviewed) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: 0,
+      color: context.gasColors.warningContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.gasColors.warning, width: 1.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.star_rate_rounded,
+                    color: context.gasColors.warning, size: 26),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.reviewPromptTitle,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.reviewPromptBody,
+              style: TextStyle(fontSize: 12, color: context.colors.onSurface),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.gasColors.warning,
+                  foregroundColor: context.gasColors.onWarning,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.rate_review, size: 16),
+                label: Text(l10n.reviewNow,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13)),
+                onPressed: () => _showReviewSheet(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showReviewSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      isDismissible: true, // allow tap outside to close
-      enableDrag: true, // allow slide down
+      isDismissible: true,
+      enableDrag: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -886,7 +1044,9 @@ class _ConsumerOrderScreenState extends State<ConsumerOrderScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: context.colors.onSurfaceVariant)),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 12, color: context.colors.onSurfaceVariant)),
           Flexible(
               child: Text(value,
                   textAlign: TextAlign.end,

@@ -205,6 +205,28 @@ Reference: `gateway/MOUNTED.md`.
 - **Phase B/C/D source:** profile setup screen, Safety Hub, 90-day memory,
   keyword opt-in, order status, vendor response, SMS-only subscriber creation.
   Release build pending.
+- **Order lifecycle v2 (source, uncommitted):**
+  `lib/services/order_lifecycle.dart` is the canonical state machine
+  (`placed → seen → confirmed → on_the_way → delivered_pending → delivered`,
+  plus `disputed`/`cancelled`), with legacy aliases read-only.
+  `OrderService` now writes every transition in a Firestore transaction, adds
+  `status_history`, releases the vendor phone at confirmation, records ETA and
+  rider only at start-journey, and registers cylinders idempotently with a
+  normal `Timestamp` inside the units array.
+- **Reliable order notifications:** transitions write idempotent
+  `notification_outbox` docs in the same transaction. Gateway workers
+  `services/notification-outbox-worker.js` and `services/order-finalizer.js`
+  are wired into `server.js`; the finalizer closes `delivered_pending` orders
+  after 10 minutes and registers the cylinder in the same transaction.
+  Verified with synthetic Firestore orders (auto-finalize + cylinder unit +
+  outbox docs) and a synthetic outbox entry (push queued to `notifications`).
+- **Operator channel:** `GASLINK_OPERATOR_PHONE=+255714604777`. Texts from the
+  operator line are logged to `data/operator-inbox.jsonl` and skipped by the
+  customer AI. `scripts/send-operator-sms.js` sends progress to the operator.
+- **TextBee quota:** the account hit its 50-message daily cap on 14 Nov 2026
+  (`429 ... used all 50 messages`). Sending resumes at midnight UTC. The
+  outbox worker detects the quota error and defers SMS entries to the next UTC
+  midnight instead of burning retries. One Textbelt fallback SMS was delivered.
 - **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
   this update). Gateway changes are outside this repo. Check `git status`
   before building.
@@ -247,15 +269,21 @@ Reference: `gateway/MOUNTED.md`.
 3. Sao Gas Supply appears; tap **Oda Sasa**.
 4. Enter address; phone is prefilled.
 5. Tap **Thibitisha Oda**. Tracking opens immediately.
-6. Vendor accepts and starts delivery (`on_the_way`) or marks
-   `delivered_pending`.
-7. Consumer taps **Nimepokea** / **Nimepokea Gesi Tayari**.
-8. The order becomes `delivered`; `OrderService.handleOrderCompletion`
-   registers the cylinder.
-9. Back to Home → pull to refresh → the kitchen cylinder/gauge updates.
+6. Buyer sees “order sent”; vendor opens the order and the buyer sees
+   “vendor opened it”.
+7. Vendor taps **Pokea / Accept**; buyer receives the vendor phone.
+8. Vendor taps **Anza Safari**, chooses ETA, optional rider phone; buyer sees
+   ETA/rider.
+9. Vendor taps **Imefika / Arrived**; buyer gets a 10-minute confirmation card.
+10. Consumer taps **Nimepokea**. The order becomes `delivered` and the cylinder
+    registers. If the buyer does nothing, the gateway finalizer closes it after
+    10 minutes. If the buyer taps **Sikupokea**, the order becomes `disputed`
+    and GasLink support mediates.
+11. Back to Home → the kitchen cylinder/gauge updates live (no pull-to-refresh).
 
 Consumer push was verified end-to-end with a real Android token. SMS outbound
-was verified with the TextBee gateway. Inbound AI is not part of this demo.
+was verified with the TextBee gateway, but the daily 50-message cap is currently
+exhausted until midnight UTC. Inbound AI is not part of this demo.
 
 ---
 

@@ -11,10 +11,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
-import '../../l10n/localized_messages.dart';
 import '../../services/auth_service.dart';
-import '../../services/notification_dispatcher.dart';
+import '../../services/order_lifecycle.dart';
+import '../../services/order_service.dart';
 import '../../widgets/ad_slot.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/offline_banner.dart';
@@ -49,105 +48,89 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   DocumentReference<Map<String, dynamic>> get _vendorDocRef =>
       FirebaseFirestore.instance.collection('vendors').doc(_vendorUid);
 
-  Future<void> _updateOrderStatus(String orderId, String newStatus) async {
+  Future<void> _runTransition(
+    Future<OrderTransitionResult> Function() action, {
+    required String successMessage,
+  }) async {
     try {
-      final orderDoc = await FirebaseFirestore.instance
-          .collection('orders')
-          .doc(orderId)
-          .get();
-
-      // ADD THIS EXACT LINE HERE TO SOLVE ALL THE CONSOLE ERRORS:
-      final orderData = orderDoc.data() ?? {};
-
-      final int etaMins = (orderData['eta_minutes'] as num?)?.toInt() ?? 20;
-      final String vendorUid =
-          orderData['vendor_id'] ?? orderData['vendorId'] ?? '';
-
-      final String consumerUid = orderData['consumer_uid'] ??
-          orderData['user_id'] ??
-          orderData['userId'] ??
-          orderData['consumer_id'] ??
-          orderData['consumerId'] ??
-          '';
-
-      await FirebaseFirestore.instance
-          .collection('orders')
-          .doc(orderId)
-          .update({
-        'status': newStatus,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-
-      // Notify the customer without blocking the status transition.
-      if (consumerUid.isNotEmpty) {
-        unawaited(() async {
-          final l10n = await loadLocalizedMessages();
-          final brandName =
-              (orderData['brand'] ?? orderData['brand_name'] ?? 'Gesi')
-                  .toString();
-          String title = l10n.orderUpdatedTitle;
-          String body = l10n.orderUpdatedBody(brandName);
-          String smsMessage = l10n.smsOrderUpdated(brandName);
-
-          if (newStatus == 'cancelled' || newStatus == 'rejected') {
-            title = l10n.orderCancelledTitle;
-            body = l10n.orderCancelledBody;
-            smsMessage = l10n.smsOrderCancelled(brandName);
-          } else if (newStatus == 'on_the_way' || newStatus == 'dispatched') {
-            title = l10n.orderStepDispatched;
-            body = l10n.orderStepDispatchedBody;
-            smsMessage = l10n.smsOrderOnTheWay(brandName);
-          } else if (newStatus == 'delivered' || newStatus == 'completed') {
-            title = l10n.orderStepDelivered;
-            body = l10n.orderStepDeliveredBody;
-            smsMessage = l10n.smsOrderDelivered(brandName);
-          }
-
-          try {
-            await NotificationDispatcher.instance.dispatchToUser(
-              userId: consumerUid,
-              title: title,
-              body: body,
-              smsMessage: smsMessage,
-              data: {
-                'orderId': orderId,
-                'type': 'order_status',
-                'status': newStatus,
-              },
-            );
-          } catch (e) {
-            debugPrint('Failed to send consumer notification: $e');
-          }
-        }());
-      }
-
-      // When order is completed, update vendor's total delivery stats for rolling average
-      if (newStatus == 'delivered' && vendorUid.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('vendors')
-            .doc(vendorUid)
-            .set({
-          'completed_orders_count': FieldValue.increment(1),
-          'total_delivery_minutes': FieldValue.increment(etaMins),
-        }, SetOptions(merge: true));
-      }
-
+      final result = await action();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Hali ya oda imebadilishwa: $newStatus'),
-          backgroundColor: newStatus == 'cancelled'
-              ? context.colors.error
-              : context.gasColors.success,
+          content: Text(result.success ? successMessage : result.message),
+          backgroundColor: result.success
+              ? context.gasColors.success
+              : context.colors.error,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Hitilafu: $e'),
-            backgroundColor: context.colors.error),
+          content: Text('Hitilafu: $e'),
+          backgroundColor: context.colors.error,
+        ),
       );
+    }
+  }
+
+  Future<void> _acceptOrder(String orderId) => _runTransition(
+        () => OrderService.instance.confirmOrder(orderId),
+        successMessage: 'Oda imethibitishwa. Inaandaliwa.',
+      );
+
+  Future<void> _rejectOrder(String orderId) => _runTransition(
+        () => OrderService.instance.rejectOrder(orderId),
+        successMessage: 'Oda imekataliwa.',
+      );
+
+  Future<void> _startJourney(
+    String orderId,
+    int etaMinutes,
+    String driverPhone,
+  ) =>
+      _runTransition(
+        () => OrderService.instance.startJourney(
+          orderId: orderId,
+          etaMinutes: etaMinutes,
+          driverPhone: driverPhone,
+        ),
+        successMessage: 'Safari imeanza. Mteja amejulishwa ETA na dereva.',
+      );
+
+  Future<void> _markArrived(String orderId) => _runTransition(
+        () => OrderService.instance.markArrived(orderId),
+        successMessage:
+            'Imewekwa kama imefika. Mteja athibitisha ndani ya dakika 10.',
+      );
+
+  Future<void> _undoArrived(String orderId) => _runTransition(
+        () => OrderService.instance.undoArrived(orderId),
+        successMessage: 'Oda imerudishwa njiani.',
+      );
+
+  Future<void> _confirmArrived(String orderId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Mzigo umefika?'),
+        content: const Text(
+          'Mteja atapewa dakika 10 kuthibitisha kupokea. Kama hakuthibitishi, oda itakamilika kiotomatiki.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Ghairi'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Ndio, umefika'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _markArrived(orderId);
     }
   }
 
@@ -201,148 +184,154 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   }
 
   void _showAcceptOrderDialog(String orderId) {
-    int selectedEta = 20;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Chagua Muda wa Kuwasilisha (ETA)',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Mteja ataona muda huu kwenye app yake mara tu utakapothibitisha.',
-                    style: TextStyle(
-                        fontSize: 12, color: context.colors.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 10,
-                    children: [15, 20, 30, 45, 60].map((mins) {
-                      final isSelected = selectedEta == mins;
-                      return ChoiceChip(
-                        label: Text('Dakika $mins'),
-                        selected: isSelected,
-                        selectedColor: context.colors.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? context.colors.onPrimary
-                              : context.colors.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        onSelected: (_) {
-                          setModalState(() => selectedEta = mins);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.colors.primary,
-                        foregroundColor: context.colors.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () async {
-                        // FIXED: Capture ScaffoldMessenger helper before popping modal tree context
-                        final scaffoldMessenger = ScaffoldMessenger.of(context);
-                        Navigator.pop(context);
-
-                        try {
-                          final orderDoc = await FirebaseFirestore.instance
-                              .collection('orders')
-                              .doc(orderId)
-                              .get();
-                          final orderData = orderDoc.data() ?? {};
-                          final String consumerUid =
-                              orderData['consumer_uid'] ??
-                                  orderData['user_id'] ??
-                                  orderData['userId'] ??
-                                  orderData['consumer_id'] ??
-                                  orderData['consumerId'] ??
-                                  '';
-
-                          await FirebaseFirestore.instance
-                              .collection('orders')
-                              .doc(orderId)
-                              .update({
-                            'status': 'accepted',
-                            'eta_minutes': selectedEta,
-                            'updated_at': FieldValue.serverTimestamp(),
-                          });
-                          // Notify the consumer without blocking the accept flow.
-                          if (consumerUid.isNotEmpty) {
-                            unawaited(() async {
-                              try {
-                                final l10n = await loadLocalizedMessages();
-                                final brandName = (orderData['brand'] ??
-                                        orderData['brand_name'] ??
-                                        'Gesi')
-                                    .toString();
-                                await NotificationDispatcher.instance
-                                    .dispatchToUser(
-                                  userId: consumerUid,
-                                  title: l10n.orderStepConfirmed,
-                                  body: l10n.orderStepConfirmedBody,
-                                  smsMessage: l10n.smsOrderConfirmed(brandName),
-                                  data: {
-                                    'orderId': orderId,
-                                    'type': 'order_status',
-                                    'status': 'accepted',
-                                  },
-                                );
-                              } catch (e) {
-                                debugPrint(
-                                    'Failed to send consumer accept notification: $e');
-                              }
-                            }());
-                          }
-
-                          // FIXED: Use the parent widget's lifecycle state verification
-                          if (!mounted) return;
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Oda imethibitishwa: Dakika $selectedEta'),
-                              backgroundColor: context.gasColors.success,
-                            ),
-                          );
-                        } catch (e) {
-                          if (!mounted) return;
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(
-                                content: Text('Hitilafu: $e'),
-                                backgroundColor: context.colors.error),
-                          );
-                        }
-                      },
-                      child: const Text('Thibitisha Oda ➔',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Thibitisha Oda',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Mteja atajulishwa kuwa oda imepokelewa na inaandaliwa. ETA itaombwa uanzapo safari.',
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.onSurfaceVariant,
               ),
-            );
-          },
-        );
-      },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    child: const Text('Ghairi'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.colors.primary,
+                      foregroundColor: context.colors.onPrimary,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _acceptOrder(orderId);
+                    },
+                    child: const Text('Thibitisha Oda'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  void _showStartJourneyDialog(String orderId) {
+    int selectedEta = 20;
+    final driverController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Anza Safari',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Weka ETA. Namba ya dereva ni ya hiari; mteja ataipata mara moja.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                children: [15, 20, 30, 45, 60].map((mins) {
+                  final isSelected = selectedEta == mins;
+                  return ChoiceChip(
+                    label: Text('Dakika $mins'),
+                    selected: isSelected,
+                    selectedColor: context.colors.primary,
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? context.colors.onPrimary
+                          : context.colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onSelected: (_) {
+                      setModalState(() => selectedEta = mins);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: driverController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Namba ya dereva (hiari)',
+                  hintText: '0712345678',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    _startJourney(
+                      orderId,
+                      selectedEta,
+                      driverController.text.trim(),
+                    );
+                  },
+                  child: const Text(
+                    'Anza Safari',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).whenComplete(driverController.dispose);
   }
 
   @override
@@ -498,42 +487,67 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                   .where('vendor_id', isEqualTo: _vendorUid)
                   .snapshots(),
               builder: (context, ordersSnap) {
+                if (ordersSnap.hasError) {
+                  return _buildOrdersError(context, ordersSnap.error!);
+                }
+                if (!ordersSnap.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
                 final allOrders = ordersSnap.data?.docs ?? [];
                 final now = DateTime.now();
                 final startOfToday = DateTime(now.year, now.month, now.day);
                 int todayOrdersCount = 0;
                 double todayRevenue = 0.0;
-                final pendingOrders =
+                final activeOrders =
                     <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+                final disputedOrders =
+                    <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+
                 for (final doc in allOrders) {
                   final data = doc.data();
-                  final status = (data['status'] as String? ?? 'pending')
-                      .toLowerCase()
-                      .trim();
+                  final status = OrderLifecycle.canonical(
+                    data['status']?.toString(),
+                  );
                   final totalPrice =
-                      (data['total_price'] ?? data['totalPrice'] as num?)
+                      ((data['total_price'] ?? data['totalPrice']) as num?)
                               ?.toDouble() ??
                           0.0;
                   final Timestamp? createdTs =
                       data['created_at'] as Timestamp? ??
                           data['createdAt'] as Timestamp?;
                   final createdAt = createdTs?.toDate() ?? DateTime.now();
-                  if (createdAt.isAfter(startOfToday)) {
+                  if (!createdAt.isBefore(startOfToday)) {
                     todayOrdersCount++;
-                    if (status == 'delivered' ||
-                        status == 'accepted' ||
-                        status == 'in_transit' ||
-                        status == 'on_the_way') {
+                    if (status == OrderLifecycle.delivered) {
                       todayRevenue += totalPrice;
                     }
                   }
-                  // Include 'seen' alongside 'pending' and 'placed' so seen orders remain visible
-                  if (status == 'pending' ||
-                      status == 'placed' ||
-                      status == 'seen') {
-                    pendingOrders.add(doc);
+                  if (OrderLifecycle.isActive(status)) {
+                    activeOrders.add(doc);
+                  } else if (status == OrderLifecycle.disputed) {
+                    disputedOrders.add(doc);
                   }
                 }
+
+                int createdMs(
+                  QueryDocumentSnapshot<Map<String, dynamic>> doc,
+                ) {
+                  final data = doc.data();
+                  final ts = (data['created_at'] ?? data['createdAt'])
+                      as Timestamp?;
+                  return ts?.millisecondsSinceEpoch ?? 0;
+                }
+
+                activeOrders.sort((a, b) => createdMs(b).compareTo(createdMs(a)));
+                disputedOrders
+                    .sort((a, b) => createdMs(b).compareTo(createdMs(a)));
+                final newOrders = activeOrders
+                    .where((doc) => OrderLifecycle.isNew(
+                          doc.data()['status']?.toString(),
+                        ))
+                    .toList();
+
                 return ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
@@ -582,10 +596,10 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                             ),
                             _buildMetricCard(
                               title: 'Zinazosubiri',
-                              value: '${pendingOrders.length}',
+                              value: '${newOrders.length}',
                               subtitle: 'Oda Mpya',
                               icon: Icons.mark_email_unread_outlined,
-                              color: pendingOrders.isNotEmpty
+                              color: newOrders.isNotEmpty
                                   ? context.gasColors.warning
                                   : context.colors.onSurfaceVariant,
                             ),
@@ -676,422 +690,43 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // ── SECTION 3: REAL-TIME INCOMING ORDER ALERTS ───────
+                    // ── SECTION 3: LIVE ACTIVE ORDER QUEUE ───────────────
                     AppSectionHeader(
-                      title: 'Oda Mpya Zinazoingia / Incoming Orders',
-                      subtitle: pendingOrders.isEmpty
-                          ? 'Hakuna oda mpya kwa sasa.'
-                          : 'Oda zinazosubiri kukubaliwa.',
-                      icon: Icons.mark_email_unread_outlined,
+                      title: 'Oda Zinazoendelea / Active Orders',
+                      subtitle: activeOrders.isEmpty
+                          ? 'Hakuna oda inayoendelea kwa sasa.'
+                          : 'Pokea, anza safari, au thibitisha kuwasili.',
+                      icon: Icons.local_shipping_outlined,
                       trailing: AppStatusPill(
-                        label: '${pendingOrders.length} Mpya',
-                        color: pendingOrders.isNotEmpty
+                        label: '${activeOrders.length} Hai',
+                        color: activeOrders.isNotEmpty
                             ? context.gasColors.warning
                             : context.colors.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    if (pendingOrders.isEmpty)
-                      Card(
-                        elevation: 0,
-                        color: context.colors.surfaceContainerLow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          side:
-                              BorderSide(color: context.colors.outlineVariant),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 64,
-                                height: 64,
-                                decoration: BoxDecoration(
-                                  color: context.colors.primaryContainer,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.inbox_outlined,
-                                  size: 30,
-                                  color: context.colors.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Hakuna oda bado / No orders yet',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Wateja watakuagiza mara tu bidhaa zako zitakapoonekana kwenye app.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: context.colors.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              FilledButton.icon(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const InventoryScreen(),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.inventory, size: 18),
-                                label: const Text(
-                                    'Hakiki Bidhaa Zako / Check Inventory'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
+                    if (activeOrders.isEmpty)
+                      _buildEmptyOrdersCard(context)
                     else
-                      ...pendingOrders.map((doc) {
-                        final data = doc.data();
-                        final currentStatus = (data['status'] as String? ?? '')
-                            .toLowerCase()
-                            .trim();
-
-                        final brand =
-                            data['brand_name'] ?? data['brand'] ?? 'Gesi';
-                        final weight = data['cylinder_weight'] ??
-                            data['weight'] ??
-                            data['size'] ??
-                            '13kg';
-                        final qty = data['quantity'] ?? 1;
-                        final total =
-                            (data['total_price'] ?? data['totalPrice'] as num?)
-                                    ?.toDouble() ??
-                                0.0;
-                        final phone = data['contact_phone'] ??
-                            data['consumerPhone'] ??
-                            '';
-
-                        // ℹ️ EXTRA INSTRUCTIONS ALERTS: Read field conditions live from Firestore
-                        final extraNote =
-                            data['special_requests'] as String? ?? '';
-                        final altPhone =
-                            data['receiver_phone'] as String? ?? '';
-                        final bool hasExtraDetails =
-                            extraNote.isNotEmpty || altPhone.isNotEmpty;
-
-                        return Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              color: currentStatus == 'delivered_pending'
-                                  ? context.colors.onSurfaceVariant
-                                  : context.colors.primary,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: context.colors.primaryContainer,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '⚡ ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: context.colors.primary,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        phone,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: context
-                                                .colors.onSurfaceVariant),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-
-                                // HIGH-VISIBILITY WARNING BADGE: Flashes dynamically if special requests exist
-                                if (hasExtraDetails) ...[
-                                  Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: context.gasColors.infoContainer,
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                          color:
-                                              context.gasColors.infoContainer),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.info_outline,
-                                            size: 14,
-                                            color: context.gasColors.info),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'ℹ️ Ina maelezo ya ziada',
-                                          style: TextStyle(
-                                              color: context.gasColors.info,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-
-                                Text(
-                                  '$brand $weight (Idadi: x$qty)',
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Jumla: TZS ${total.toStringAsFixed(0)} • Cash on Delivery',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: context.gasColors.success),
-                                ),
-                                const Divider(height: 20),
-                                // DYNAMIC EXPLICIT UI MORPHING TIMELINE HOOKS
-                                if (currentStatus == 'seen' ||
-                                    currentStatus == 'placed' ||
-                                    currentStatus == 'pending') ...[
-                                  Row(
-                                    children: [
-                                      OutlinedButton(
-                                        onPressed: () {
-                                          // View Shortcut routes straight to the detailed Order Manager Screen
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const VendorOrderScreen()));
-                                        },
-                                        style: OutlinedButton.styleFrom(
-                                          side: BorderSide(
-                                              color: context.colors.primary),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8)),
-                                        ),
-                                        child: Text('View',
-                                            style: TextStyle(
-                                                color: context.colors.primary)),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          onPressed: () => _updateOrderStatus(
-                                              doc.id, 'cancelled'),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor:
-                                                context.colors.error,
-                                            side: BorderSide(
-                                                color: context.colors.error),
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8)),
-                                          ),
-                                          child: const Text('Kataa / Reject'),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: ElevatedButton(
-                                          onPressed: () =>
-                                              _showAcceptOrderDialog(doc.id),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                context.colors.primary,
-                                            foregroundColor:
-                                                context.colors.onPrimary,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8)),
-                                          ),
-                                          child: const Text('Pokea / Accept'),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ] else if (currentStatus == 'accepted') ...[
-                                  // INLINE DRIVER PHONE TEXT TRAY: Appears automatically once order is accepted
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Ingiza namba ya dereva:',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: SizedBox(
-                                              height: 40,
-                                              child: TextField(
-                                                keyboardType:
-                                                    TextInputType.phone,
-                                                decoration: InputDecoration(
-                                                  hintText: 'Mfano: 0777123456',
-                                                  contentPadding:
-                                                      const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 10,
-                                                          vertical: 8),
-                                                  border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8)),
-                                                ),
-                                                onChanged: (val) {
-                                                  data['_tmp_driver_phone'] =
-                                                      val;
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              final dPhone =
-                                                  data['_tmp_driver_phone']
-                                                          as String? ??
-                                                      '';
-                                              if (dPhone.isEmpty) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(const SnackBar(
-                                                        content: Text(
-                                                            'Tafadhali weka namba ya simu ya dereva.')));
-                                                return;
-                                              }
-                                              // Write driver parameters cleanly and advance state to on_the_way
-                                              await doc.reference.update({
-                                                'driver_phone': dPhone,
-                                                'status': 'on_the_way',
-                                                'updated_at': FieldValue
-                                                    .serverTimestamp(),
-                                              });
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    context.colors.tertiary,
-                                                foregroundColor:
-                                                    context.colors.onTertiary),
-                                            child: const Text('Hifadhi'),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ] else if (currentStatus == 'on_the_way') ...[
-                                  // STATE 3 UI LINE: Displays native Njiani status tag and green Delivered button
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text('Njiani 🚚',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                color: context.colors.tertiary,
-                                                fontWeight: FontWeight.bold)),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          // Update state to pending approval to flag the 4s undo clock ticker
-                                          await doc.reference.update({
-                                            'status': 'delivered_pending',
-                                            '_delivered_at_ms': DateTime.now()
-                                                .millisecondsSinceEpoch,
-                                          });
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                context.gasColors.success,
-                                            foregroundColor:
-                                                context.gasColors.onSuccess),
-                                        child:
-                                            const Text('Imefika / Delivered'),
-                                      ),
-                                    ],
-                                  ),
-                                ] else if (currentStatus ==
-                                    'delivered_pending') ...[
-                                  // STATE 4 UI LINE: Anti-mock protection ledger display with 4-second instant Undo text trigger
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text('Inasubiri Mteja...',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                color: context
-                                                    .colors.onSurfaceVariant,
-                                                fontStyle: FontStyle.italic)),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      TextButton(
-                                        onPressed: () async {
-                                          // Rollback state back to on_the_way instantly to resolve mis-clicks smoothly
-                                          await doc.reference
-                                              .update({'status': 'on_the_way'});
-                                        },
-                                        child: Text(
-                                          'Batilisha / Undo',
-                                          style: TextStyle(
-                                              color: context.colors.error,
-                                              fontWeight: FontWeight.bold,
-                                              decoration:
-                                                  TextDecoration.underline),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                      ...activeOrders.map(
+                        (doc) => _buildActiveOrderCard(context, doc),
+                      ),
+                    if (disputedOrders.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      AppSectionHeader(
+                        title: 'Migogoro / Disputes',
+                        subtitle: 'GasLink support inashughulikia oda hizi.',
+                        icon: Icons.gavel_outlined,
+                        trailing: AppStatusPill(
+                          label: '${disputedOrders.length}',
+                          color: context.colors.error,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ...disputedOrders.map(
+                        (doc) => _buildDisputedOrderCard(context, doc),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     ReferralCard(uid: _vendorUid, role: 'vendor'),
                     const SizedBox(height: 20),
@@ -1104,6 +739,433 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         );
       },
     );
+  }
+
+  Widget _buildOrdersError(BuildContext context, Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off, size: 40, color: context.colors.error),
+            const SizedBox(height: 12),
+            const Text(
+              'Imeshindikana kupata oda / Could not load orders',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '$error',
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => setState(() {}),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Jaribu tena / Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyOrdersCard(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: context.colors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: context.colors.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.inbox_outlined,
+                size: 30,
+                color: context.colors.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Hakuna oda bado / No orders yet',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Wateja watakuagiza mara tu bidhaa zako zitakapoonekana kwenye app.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const InventoryScreen()),
+                );
+              },
+              icon: const Icon(Icons.inventory, size: 18),
+              label: const Text('Hakiki Bidhaa Zako / Check Inventory'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveOrderCard(
+    BuildContext context,
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+    final status = OrderLifecycle.canonical(data['status']?.toString());
+    final brand = (data['brand_name'] ?? data['brand'] ?? 'Gesi').toString();
+    final weight = (data['cylinder_weight'] ??
+            data['weight'] ??
+            data['size'] ??
+            '')
+        .toString();
+    final qty = (data['quantity'] as num?)?.toInt() ?? 1;
+    final total = ((data['total_price'] ??
+                data['totalPrice'] ??
+                data['total']) as num?)
+            ?.toDouble() ??
+        0.0;
+    final phone = (data['contact_phone'] ??
+            data['consumerPhone'] ??
+            data['receiver_phone'] ??
+            '')
+        .toString();
+    final extraNote = (data['special_requests'] as String?) ?? '';
+    final altPhone = (data['receiver_phone'] as String?) ?? '';
+    final eta = (data['eta_minutes'] as num?)?.toInt();
+    final driverPhone =
+        (data['driver_phone'] ?? data['driverPhone'] ?? '').toString();
+    final hasExtraDetails = extraNote.isNotEmpty || altPhone.isNotEmpty;
+    final isNewOrder = OrderLifecycle.isNew(status);
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isNewOrder
+              ? context.gasColors.warning
+              : context.colors.primary,
+          width: 1.5,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '⚡ ODA #${OrderLifecycle.orderCode(doc.id)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AppStatusPill(
+                  label: _statusLabel(status),
+                  color: isNewOrder
+                      ? context.gasColors.warning
+                      : context.colors.primary,
+                ),
+              ],
+            ),
+            if (phone.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                'Simu: $phone',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (hasExtraDetails) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: context.gasColors.infoContainer,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: context.gasColors.infoContainer),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: context.gasColors.info,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'ℹ️ Ina maelezo ya ziada',
+                        style: TextStyle(
+                          color: context.gasColors.info,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              weight.isEmpty ? '$brand (Idadi: x$qty)' : '$brand $weight (Idadi: x$qty)',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Jumla: TZS ${total.toStringAsFixed(0)} • Cash on Delivery',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: context.gasColors.success,
+              ),
+            ),
+            if (status == OrderLifecycle.onTheWay && eta != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'ETA: dakika $eta${driverPhone.isEmpty ? '' : ' • Dereva: $driverPhone'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const Divider(height: 20),
+            _buildOrderActions(context, doc, status),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderActions(
+    BuildContext context,
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    String status,
+  ) {
+    switch (status) {
+      case OrderLifecycle.placed:
+      case OrderLifecycle.seen:
+        return Row(
+          children: [
+            OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const VendorOrderScreen(),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: context.colors.primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'View',
+                style: TextStyle(color: context.colors.primary),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _rejectOrder(doc.id),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: context.colors.error,
+                  side: BorderSide(color: context.colors.error),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Kataa / Reject'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => _showAcceptOrderDialog(doc.id),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Pokea / Accept'),
+              ),
+            ),
+          ],
+        );
+      case OrderLifecycle.confirmed:
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Imethibitishwa. Anza safari ukikamilisha maandalizi.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              onPressed: () => _showStartJourneyDialog(doc.id),
+              icon: const Icon(Icons.local_shipping, size: 18),
+              label: const Text('Anza Safari'),
+            ),
+          ],
+        );
+      case OrderLifecycle.onTheWay:
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Njiani 🚚',
+                style: TextStyle(
+                  color: context.colors.tertiary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _confirmArrived(doc.id),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.gasColors.success,
+                foregroundColor: context.gasColors.onSuccess,
+              ),
+              child: const Text('Imefika / Arrived'),
+            ),
+          ],
+        );
+      case OrderLifecycle.deliveredPending:
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Inasubiri mteja athibitishe (dakika 10).',
+                style: TextStyle(
+                  color: context.colors.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => _undoArrived(doc.id),
+              child: Text(
+                'Batilisha / Undo',
+                style: TextStyle(
+                  color: context.colors.error,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildDisputedOrderCard(
+    BuildContext context,
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+    final brand = (data['brand_name'] ?? data['brand'] ?? 'Gesi').toString();
+    final total = ((data['total_price'] ??
+                data['totalPrice'] ??
+                data['total']) as num?)
+            ?.toDouble() ??
+        0.0;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.colors.error),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.gavel, color: context.colors.error),
+        title: Text(
+          'Oda #${OrderLifecycle.orderCode(doc.id)} • $brand',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          'Mteja amesema hakupokea. GasLink support: 0767304776\nTZS ${total.toStringAsFixed(0)}',
+        ),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case OrderLifecycle.placed:
+        return 'Mpya';
+      case OrderLifecycle.seen:
+        return 'Imeonekana';
+      case OrderLifecycle.confirmed:
+        return 'Imethibitishwa';
+      case OrderLifecycle.onTheWay:
+        return 'Njiani';
+      case OrderLifecycle.deliveredPending:
+        return 'Inasubiri mteja';
+      default:
+        return status;
+    }
   }
 
   Widget _buildVerificationCard(

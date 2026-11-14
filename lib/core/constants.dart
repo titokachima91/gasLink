@@ -61,6 +61,7 @@ class AppConstants {
     'on_the_way',
     'delivered_pending',
     'delivered',
+    'disputed',
     'cancelled',
   ];
 
@@ -68,9 +69,16 @@ class AppConstants {
   /// this pattern from day one (retrofitting Swahili later is painful).
   static const Map<String, Map<String, String>> statusLabels = {
     'placed': {'en': 'Placed', 'sw': 'Imewekwa'},
+    'seen': {'en': 'Opened', 'sw': 'Imeonekana'},
     'confirmed': {'en': 'Confirmed', 'sw': 'Imethibitishwa'},
     'on_the_way': {'en': 'On the way', 'sw': 'Njiani'},
+    'delivered_pending': {
+      'en': 'Awaiting confirmation',
+      'sw': 'Inasubiri uthibitisho'
+    },
     'delivered': {'en': 'Delivered', 'sw': 'Imefika'},
+    'disputed': {'en': 'Disputed', 'sw': 'Ina mgogoro'},
+    'cancelled': {'en': 'Cancelled', 'sw': 'Imesitishwa'},
     'refused': {'en': 'Refused', 'sw': 'Imekataliwa'},
   };
 
@@ -79,9 +87,16 @@ class AppConstants {
   static const double defaultCommissionRate = 0.03;
 
   static const String statusPlaced = 'placed';
+  static const String statusSeen = 'seen';
   static const String statusConfirmed = 'confirmed';
   static const String statusOnTheWay = 'on_the_way';
+  static const String statusDeliveredPending = 'delivered_pending';
   static const String statusDelivered = 'delivered';
+  static const String statusDisputed = 'disputed';
+  static const String statusCancelled = 'cancelled';
+
+  /// Public GasLink support line. Used only for disputes and human help.
+  static const String supportPhone = '0767304776';
 
   // ===========================================================================
   // 🟢 NEW ACCESSIBLE INTENT CATEGORY TARGETS (NO HARDCODED VALUES)

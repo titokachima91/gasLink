@@ -366,9 +366,10 @@ Sizes are per brand (`AppConstants.brandSizes`): e.g. Taifa 3/6/15/38kg,
 Manjis 6/15/40kg.
 
 Order statuses: `placed`, `seen`, `confirmed`, `on_the_way`,
-`delivered_pending`, `delivered`, `cancelled`.
-UI also accepts legacy aliases: `pending`, `accepted`, `preparing`,
-`dispatched`, `in_transit`, `completed`, `rejected`, `refused`.
+`delivered_pending`, `delivered`, `disputed`, `cancelled`.
+UI also accepts legacy aliases: `pending`, `planned`, `accepted`, `preparing`,
+`dispatched`, `in_transit`, `delivering`, `completed`, `rejected`, `refused`.
+`lib/services/order_lifecycle.dart` is the only alias map.
 
 Product types: `refill`, `full_set`, `accessories`, `services`.
 Order intents: `new_asset`, `add_stock`, `swap`.
@@ -403,15 +404,48 @@ AI opt-in: `ai_assistant_enabled` boolean (default false).
 
 ```text
 placed → seen → confirmed → on_the_way → delivered_pending → delivered
-                                                      ↘ cancelled
+                                            ↘ disputed (GasLink mediation)
+Any pre-confirmation order can be cancelled by the right actor.
 ```
 
-- Consumer places order; vendor sees it; vendor accepts/ETA; rider dispatched;
-  vendor marks delivered-pending; consumer confirms receipt; cylinder registers.
-- Consumer can confirm from `on_the_way`/`in_transit` (“Nimepokea Gesi Tayari”)
-  or from `delivered_pending` (“Nimepokea”).
-- Vendor can reject/cancel early. Consumer can cancel before acceptance.
+- **Step 1 has two buyer-visible substeps:** order sent, then vendor opened it
+  (`placed` → `seen`). Opening the order manager does not mark every order seen;
+  the vendor must open the specific order or accept it.
+- Vendor **Accept** moves `seen` → `confirmed` and releases the vendor phone to
+  the buyer. Accept never asks for an ETA.
+- Vendor **Start Journey** requires an ETA (1–240 minutes) and accepts an
+  optional rider phone; the buyer sees the ETA and rider number only after this
+  step.
+- Vendor **Arrived** moves `on_the_way` → `delivered_pending` and starts the
+  buyer’s 10-minute confirmation window. The buyer may confirm earlier from
+  `on_the_way`.
+- Buyer **Confirm receipt** moves to `delivered` immediately and registers the
+  cylinder. If the buyer does nothing, the gateway `order-finalizer` worker
+  finalizes the order after 10 minutes with a Firestore transaction and
+  registers the cylinder in the same transaction.
+- Buyer **Did not receive** moves to `disputed`, writes a `disputes/{orderId}`
+  record, alerts the vendor and support, and stops auto-finalization. Support
+  mediates.
+- Vendor can undo a mis-tapped arrival (`delivered_pending` → `on_the_way`).
 - ETA is manual (`eta_minutes`), not GPS-tracked.
+
+### Order notifications
+
+The app never sends order notifications directly. Every transition writes an
+idempotent `notification_outbox/{orderId}_{event}_{recipient}` document in the
+same transaction as the status change. The gateway
+`services/notification-outbox-worker.js` drains it:
+
+- Push-capable users get a `notifications` document with `fcmToken`; the Python
+  `server.py` dispatcher delivers it and marks it sent.
+- SMS-only users, users without a token, or a failed push fall back to TextBee.
+- Retries use exponential backoff. A TextBee daily-quota error defers the entry
+  until the next UTC midnight instead of burning attempts.
+
+`services/order-finalizer.js` runs every 30 seconds in the same Node gateway.
+It also repairs a missing cylinder registration if the buyer confirmed before
+the worker ran. Both workers are started by `server.js` and can be disabled with
+`OUTBOX_WORKER_ENABLED=false` / `ORDER_FINALIZER_ENABLED=false`.
 
 ### Four categories
 
@@ -506,14 +540,18 @@ Shop Storefront (`VendorDetailScreen`):
 
 Checkout → `OrderService.placeOrder` → tracking screen (`ConsumerOrderScreen`):
 
-- Live status stream, ETA, driver/office call
-- Cancel / confirm receipt
-- Persistent review card and review/refill reminder sheet
+- Live status stream with two step-1 substeps (sent / vendor opened)
+- Vendor phone only after confirmation; ETA/rider only after the journey starts
+- Buyer can confirm from `on_the_way` or `delivered_pending`
+- 10-minute receipt countdown, “not received” dispute path
+- Cancel before confirmation; persistent review card and review/refill reminder
 
 ### Vendor flow
 
-Dashboard → incoming orders → accept/ETA → driver/on-the-way →
-delivered-pending → consumer confirm. Inventory, brand/price editor, profile,
+Dashboard active queue shows every live status (`placed`, `seen`, `confirmed`,
+`on_the_way`, `delivered_pending`) with the correct action: Accept/Reject,
+Start Journey (ETA + optional rider), Arrived, Undo. Disputed orders appear in a
+separate mediation section. Inventory, brand/price editor, profile,
 verification, commission terms, settings, referrals.
 
 ### Admin flow
@@ -537,15 +575,18 @@ vendor settings.
 
 ### Dispatcher
 
-`NotificationDispatcher.dispatchToUser`:
+`NotificationDispatcher.dispatchToUser` is retained for non-order events:
 
 - push channels → `NotificationService.sendNotificationToUser` (ledger + FCM)
 - SMS channels → `SmsGatewayService.sendSms`
 - none → nothing
-- Failures never block order placement; order notifications are `unawaited`.
+- Failures never block the calling screen.
 
-Order-created notifies vendor + consumer. Status changes notified once by the
-dispatcher; the old Python order-status listener was removed to avoid duplicates.
+**Order events no longer use this path.** `OrderService` writes
+`notification_outbox` in the same transaction as the status change, and the
+gateway workers deliver push/SMS with retry. The buyer no longer receives an
+“order received” notification at creation; the first buyer notification is
+“vendor opened your order”.
 
 ### FCM
 

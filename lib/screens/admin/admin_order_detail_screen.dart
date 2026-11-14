@@ -457,6 +457,25 @@ class _OrderTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (status == 'disputed') {
+      return Column(
+        children: [
+          for (final entry in [
+            ('placed', 'Order placed'),
+            ('delivered_pending', 'Vendor marked arrived'),
+            ('disputed', 'Customer denied receipt — GasLink mediation'),
+          ])
+            _TimelineStep(
+              label: entry.$2,
+              status: entry.$1,
+              done: true,
+              current: entry.$1 == 'disputed',
+              last: entry.$1 == 'disputed',
+            ),
+        ],
+      );
+    }
+
     if (status == 'cancelled') {
       return Column(
         children: [
@@ -475,16 +494,19 @@ class _OrderTimeline extends StatelessWidget {
       );
     }
 
-    final currentIndex = AppConstants.orderStatuses.indexOf(status);
+    final happyPath = AppConstants.orderStatuses
+        .where((status) => status != 'cancelled' && status != 'disputed')
+        .toList();
+    final currentIndex = happyPath.indexOf(status);
     return Column(
       children: [
-        for (var i = 0; i < AppConstants.orderStatuses.length; i++)
+        for (var i = 0; i < happyPath.length; i++)
           _TimelineStep(
-            label: _timelineLabel(AppConstants.orderStatuses[i]),
-            status: AppConstants.orderStatuses[i],
+            label: _timelineLabel(happyPath[i]),
+            status: happyPath[i],
             done: i <= currentIndex,
             current: i == currentIndex,
-            last: i == AppConstants.orderStatuses.length - 1,
+            last: i == happyPath.length - 1,
           ),
       ],
     );
@@ -504,6 +526,8 @@ class _OrderTimeline extends StatelessWidget {
         return 'Delivery confirmation pending';
       case 'delivered':
         return 'Delivered';
+      case 'disputed':
+        return 'Disputed — GasLink mediation';
       case 'cancelled':
         return 'Cancelled';
       default:

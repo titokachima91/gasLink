@@ -1,12 +1,17 @@
 // lib/screens/vendor/vendor_order_screen.dart
-// Live order tracking and management interface for LPG vendors (Usimamizi wa Oda).
-// Integrated Dual-Lock completion matrix supporting 10-minute cash fallbacks and Awaiting Payment states.
+// Live order management for LPG vendors (Usimamizi wa Oda).
+//
+// This screen never writes order status directly. Every action goes through
+// OrderService so the state machine, audit trail and notification outbox stay
+// authoritative. The 10-minute receipt finalizer runs on the gateway, not here.
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth_service.dart';
+import '../../services/order_lifecycle.dart';
+import '../../services/order_service.dart';
 import '../../widgets/app_ui.dart';
 
 import '../../core/theme_ext.dart';
@@ -50,6 +55,169 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
     }
   }
 
+  Future<void> _runTransition(
+    Future<OrderTransitionResult> Function() action, {
+    required String successMessage,
+  }) async {
+    try {
+      final result = await action();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.success ? successMessage : result.message),
+          backgroundColor: result.success
+              ? context.gasColors.success
+              : context.colors.error,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hitilafu: $e'),
+          backgroundColor: context.colors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _openOrder(String orderId, String status) async {
+    if (status == OrderLifecycle.placed) {
+      await OrderService.instance.markOrderAsSeen(orderId);
+    }
+  }
+
+  Future<void> _acceptOrder(String orderId) => _runTransition(
+        () => OrderService.instance.confirmOrder(orderId),
+        successMessage: 'Oda imethibitishwa. Inaandaliwa.',
+      );
+
+  Future<void> _rejectOrder(String orderId) => _runTransition(
+        () => OrderService.instance.rejectOrder(orderId),
+        successMessage: 'Oda imekataliwa.',
+      );
+
+  Future<void> _markArrived(String orderId) => _runTransition(
+        () => OrderService.instance.markArrived(orderId),
+        successMessage:
+            'Imewekwa kama imefika. Mteja athibitisha ndani ya dakika 10.',
+      );
+
+  Future<void> _undoArrived(String orderId) => _runTransition(
+        () => OrderService.instance.undoArrived(orderId),
+        successMessage: 'Oda imerudishwa njiani.',
+      );
+
+  Future<void> _startJourney(
+    String orderId,
+    int etaMinutes,
+    String driverPhone,
+  ) =>
+      _runTransition(
+        () => OrderService.instance.startJourney(
+          orderId: orderId,
+          etaMinutes: etaMinutes,
+          driverPhone: driverPhone,
+        ),
+        successMessage: 'Safari imeanza. Mteja amejulishwa ETA na dereva.',
+      );
+
+  void _showStartJourneyDialog(String orderId) {
+    int selectedEta = 20;
+    final driverController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Anza Safari',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Weka ETA. Namba ya dereva ni ya hiari; mteja ataipata mara moja.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                children: [15, 20, 30, 45, 60].map((mins) {
+                  final isSelected = selectedEta == mins;
+                  return ChoiceChip(
+                    label: Text('Dakika $mins'),
+                    selected: isSelected,
+                    selectedColor: context.colors.primary,
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? context.colors.onPrimary
+                          : context.colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onSelected: (_) {
+                      setModalState(() => selectedEta = mins);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: driverController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Namba ya dereva (hiari)',
+                  hintText: '0712345678',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    _startJourney(
+                      orderId,
+                      selectedEta,
+                      driverController.text.trim(),
+                    );
+                  },
+                  child: const Text(
+                    'Anza Safari',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).whenComplete(driverController.dispose);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_vendorUid.isEmpty) {
@@ -88,7 +256,14 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
             .where('vendor_id', isEqualTo: _vendorUid)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.hasError) {
+            return AppEmptyState(
+              icon: Icons.cloud_off,
+              title: 'Imeshindikana kupata oda',
+              message: '${snapshot.error}',
+            );
+          }
+          if (!snapshot.hasData) {
             return Center(
                 child:
                     CircularProgressIndicator(color: context.colors.primary));
@@ -99,55 +274,38 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           final sortedDocs =
               List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(allDocs)
                 ..sort((a, b) {
-                  final Timestamp? tA = a.data()['createdAt'] as Timestamp? ??
-                      a.data()['created_at'] as Timestamp?;
-                  final Timestamp? tB = b.data()['createdAt'] as Timestamp? ??
-                      b.data()['created_at'] as Timestamp?;
-                  if (tA == null || tB == null) return 0;
-                  return tB.compareTo(tA);
+                  final Timestamp? tA = a.data()['created_at'] as Timestamp? ??
+                      a.data()['createdAt'] as Timestamp?;
+                  final Timestamp? tB = b.data()['created_at'] as Timestamp? ??
+                      b.data()['createdAt'] as Timestamp?;
+                  return (tB?.millisecondsSinceEpoch ?? 0)
+                      .compareTo(tA?.millisecondsSinceEpoch ?? 0);
                 });
 
-          final pendingOrders = sortedDocs.where((d) {
-            final st = (d.data()['status'] as String? ?? 'pending')
-                .toLowerCase()
-                .trim();
-            return st == 'pending' || st == 'placed' || st == 'seen';
+          String statusOf(QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+              OrderLifecycle.canonical(doc.data()['status']?.toString());
+
+          final newOrders =
+              sortedDocs.where((d) => OrderLifecycle.isNew(statusOf(d))).toList();
+
+          final movingOrders = sortedDocs.where((d) {
+            final st = statusOf(d);
+            return st == OrderLifecycle.confirmed ||
+                st == OrderLifecycle.onTheWay ||
+                st == OrderLifecycle.deliveredPending;
           }).toList();
 
-          final inTransitOrders = sortedDocs.where((d) {
-            final st =
-                (d.data()['status'] as String? ?? '').toLowerCase().trim();
-            return st == 'accepted' ||
-                st == 'on_the_way' ||
-                st == 'in_transit' ||
-                st == 'delivering' ||
-                st == 'delivered_pending';
-          }).toList();
-// Automatically mark incoming pending/placed orders as seen when loaded in vendor view
-          for (var doc in pendingOrders) {
-            final st =
-                (doc.data()['status'] ?? '').toString().toLowerCase().trim();
-            if (st == 'pending' || st == 'placed') {
-              doc.reference.update({
-                'status': 'seen',
-                'vendor_viewed': true,
-                'vendorViewed': true,
-              });
-            }
-          }
-          final completedOrders = sortedDocs.where((d) {
-            final st =
-                (d.data()['status'] as String? ?? '').toLowerCase().trim();
-            return st == 'delivered' || st == 'completed';
-          }).toList();
+          final closedOrders = sortedDocs
+              .where((d) => OrderLifecycle.isClosed(statusOf(d)))
+              .toList();
 
           return TabBarView(
             controller: _tabController,
             children: [
               _buildOrderList(sortedDocs, 'Oda Zote'),
-              _buildOrderList(pendingOrders, 'Oda Mpya'),
-              _buildOrderList(inTransitOrders, 'Zinazoenda'),
-              _buildOrderList(completedOrders, 'Zilizokamilika'),
+              _buildOrderList(newOrders, 'Oda Mpya'),
+              _buildOrderList(movingOrders, 'Zinazoenda'),
+              _buildOrderList(closedOrders, 'Zilizokamilika'),
             ],
           );
         },
@@ -184,14 +342,15 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         final doc = docs[index - 1];
         final data = doc.data();
         final String status =
-            (data['status'] ?? 'pending').toString().toLowerCase().trim();
+            OrderLifecycle.canonical(data['status']?.toString());
         final String brand =
             (data['brand'] ?? data['brand_name'] ?? 'Gesi').toString();
         final String weight =
-            (data['weight'] ?? data['size'] ?? '15kg').toString();
+            (data['weight'] ?? data['size'] ?? '').toString();
         final int quantity = (data['quantity'] as num?)?.toInt() ?? 1;
         final double totalPrice =
-            (data['total_price'] ?? data['totalPrice'] ?? 0.0).toDouble();
+            ((data['total_price'] ?? data['totalPrice'] ?? 0) as num)
+                .toDouble();
         final String address = (data['delivery_address'] ??
                 data['deliveryAddress'] ??
                 'Dar es Salaam')
@@ -204,22 +363,9 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         final String specialRequests =
             (data['special_requests'] ?? '').toString();
         final String receiverPhone = (data['receiver_phone'] ?? '').toString();
-
-        // ⏳ 10-MINUTE CASH FALLBACK AUTO-APPROVAL HANDLER
-        if (status == 'delivered_pending') {
-          final int deliveredAtMs = data['_delivered_at_ms'] as int? ?? 0;
-          if (deliveredAtMs > 0) {
-            final int elapsedMins =
-                (DateTime.now().millisecondsSinceEpoch - deliveredAtMs) ~/
-                    60000;
-            if (elapsedMins >= 10) {
-              doc.reference.update({
-                'status': 'delivered',
-                'finalized_at': FieldValue.serverTimestamp(),
-              });
-            }
-          }
-        }
+        final int? eta = (data['eta_minutes'] as num?)?.toInt();
+        final String driverPhone =
+            (data['driver_phone'] ?? data['driverPhone'] ?? '').toString();
 
         return Card(
           elevation: 0,
@@ -227,71 +373,66 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: context.colors.outlineVariant)),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'ODA #${doc.id.substring(0, doc.id.length > 6 ? 6 : doc.id.length).toUpperCase()}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: context.colors.onSurface)),
-                          Text('Mteja: $customerName',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  color: context.colors.onSurfaceVariant)),
-                        ],
-                      ),
-                    ),
-                    if (phone.isNotEmpty)
-                      SizedBox(
-                        width: 96,
-                        height: 32,
-                        child: ElevatedButton.icon(
-                          onPressed: () => _makePhoneCall(phone),
-                          icon: const Icon(Icons.phone, size: 12),
-                          label: const Text('Piga Simu',
-                              style: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 6),
-                              backgroundColor: context.gasColors.success,
-                              foregroundColor: context.gasColors.onSuccess,
-                              elevation: 0),
-                        ),
-                      ),
-                  ],
-                ),
-                const Divider(),
-                InkWell(
-                  onTap: () async {
-                    if (status == 'pending' || status == 'placed') {
-                      await doc.reference.update({
-                        'status': 'seen',
-                        'vendor_viewed': true,
-                        'vendorViewed': true,
-                        'updated_at': FieldValue.serverTimestamp()
-                      });
-                    }
-                  },
-                  child: Row(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => _openOrder(doc.id, status),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text('$brand $weight (x$quantity)',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'ODA #${OrderLifecycle.orderCode(doc.id)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: context.colors.onSurface)),
+                            Text('Mteja: $customerName',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.colors.onSurfaceVariant)),
+                          ],
+                        ),
+                      ),
+                      if (phone.isNotEmpty)
+                        SizedBox(
+                          width: 96,
+                          height: 32,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _makePhoneCall(phone),
+                            icon: const Icon(Icons.phone, size: 12),
+                            label: const Text('Piga Simu',
+                                style: TextStyle(
+                                    fontSize: 10, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                backgroundColor: context.gasColors.success,
+                                foregroundColor: context.gasColors.onSuccess,
+                                elevation: 0),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                            weight.isEmpty
+                                ? '$brand (x$quantity)'
+                                : '$brand $weight (x$quantity)',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -301,85 +442,93 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                       _buildStatusChip(status),
                     ],
                   ),
-                ),
-                Text('Jumla: TZS ${totalPrice.toStringAsFixed(0)}',
-                    style: TextStyle(
-                        color: context.colors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12)),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 14, color: context.colors.onSurfaceVariant),
-                    const SizedBox(width: 4),
-                    Expanded(
-                        child: Text(address,
-                            style: TextStyle(
-                                fontSize: 11, color: context.colors.onSurface),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis)),
-                  ],
-                ),
-                if (specialRequests.isNotEmpty || receiverPhone.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: context.gasColors.infoContainer,
-                        borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: context.gasColors.infoContainer)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(children: [
-                          Icon(Icons.info_outline,
-                              size: 14, color: context.gasColors.info),
-                          SizedBox(width: 4),
-                          Expanded(
-                            child: Text('ℹ️ Maelezo ya Ziada:',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.gasColors.info)),
-                          )
-                        ]),
-                        if (specialRequests.isNotEmpty)
-                          Text('📝 Ombi: $specialRequests',
-                              style: const TextStyle(fontSize: 11)),
-                        if (receiverPhone.isNotEmpty)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text('📞 Mpokeaji: $receiverPhone',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                              TextButton(
-                                  onPressed: () =>
-                                      _makePhoneCall(receiverPhone),
-                                  child: Text('Piga Simu',
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: context.gasColors.success))),
-                            ],
-                          ),
-                      ],
+                  Text('Jumla: TZS ${totalPrice.toStringAsFixed(0)}',
+                      style: TextStyle(
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
+                  if (status == OrderLifecycle.onTheWay && eta != null)
+                    Text(
+                      'ETA: dakika $eta${driverPhone.isEmpty ? '' : ' • Dereva: $driverPhone'}',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: context.colors.onSurfaceVariant),
                     ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 14, color: context.colors.onSurfaceVariant),
+                      const SizedBox(width: 4),
+                      Expanded(
+                          child: Text(address,
+                              style: TextStyle(
+                                  fontSize: 11, color: context.colors.onSurface),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis)),
+                    ],
                   ),
+                  if (specialRequests.isNotEmpty ||
+                      receiverPhone.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: context.gasColors.infoContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: context.gasColors.infoContainer)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Icon(Icons.info_outline,
+                                size: 14, color: context.gasColors.info),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text('ℹ️ Maelezo ya Ziada:',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.gasColors.info)),
+                            )
+                          ]),
+                          if (specialRequests.isNotEmpty)
+                            Text('📝 Ombi: $specialRequests',
+                                style: const TextStyle(fontSize: 11)),
+                          if (receiverPhone.isNotEmpty)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text('📞 Mpokeaji: $receiverPhone',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                TextButton(
+                                    onPressed: () =>
+                                        _makePhoneCall(receiverPhone),
+                                    child: Text('Piga Simu',
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: context.gasColors.success))),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const Divider(height: 20),
+                  _buildOrderActions(doc, status),
                 ],
-                const Divider(height: 20),
-                _buildOrderActions(doc, status, data),
-              ],
+              ),
             ),
           ),
         );
@@ -388,16 +537,13 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
   }
 
   Widget _buildOrderActions(
-      DocumentSnapshot doc, String status, Map<String, dynamic> data) {
-    if (status == 'pending' || status == 'placed' || status == 'seen') {
+      QueryDocumentSnapshot<Map<String, dynamic>> doc, String status) {
+    if (status == OrderLifecycle.placed || status == OrderLifecycle.seen) {
       return Row(
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => doc.reference.update({
-                'status': 'cancelled',
-                'updated_at': FieldValue.serverTimestamp()
-              }),
+              onPressed: () => _rejectOrder(doc.id),
               style: OutlinedButton.styleFrom(
                   foregroundColor: context.colors.error,
                   side: BorderSide(color: context.colors.error)),
@@ -407,10 +553,7 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           const SizedBox(width: 8),
           Expanded(
             child: ElevatedButton(
-              onPressed: () => doc.reference.update({
-                'status': 'accepted',
-                'updated_at': FieldValue.serverTimestamp()
-              }),
+              onPressed: () => _acceptOrder(doc.id),
               style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
@@ -421,93 +564,25 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
         ],
       );
     }
-    if (status == 'accepted') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Maelezo ya Usafirishaji / Logistics Dispatch:',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.primary)),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 40,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                        labelText: 'Dakika (ETA)',
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8))),
-                    onChanged: (val) =>
-                        data['_tmp_eta_minutes'] = int.tryParse(val) ?? 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  height: 40,
-                  child: TextField(
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                        labelText: 'Namba ya Dereva',
-                        hintText: '0712345678',
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8))),
-                    onChanged: (val) => data['_tmp_driver_phone'] = val.trim(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 42,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                final dPhone =
-                    (data['_tmp_driver_phone'] ?? '').toString().trim();
-                final etaMins = data['_tmp_eta_minutes'] as int? ?? 20;
-                if (dPhone.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Tafadhali weka namba ya dereva.')));
-                  return;
-                }
-                await doc.reference.update({
-                  'driver_phone': dPhone,
-                  'eta_minutes': etaMins,
-                  'status': 'on_the_way',
-                  'updated_at': FieldValue.serverTimestamp(),
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: context.colors.tertiary,
-                  foregroundColor: context.colors.onTertiary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8))),
-              icon: const Icon(Icons.delivery_dining, size: 16),
-              label: const Text('Anza Safari ➔',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ],
+    if (status == OrderLifecycle.confirmed) {
+      return SizedBox(
+        width: double.infinity,
+        height: 42,
+        child: ElevatedButton.icon(
+          onPressed: () => _showStartJourneyDialog(doc.id),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: context.colors.tertiary,
+              foregroundColor: context.colors.onTertiary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8))),
+          icon: const Icon(Icons.delivery_dining, size: 16),
+          label: const Text('Anza Safari ➔',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        ),
       );
     }
-    if (status == 'on_the_way' ||
-        status == 'in_transit' ||
-        status == 'delivering') {
+    if (status == OrderLifecycle.onTheWay) {
       return Row(
         children: [
           Expanded(
@@ -521,24 +596,19 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
           ),
           const SizedBox(width: 8),
           ElevatedButton.icon(
-            onPressed: () => doc.reference.update({
-              'status': 'delivered_pending',
-              '_delivered_at_ms': DateTime.now().millisecondsSinceEpoch,
-              'updated_at': FieldValue.serverTimestamp(),
-            }),
+            onPressed: () => _markArrived(doc.id),
             style: ElevatedButton.styleFrom(
                 backgroundColor: context.gasColors.success,
                 foregroundColor: context.gasColors.onSuccess,
                 elevation: 0),
             icon: const Icon(Icons.check_circle_outline, size: 16),
-            label: const Text('Imefika / Delivered',
+            label: const Text('Imefika / Arrived',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       );
     }
-// 🟢 AWAITING CONSUMER CONFIRMATION (No manual vendor payment gate)
-    if (status == 'delivered_pending') {
+    if (status == OrderLifecycle.deliveredPending) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
@@ -563,12 +633,44 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
                         color: context.colors.onSurface)),
               )
             ]),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-                'Mzigo umewasilishwa. Inasubiri mteja athibitishe kupokea au muda wa dakika 10 uishe kiotomatiki.',
+                'Mzigo umewasilishwa. Mteja athibitishe kupokea au muda wa dakika 10 uishe kiotomatiki.',
                 style: TextStyle(
                     fontSize: 11, color: context.colors.onSurfaceVariant)),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => _undoArrived(doc.id),
+                child: Text(
+                  'Batilisha / Undo',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.error,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
           ],
+        ),
+      );
+    }
+    if (status == OrderLifecycle.disputed) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+            color: context.colors.errorContainer,
+            borderRadius: BorderRadius.circular(8)),
+        child: Text(
+          'Mgogoro / Disputed. GasLink support inashughulikia. Piga 0767304776.',
+          style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: context.colors.onErrorContainer),
         ),
       );
     }
@@ -578,21 +680,25 @@ class _VendorOrderScreenState extends State<VendorOrderScreen>
   Widget _buildStatusChip(String status) {
     Color color = context.colors.primary;
     String text = 'Mpya';
-    if (status == 'accepted') {
+    if (status == OrderLifecycle.seen) {
       color = context.gasColors.info;
-      text = 'Imepokelewa';
-    } else if (status == 'on_the_way' ||
-        status == 'in_transit' ||
-        status == 'delivering') {
+      text = 'Imeonekana';
+    } else if (status == OrderLifecycle.confirmed) {
+      color = context.gasColors.info;
+      text = 'Imethibitishwa';
+    } else if (status == OrderLifecycle.onTheWay) {
       color = context.colors.tertiary;
       text = 'Njiani';
-    } else if (status == 'delivered_pending') {
+    } else if (status == OrderLifecycle.deliveredPending) {
       color = context.gasColors.warning;
-      text = 'Awaiting';
-    } else if (status == 'delivered' || status == 'completed') {
+      text = 'Inasubiri mteja';
+    } else if (status == OrderLifecycle.delivered) {
       color = context.gasColors.success;
       text = 'Kamilifu';
-    } else if (status == 'cancelled' || status == 'rejected') {
+    } else if (status == OrderLifecycle.disputed) {
+      color = context.colors.error;
+      text = 'Mgogoro';
+    } else if (status == OrderLifecycle.cancelled) {
       color = context.colors.error;
       text = 'Imeghairiwa';
     }

@@ -583,38 +583,70 @@
   "aiAssistantSubtitle": "Uliza bei, stock na delivery kwa SMS. Agiza kupitia app.",
   "preferenceSaved": "Mapendeleo yamehifadhiwa.",
   "preferenceSaveFailed": "Imeshindikana kuhifadhi mapendeleo. Jaribu tena.",
-  "orderPlacedNotificationTitle": "Oda Imepokelewa",
-  "orderPlacedNotificationBody": "Oda yako ya {brand} ({size}) imepokelewa. Tunaiandaa sasa.",
-  "@orderPlacedNotificationBody": {
-    "placeholders": {
-      "brand": {
-        "type": "String"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "orderUpdatedTitle": "Oda Imebadilishwa",
-  "orderUpdatedBody": "Hali ya oda yako ya {brand} imebadilika.",
-  "@orderUpdatedBody": {
+  "orderSeenNotificationTitle": "Muuzaji Ameona Oda Yako",
+  "orderSeenNotificationBody": "Oda yako ya {brand} imeonekana. Inasubiri muuzaji athibitishe.",
+  "@orderSeenNotificationBody": {
     "placeholders": {
       "brand": {
         "type": "String"
       }
     }
   },
-  "smsOrderPlacedCustomer": "GasLink: Oda yako ya {brand} ({size}) imepokelewa. Tunaiandaa sasa.",
-  "@smsOrderPlacedCustomer": {
+  "orderArrivedNotificationTitle": "Gesi Yako Imefika",
+  "orderArrivedNotificationBody": "Oda yako ya {brand} imefika. Thibitisha kupokea ndani ya dakika 10.",
+  "@orderArrivedNotificationBody": {
     "placeholders": {
       "brand": {
-        "type": "String"
-      },
-      "size": {
         "type": "String"
       }
     }
   },
+  "orderDisputedConsumerTitle": "Kupokea Hakujathibitishwa",
+  "orderDisputedConsumerBody": "GasLink inashughulikia oda hii. Support atakupigia.",
+  "orderDisputedVendorTitle": "Mteja Amekataa Kupokea",
+  "orderDisputedVendorBody": "Oda #{code}: mteja amesema hakupokea mtungi. GasLink inashughulikia.",
+  "@orderDisputedVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDeliveredVendorTitle": "Oda Imekamilika",
+  "orderDeliveredVendorBody": "Oda #{code} imekamilika kiotomatiki baada ya dakika 10.",
+  "@orderDeliveredVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelledVendorTitle": "Oda Imesitishwa",
+  "orderCancelledVendorBody": "Oda #{code} imesitishwa na mteja.",
+  "@orderCancelledVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "vendorPhoneLabel": "Muuzaji",
+  "driverPhoneLabel": "Dereva",
+  "etaShort": "ETA",
+  "etaPreparing": "Inaandaliwa",
+  "confirmWithinMinutes": "Thibitisha ndani ya dakika {minutes}",
+  "@confirmWithinMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "orderSubstepSent": "Oda imetumwa",
+  "orderSubstepSeen": "Muuzaji ameifungua",
+  "orderDisputeTitle": "Kupokea Hakujathibitishwa",
+  "orderDisputeBody": "Support wa GasLink anashughulikia oda hii. Tafadhali weka simu yako karibu.",
+  "vendorNumberAfterConfirmation": "Namba ya muuzaji itaonekana baada ya uthibitisho",
   "smsOrderPlacedVendor": "GasLink: Oda mpya ya {brand} ({size}). Fungua app kuidhinisha.",
   "@smsOrderPlacedVendor": {
     "placeholders": {
@@ -622,6 +654,14 @@
         "type": "String"
       },
       "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderSeen": "GasLink: Muuzaji ameona oda yako ya {brand}. Inasubiri uthibitisho.",
+  "@smsOrderSeen": {
+    "placeholders": {
+      "brand": {
         "type": "String"
       }
     }
@@ -642,10 +682,26 @@
       }
     }
   },
+  "smsOrderArrived": "GasLink: Oda yako ya {brand} imefika. Thibitisha ndani ya dakika 10.",
+  "@smsOrderArrived": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
   "smsOrderDelivered": "GasLink: Oda yako ya {brand} imefika. Asante kwa kutumia GasLink.",
   "@smsOrderDelivered": {
     "placeholders": {
       "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDeliveredVendor": "GasLink: Oda #{code} imekamilika. Mtungi umeongezwa kwa mteja.",
+  "@smsOrderDeliveredVendor": {
+    "placeholders": {
+      "code": {
         "type": "String"
       }
     }
@@ -658,10 +714,34 @@
       }
     }
   },
-  "smsOrderUpdated": "GasLink: Hali ya oda yako ya {brand} imebadilika.",
-  "@smsOrderUpdated": {
+  "smsOrderCancelledVendor": "GasLink: Oda #{code} imesitishwa na mteja.",
+  "@smsOrderCancelledVendor": {
     "placeholders": {
-      "brand": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedVendor": "GasLink: Mteja wa oda #{code} amesema hakupokea. Fungua app kutatua.",
+  "@smsOrderDisputedVendor": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedSupport": "GasLink: Mgogoro oda #{code}. Mteja amesema hakupokea. Piga 0767304776.",
+  "@smsOrderDisputedSupport": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedConsumer": "GasLink: Tumepokea taarifa yako ya oda #{code}. Support atakupigia.",
+  "@smsOrderDisputedConsumer": {
+    "placeholders": {
+      "code": {
         "type": "String"
       }
     }

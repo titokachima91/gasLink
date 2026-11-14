@@ -5,6 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:async';
 import '../../core/constants.dart';
 import '../../core/session_data.dart';
 import '../../core/session_gate.dart';
@@ -43,6 +44,9 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
   List<Map<String, dynamic>> _myCylinders = [];
   List<Map<String, dynamic>> _deliveredOrders = [];
   Map<String, dynamic>? _lastCompletedOrder;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _cylinderSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+      _deliveredOrdersSub;
 
   static const int _stockPageSize = 10;
   int _visibleItemCount = _stockPageSize;
@@ -192,6 +196,62 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
     _fetchLiveSessionData();
     _fetchUserCylinders();
     _fetchLastCompletedOrder();
+    _watchCylinders();
+  }
+
+  @override
+  void dispose() {
+    _cylinderSub?.cancel();
+    _deliveredOrdersSub?.cancel();
+    super.dispose();
+  }
+
+  /// Live cylinder ledger: when the gateway finalizer or the vendor confirms a
+  /// delivery, the home gauge updates without a pull-to-refresh.
+  void _watchCylinders() {
+    final uid = AuthService.instance.currentUserId;
+    if (uid == null || uid.isEmpty) return;
+
+    _cylinderSub?.cancel();
+    _cylinderSub = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('cylinders')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen(
+      (snap) {
+        if (!mounted) return;
+        setState(() {
+          _myCylinders = snap.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return data;
+          }).toList();
+        });
+      },
+      onError: (Object e) {
+        debugPrint('Live cylinder stream failed: $e');
+      },
+    );
+
+    _deliveredOrdersSub?.cancel();
+    _deliveredOrdersSub = FirebaseFirestore.instance
+        .collection('orders')
+        .where('consumer_uid', isEqualTo: uid)
+        .where('status', isEqualTo: 'delivered')
+        .snapshots()
+        .listen(
+      (snap) {
+        if (!mounted) return;
+        setState(() {
+          _deliveredOrders = snap.docs.map((doc) => doc.data()).toList();
+        });
+      },
+      onError: (Object e) {
+        debugPrint('Live delivered-order stream failed: $e');
+      },
+    );
   }
 
   Future<void> _fetchLiveSessionData() async {

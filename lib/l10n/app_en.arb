@@ -576,38 +576,70 @@
   "aiAssistantSubtitle": "Ask about live prices, stock and delivery by SMS. Order in the app.",
   "preferenceSaved": "Preferences saved.",
   "preferenceSaveFailed": "Could not save preferences. Try again.",
-  "orderPlacedNotificationTitle": "Order received",
-  "orderPlacedNotificationBody": "Your {brand} ({size}) order has been received. We are preparing it now.",
-  "@orderPlacedNotificationBody": {
-    "placeholders": {
-      "brand": {
-        "type": "String"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "orderUpdatedTitle": "Order updated",
-  "orderUpdatedBody": "Your {brand} order status has changed.",
-  "@orderUpdatedBody": {
+  "orderSeenNotificationTitle": "Vendor opened your order",
+  "orderSeenNotificationBody": "Your {brand} order was opened. Waiting for the vendor to confirm.",
+  "@orderSeenNotificationBody": {
     "placeholders": {
       "brand": {
         "type": "String"
       }
     }
   },
-  "smsOrderPlacedCustomer": "GasLink: Your {brand} ({size}) order has been received. We are preparing it now.",
-  "@smsOrderPlacedCustomer": {
+  "orderArrivedNotificationTitle": "Your gas has arrived",
+  "orderArrivedNotificationBody": "Your {brand} order has arrived. Confirm receipt within 10 minutes.",
+  "@orderArrivedNotificationBody": {
     "placeholders": {
       "brand": {
-        "type": "String"
-      },
-      "size": {
         "type": "String"
       }
     }
   },
+  "orderDisputedConsumerTitle": "Receipt not confirmed",
+  "orderDisputedConsumerBody": "GasLink is mediating this order. Support will contact you.",
+  "orderDisputedVendorTitle": "Customer denied receipt",
+  "orderDisputedVendorBody": "Order #{code}: the customer says the cylinder was not received. GasLink is mediating.",
+  "@orderDisputedVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDeliveredVendorTitle": "Order completed",
+  "orderDeliveredVendorBody": "Order #{code} was finalized automatically after 10 minutes.",
+  "@orderDeliveredVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelledVendorTitle": "Order cancelled",
+  "orderCancelledVendorBody": "Order #{code} was cancelled by the customer.",
+  "@orderCancelledVendorBody": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "vendorPhoneLabel": "Vendor",
+  "driverPhoneLabel": "Rider",
+  "etaShort": "ETA",
+  "etaPreparing": "Being prepared",
+  "confirmWithinMinutes": "Confirm within {minutes} min",
+  "@confirmWithinMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "orderSubstepSent": "Order sent",
+  "orderSubstepSeen": "Vendor opened it",
+  "orderDisputeTitle": "Receipt not confirmed",
+  "orderDisputeBody": "GasLink support is mediating this order. Please keep your phone reachable.",
+  "vendorNumberAfterConfirmation": "Vendor number appears after confirmation",
   "smsOrderPlacedVendor": "GasLink: New {brand} ({size}) order. Open the app to confirm.",
   "@smsOrderPlacedVendor": {
     "placeholders": {
@@ -615,6 +647,14 @@
         "type": "String"
       },
       "size": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderSeen": "GasLink: Vendor opened your {brand} order. Waiting for confirmation.",
+  "@smsOrderSeen": {
+    "placeholders": {
+      "brand": {
         "type": "String"
       }
     }
@@ -635,10 +675,26 @@
       }
     }
   },
+  "smsOrderArrived": "GasLink: Your {brand} order has arrived. Confirm within 10 minutes.",
+  "@smsOrderArrived": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
   "smsOrderDelivered": "GasLink: Your {brand} order has arrived. Thank you for using GasLink.",
   "@smsOrderDelivered": {
     "placeholders": {
       "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDeliveredVendor": "GasLink: Order #{code} is complete. The cylinder was added to the customer.",
+  "@smsOrderDeliveredVendor": {
+    "placeholders": {
+      "code": {
         "type": "String"
       }
     }
@@ -651,10 +707,34 @@
       }
     }
   },
-  "smsOrderUpdated": "GasLink: Your {brand} order status has changed.",
-  "@smsOrderUpdated": {
+  "smsOrderCancelledVendor": "GasLink: Order #{code} was cancelled by the customer.",
+  "@smsOrderCancelledVendor": {
     "placeholders": {
-      "brand": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedVendor": "GasLink: Customer on order #{code} says it was not received. Open the app to resolve.",
+  "@smsOrderDisputedVendor": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedSupport": "GasLink: Dispute on order #{code}. Customer says it was not received. Call 0767304776.",
+  "@smsOrderDisputedSupport": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "smsOrderDisputedConsumer": "GasLink: We received your report for order #{code}. Support will call you.",
+  "@smsOrderDisputedConsumer": {
+    "placeholders": {
+      "code": {
         "type": "String"
       }
     }

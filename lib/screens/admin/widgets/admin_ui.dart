@@ -18,7 +18,8 @@ Color adminStatusColor(BuildContext context, String status) {
   }
   if (normalized == VendorStatus.suspended ||
       normalized == VendorStatus.rejected ||
-      normalized == 'cancelled') {
+      normalized == 'cancelled' ||
+      normalized == 'disputed') {
     return context.colors.error;
   }
   if (normalized == 'confirmed' ||
@@ -228,6 +229,8 @@ class AdminStatusBadge extends StatelessWidget {
         return 'Delivered pending';
       case 'delivered':
         return 'Delivered';
+      case 'disputed':
+        return 'Disputed';
       case 'cancelled':
         return 'Cancelled';
       default:
