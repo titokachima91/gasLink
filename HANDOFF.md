@@ -157,7 +157,7 @@ Reference: `gateway/MOUNTED.md`.
 ## Current state at 14 Nov 2026
 
 - **Power:** AC connected.
-- **LAN IP:** `192.168.1.11`.
+- **LAN IP:** `192.168.1.24` (new Wi-Fi; DHCP).
 - **Source HEAD:** `885f828` — four vendor categories + split vendor-card
   actions.
 - **Servers:** gateway `8080` is running (dashboard 200) with the AI live
@@ -182,7 +182,7 @@ Reference: `gateway/MOUNTED.md`.
   `/v1/bridge/catalog` on every message; the sample catalogue and sandbox
   ledger/transactions are gone. The dashboard persona was rewritten. The bridge
   now returns a `vendors` array with delivery, scale, payment and hours terms.
-- **AI evaluation:** **43/43** cases pass (live prices, brand colours, 13kg,
+- **AI evaluation:** **46/46** cases pass (live prices, brand colours, 13kg,
   full-set/complete, fullness/weight, delivery, vendor-number policy, support,
   order-status refusal, safety, NO_REPLY, language and household size words).
   Results: `data/ai-eval-latest.json`; runner: `scripts/eval-ai.js`.
@@ -198,10 +198,13 @@ Reference: `gateway/MOUNTED.md`.
 - **AI physical round trip verified:** real SMS from `+255745123046` was polled
   from TextBee and answered through DeepSeek. The assistant quoted live prices,
   refused SMS ordering, and directed the customer to the app.
-- **SMS ordering:** still **not wired**. The bridge has
-  `POST /v1/bridge/orders`, but the AI does not call it and the persona says
-  `SMS ORDERING: DISABLED`. Phase D will add the confirm-then-create and vendor
-  SMS acceptance flow.
+- **SMS ordering:** **enabled for pilot** (`SMS_ORDERING_ENABLED=true`).
+  `services/sms-order-service.js` handles intent → name/address → YES →
+  live re-check → `POST /v1/bridge/orders`; vendors reply `YES`/`NO` by SMS.
+  Mock end-to-end test passed against Firestore and cleaned up after itself.
+- **Phase B/C/D source:** profile setup screen, Safety Hub, 90-day memory,
+  keyword opt-in, order status, vendor response, SMS-only subscriber creation.
+  Release build pending.
 - **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
   this update). Gateway changes are outside this repo. Check `git status`
   before building.
@@ -215,10 +218,9 @@ Reference: `gateway/MOUNTED.md`.
   `Permission denied by the third party webpush service`. Consumer Android push
   was verified; do not chase web push during a mobile demo.
 - DeepSeek/AI live-catalogue answers, brand colours and the physical phone
-  round trip are verified (43/43). SMS order creation is not wired; the
-  assistant must keep refusing it until Phase D. TextBee webhooks cannot reach
-  a LAN gateway, so do not delete the poller unless a public HTTPS tunnel is
-  added.
+  round trip are verified (46/46). SMS ordering is pilot-only and needs a real
+  phone order test. TextBee webhooks cannot reach a LAN gateway, so do not
+  delete the poller unless a public HTTPS tunnel is added.
 - OTP is feature-flagged off; app user/session linking is not wired.
 - Firebase rules are still open (no `firestore.rules`); do not enable
   auth-required rules before Phase 6A.
@@ -229,9 +231,9 @@ Reference: `gateway/MOUNTED.md`.
 ### Next plan
 
 1. Verify the four-category build and shop UI on a device.
-2. AI Phase B: onboarding data, order-status lookup, safety hub, app link.
-3. AI Phase C: 90-day bounded memory, keyword opt-in, monitoring.
-4. AI Phase D: SMS ordering (confirm-then-create, vendor SMS acceptance).
+2. Finish Flutter tests, update docs, commit.
+3. Build and verify the release APK on `192.168.1.24`.
+4. Real-phone SMS order + vendor acceptance check.
 5. D3 vendor localization, then D4 remaining surfaces.
 6. Wire OTP login.
 7. Phase 6 security/scale after Blaze.

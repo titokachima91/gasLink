@@ -675,5 +675,22 @@
   "otpDisabled": "SMS login is not available yet.",
   "otpSendFailed": "Could not send the code. Try again.",
   "otpInvalid": "The code is incorrect.",
-  "orderNow": "Order Now"
+  "orderNow": "Order Now",
+  "profileSetupTitle": "Complete your profile",
+  "profileSetupSubtitle": "We use this to deliver gas and track your cylinders.",
+  "areaLabel": "Area / ward",
+  "areaHint": "e.g. Sinza, Mori",
+  "streetLabel": "Street / landmark",
+  "streetHint": "e.g. near the mosque",
+  "cylinderDetailsTitle": "Your cylinder",
+  "quantityLabel": "Quantity",
+  "orderNowQuestion": "Do you need gas now?",
+  "orderNowHint": "After saving, choose gas and order.",
+  "profileSetupSave": "Save and continue",
+  "profileSetupSaved": "Profile saved. Choose gas to order.",
+  "profileDetails": "Delivery and cylinder details",
+  "profileDetailsSubtitle": "Used for delivery and cylinder tracking.",
+  "safetyHub": "Gas safety",
+  "safetyHubSubtitle": "Approved safety steps and emergency guidance.",
+  "safetyHubEmpty": "Safety guidance will appear here."
 }

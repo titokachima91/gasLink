@@ -29,8 +29,8 @@ class AppConstants {
   ];
 
   /// Cylinder sizes PER BRAND — a UI can never offer a size
-  /// the brand doesn't manufacture (Taifa = only 3kg brand;
-  /// Manjis = 40kg, not 38kg).
+  /// the brand doesn't manufacture (Manjis = 40kg, not 38kg).
+  /// 13kg is not offered in Tanzania and must never be added here.
   static const Map<String, List<String>> brandSizes = {
     'Oryx Gas': ['6kg', '15kg', '38kg'],
     'Taifa Gas': ['3kg', '6kg', '15kg', '38kg'],

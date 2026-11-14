@@ -11,9 +11,15 @@ x-api-key: gl-...
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET/POST` | `/v1/bridge/subscriber` | Existence + AI opt-in check (`phone` query or `{phone}` body) |
-| `GET` | `/v1/bridge/catalog` | Live products, colours, sizes, prices, vendor stock |
+| `GET/POST` | `/v1/bridge/subscriber` | Existence + AI opt-in check; includes profile/cylinders for AI-enabled users |
+| `GET` | `/v1/bridge/catalog` | Live products, colours, sizes, prices, vendor stock and vendor terms |
 | `POST` | `/v1/bridge/orders` | Create a PENDING (`placed`) SMS order |
+| `GET` | `/v1/bridge/orders/status` | Latest orders for a phone; releases vendor/driver numbers by status |
+| `GET` | `/v1/bridge/vendors/contact` | Vendor phone for server-side dispatch |
+| `GET` | `/v1/bridge/vendors/pending-order` | Latest `placed`/`seen` order for a vendor phone |
+| `POST` | `/v1/bridge/orders/vendor-response` | Vendor `accept`/`reject` |
+| `POST` | `/v1/bridge/subscribers/sms` | Create/merge a minimal SMS-only consumer |
+| `GET` | `/v1/bridge/safety` | Published safety guidance |
 | `GET` | `/v1/bridge/health` | Liveness |
 
 The subscriber response includes both naming conventions expected by the

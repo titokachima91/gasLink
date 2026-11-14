@@ -12,6 +12,8 @@ import '../../widgets/app_ui.dart';
 import '../legal/legal_screens.dart';
 import 'consumer_cylinder_screen.dart';
 import 'consumer_settings_screen.dart';
+import 'consumer_profile_setup_screen.dart';
+import 'safety_hub_screen.dart';
 
 class ConsumerProfileScreen extends StatelessWidget {
   const ConsumerProfileScreen({super.key});
@@ -135,6 +137,37 @@ class ConsumerProfileScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => const ConsumerCylinderScreen(),
                         ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: Icon(
+                        Icons.location_on_outlined,
+                        color: context.colors.primary,
+                      ),
+                      title: Text(l10n.profileDetails),
+                      subtitle: Text(l10n.profileDetailsSubtitle),
+                      trailing: const Icon(Icons.chevron_right, size: 18),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ConsumerProfileSetupScreen(),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: Icon(
+                        Icons.health_and_safety_outlined,
+                        color: context.colors.primary,
+                      ),
+                      title: Text(l10n.safetyHub),
+                      subtitle: Text(l10n.safetyHubSubtitle),
+                      trailing: const Icon(Icons.chevron_right, size: 18),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const SafetyHubScreen()),
                       ),
                     ),
                     const Divider(height: 1),

@@ -39,9 +39,11 @@ When they disagree with `PROJECT_BIBLE.md`, the Bible wins.
   complete; **D3 vendor localization and D4 remaining surfaces are still open**
 - Phase 5F SMS/AI gateway foundation implemented; outbound SMS and real inbound
   phone round trip tested
-- DeepSeek AI Phase A complete: live Firestore catalogue, corrected brand
-  colours, 13kg rule, delivery/scale terms from vendor profiles, 43/43
-  evaluation. SMS ordering is still not wired.
+- DeepSeek AI Phases A–D complete in source: live Firestore catalogue, corrected
+  brand colours, 13kg rule, delivery/scale terms from vendor profiles,
+  profile onboarding, Safety Hub, 90-day memory, keyword opt-in and SMS
+  ordering (customer confirmation + vendor YES/NO), 46/46 evaluation. Release
+  build pending.
 - OTP service/screen exist behind `ENABLE_OTP_LOGIN=false`; wiring is a later
   workstream
 - Phase 6 (Blaze, rules, custom-token auth, production notifications) is parked
@@ -174,7 +176,7 @@ UI changes after that suite must be re-tested before a release claim.
 - APK is debug-signed; production keystore is pending.
 - The APK embeds the LAN gateway URL, so a DHCP IP change requires a rebuild.
 - AI live-catalogue answers and a real phone-to-TextBee SMS round trip are verified. TextBee webhooks need public HTTPS, so the gateway polls TextBee locally.
-- SMS ordering is **not wired** yet: the bridge endpoint exists, but the AI only answers questions and tells customers to order in the app.
+- SMS ordering is **pilot-only**: implemented behind `SMS_ORDERING_ENABLED`, with customer confirmation, live price/stock re-check, idempotency and vendor YES/NO acceptance. The app remains the primary ordering path.
 - Vendor FCM token can be stale/web; consumer Android push was verified.
 - Current Sao Gas catalogue is refill-only; Full Set/Vifaa/Huduma tabs will be
   empty until products are seeded.

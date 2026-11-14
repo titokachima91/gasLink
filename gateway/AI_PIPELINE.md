@@ -94,7 +94,7 @@ Key properties:
 | Habari yako? | `NO_REPLY`; nothing sent |
 | Unknown phone | Subscriber gate blocks before DeepSeek |
 
-**Evaluation:** 43/43 cases passed on 14 Nov 2026 after Phase A. The run covers
+**Evaluation:** 46/46 cases passed on 14 Nov 2026 after Phases A–D. The run covers
 live prices, brand colours, 13kg, full-set/complete, fullness/weight, delivery,
 vendor-number policy, support number, order-status refusal, safety, NO_REPLY,
 language mirroring and household size words. Results are in
@@ -120,7 +120,7 @@ language mirroring and household size words. Results are in
 ### Why not the TextBee webhook?
 
 TextBee pushes `MESSAGE_RECEIVED` to a **public HTTPS URL**. The gateway is on
-the pilot LAN (`192.168.1.11:8080`) and has no public URL, so TextBee’s cloud
+the pilot LAN (`192.168.1.24:8080`) and has no public URL, so TextBee’s cloud
 cannot reach it. A tunnel would work but adds exposure, cost and a moving URL.
 
 ### Local poller
@@ -227,6 +227,35 @@ Expected: `{"success":true,"ai":{...},"replySent":true}` and a matching
 3. Check `tail gateway.log` and `data/sms-log.json` for an `inbound` entry with
    `channel: "textbee-poll"` and an `ai-reply` outbound entry.
 
+### Phase B–D additions (14 Nov 2026)
+
+- `/v1/bridge/subscriber` returns a `profile` block for AI-enabled users:
+  name, area, address, ward, district, preferred brand/size and registered
+  cylinders.
+- `/v1/bridge/orders/status` returns recent orders. Vendor phone is released
+  only at `confirmed` or later; driver phone only at `on_the_way` or later.
+- `/v1/bridge/safety` serves published `safety_guidelines`; the app Safety Hub
+  reads the same collection.
+- `/v1/bridge/subscribers/sms` creates/merges a minimal SMS-only consumer and
+  cylinder, so ordering does not require the app.
+- `/v1/bridge/vendors/pending-order` and `/v1/bridge/orders/vendor-response`
+  implement vendor YES/NO acceptance without the app.
+- `services/ai-session-store.js` persists the last 8 turns per phone for 90
+  days in `data/ai-sessions.json`.
+- The TextBee poller forwards unknown numbers only when the message matches a
+  GasLink business keyword or order intent; all other personal SMS is skipped.
+- App: first-run profile setup captures name, area, street, cylinder
+  brand/size/quantity and last refill; Safety Hub is reachable from profile and
+  settings.
+
+Environment additions:
+
+```dotenv
+SMS_ORDERING_ENABLED=true
+GASLINK_SUPPORT_PHONE=0767304776
+GASLINK_APP_LINK=
+```
+
 ### Physical round trip (verified 14 Nov 2026)
 
 Real inbound SMS from `+255745123046` was picked up by the poller and answered:
@@ -261,35 +290,29 @@ Real inbound SMS from `+255745123046` was picked up by the poller and answered:
   route accepts unauthenticated posts by design for sandbox use.
 - Never expose port 8080 publicly without HTTPS and the webhook secret.
 
-## 8. Ordering by SMS — current status
+## 8. Ordering by SMS — implemented pilot
 
-The bridge endpoint `POST /v1/bridge/orders` exists and can create a `placed`
-order with `source: sms_ai`, but **the AI assistant does not call it**. There is
-no order parser, address capture, confirmation step or idempotency key in the
-inbound pipeline, so a text such as “Nataka Oryx 6kg mbili” must not be treated
-as an order.
+`services/sms-order-service.js` owns the transaction; the model never writes an
+order. The flow:
 
-Current behaviour:
+1. `isOrderIntent()` detects an explicit order, or a brand/size request without
+   a price question.
+2. Brand/size/quantity resolve against the live catalogue. Colour words map to
+   brands (red → Oryx, blue → Lake, green → Taifa, yellow → Mihan/O-Gas,
+   grey → Manjis); ndogo → 6kg, kubwa → 15kg. Commercial words ask for the
+   exact size.
+3. Name and delivery address come from the subscriber profile, or are collected
+   by SMS. Unknown callers get a minimal SMS-only profile.
+4. The customer must reply `YES` to an explicit summary.
+5. Before creation, the service re-checks live price/stock and uses an
+   idempotency key. It calls `POST /v1/bridge/orders`.
+6. The vendor gets a short SMS and replies `YES`/`NO`; the bridge updates the
+   order. The customer receives the vendor phone only after confirmation.
+7. Order status is available through `GET /v1/bridge/orders/status`.
 
-- The AI answers price, stock, delivery-policy and product questions.
-- System prompt rule 6 forbids accepting, confirming or claiming to place an
-  order by SMS. It tells the customer to order in the GasLink app.
-- The settings subtitle is now:
-  - EN: “Ask about live prices, stock and delivery by SMS. Order in the app.”
-  - SW: “Uliza bei, stock na delivery kwa SMS. Agiza kupitia app.”
-- The old “Order by SMS in Swahili. Coming soon.” string was removed.
+Feature flag: `SMS_ORDERING_ENABLED=true`.
+Mock end-to-end test: real Firestore order, vendor acceptance, customer/vendor
+SMS payloads verified, then deleted.
 
-To enable SMS ordering safely later:
-
-1. Detect an explicit order intent and resolve brand/size/quantity against the
-   live catalogue (never a model-invented vendor or price).
-2. Collect or confirm the delivery address.
-3. Send a “Reply YES to confirm …” message and keep pending state per phone.
-4. On YES, call `/v1/bridge/orders` with an idempotency key derived from the
-   phone and pending-order ID.
-5. Re-check stock and price immediately before creating the order.
-6. Send the order-placed SMS and let the existing notification pipeline take
-   over.
-
-Do not give the model an unrestricted order-creation tool; a wrong address or
-duplicate confirmation creates a real dispatch.
+Do not give the model an unrestricted order-creation tool. The state machine
+and bridge validation stay in code.

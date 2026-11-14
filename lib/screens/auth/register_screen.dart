@@ -8,7 +8,7 @@ import '../../core/theme_ext.dart';
 import '../../l10n/error_messages.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/language_picker.dart';
-import '../role_router.dart';
+import '../consumer/consumer_profile_setup_screen.dart';
 import 'landing_screen.dart';
 import 'login_screen.dart';
 import 'widgets/auth_widgets.dart';
@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (_) => const RoleRouter(userRole: 'consumer')),
+            builder: (_) => const ConsumerProfileSetupScreen(firstRun: true)),
         (_) => false,
       );
     } catch (e) {

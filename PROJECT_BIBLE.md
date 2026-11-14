@@ -89,7 +89,7 @@ Never ship the hardcoded admin credentials to production. Phase 6 replaces them.
 | Phase 5E D3: vendor localization | **Open** |
 | Phase 5E D4: admin/remaining localization | **Open** |
 | Phase 5F: SMS/AI/OTP/bridge foundation | Implemented; live SMS + consumer FCM tested |
-| DeepSeek AI testing | **Verified** — live catalogue, real phone-to-TextBee round trip, 43/43 evaluation; SMS ordering intentionally not wired |
+| DeepSeek AI testing | **Verified** — live catalogue, real phone round trip, 46/46 evaluation |
 | OTP app wiring | Foundation only; `ENABLE_OTP_LOGIN=false` |
 | Phase 6: scale/security | **Parked** (Firebase Spark) |
 | Release signing | Debug key only |
@@ -240,7 +240,7 @@ ipconfig getifaddr en0
 Then update `env.local.json` and the Android network security config if needed,
 and rebuild. A DHCP reservation or HTTPS tunnel is the permanent fix.
 
-At the time of writing: `192.168.1.11`.
+At the time of writing: `192.168.1.24` (DHCP; it has moved several times).
 
 ### App configuration
 
@@ -255,7 +255,7 @@ At the time of writing: `192.168.1.11`.
 
 ```json
 {
-  "SMS_GATEWAY_BASE_URL": "http://192.168.1.11:8080",
+  "SMS_GATEWAY_BASE_URL": "http://192.168.1.24:8080",
   "SMS_GATEWAY_API_KEY": "gl-...",
   "ENABLE_OTP_LOGIN": "false"
 }
@@ -478,7 +478,9 @@ Do not change these semantics for UI convenience.
 
 ### Consumer flow (pilot)
 
-Landing → login/register (or guest) → Home:
+Landing → login/register (or guest) → **first-run profile setup** (name,
+area/ward, street/landmark, cylinder brand/size/quantity, last refill,
+"need gas now") → Home:
 
 - Orders tracker banner
 - My cylinders overview
@@ -630,9 +632,10 @@ ships a local poller:
 - Enabled with `TEXTBEE_POLL_ENABLED=true` (10s interval by default).
 - It anchors a cursor at the newest existing SMS on first run, so old messages
   are never replayed.
-- New received messages are checked against the subscriber gate. Only
-  AI-enabled senders are forwarded to `/v1/inbound-sms`; personal SMS on the
-  TextBee phone is skipped silently (no log, no AI credit, no reply).
+- New received messages are checked against the subscriber gate. Known
+  AI-enabled senders are forwarded. Unknown numbers are forwarded only when
+  the message matches a GasLink business keyword or order intent; personal SMS
+  is skipped silently (no log, no AI credit, no reply).
 - Cursor: `data/textbee-inbound-cursor.json`.
 
 If a public HTTPS tunnel is added later, point TextBee’s `MESSAGE_RECEIVED`
@@ -640,10 +643,28 @@ webhook at `/v1/inbound-sms` and set `TEXTBEE_INBOUND_SECRET`. The route has a
 200/ignored guard for `MESSAGE_SENT`, `MESSAGE_DELIVERED` and `MESSAGE_FAILED`
 events so status callbacks can never trigger an AI reply.
 
-**SMS ordering is not wired yet.** The bridge has `POST /v1/bridge/orders`, but
-the assistant only answers questions. It is explicitly instructed never to
-accept or confirm an SMS order; customers are told to order in the app. Do not
-claim “order by SMS” until a confirm-then-create flow exists.
+### SMS ordering (pilot, enabled)
+
+`services/sms-order-service.js` owns the transaction; the model never writes an
+order. The flow is:
+
+```text
+order intent → brand/size/quantity → profile (name + address)
+→ explicit YES confirmation → live price/stock re-check
+→ POST /v1/bridge/orders (idempotency key) → vendor SMS
+→ vendor YES/NO → confirmed/cancelled → customer gets vendor number
+```
+
+- Unknown callers can create a minimal SMS-only profile through
+  `POST /v1/bridge/subscribers/sms`; no app is required to order.
+- Vendors accept or reject by replying `YES`/`NO`; the bridge updates the order
+  and releases the customer phone only after acceptance.
+- Order status: `GET /v1/bridge/orders/status?phone=...`.
+- Feature flag: `SMS_ORDERING_ENABLED=true`.
+- Mock end-to-end test created a real Firestore order, accepted it as the
+  vendor, verified the SMS payloads, then deleted the test order.
+- The app remains the primary ordering surface; SMS ordering is the offline /
+  no-data path.
 
 Full pipeline, environment and troubleshooting details:
 **[`gateway/AI_PIPELINE.md`](gateway/AI_PIPELINE.md)**.
@@ -654,9 +675,15 @@ Full pipeline, environment and troubleshooting details:
 
 | Endpoint | Purpose |
 |---|---|
-| `GET/POST /subscriber` | `{exists, registered, found, aiAssistantEnabled, aiEnabled, uid?, name?, channel}` |
-| `GET /catalog` | live products, colours, prices, stock |
+| `GET/POST /subscriber` | subscriber + AI gate; includes `profile` (name, area, address, cylinders) for AI-enabled users |
+| `GET /catalog` | live products, colours, prices, stock, vendor terms |
 | `POST /orders` | create `placed` SMS order with idempotency |
+| `GET /orders/status` | latest orders for a phone; vendor phone only after confirmation, driver phone after dispatch |
+| `GET /vendors/contact` | vendor phone for server-side dispatch |
+| `GET /vendors/pending-order` | latest `placed`/`seen` order for a vendor phone |
+| `POST /orders/vendor-response` | vendor `accept`/`reject`; updates status and notifies the consumer |
+| `POST /subscribers/sms` | create/merge a minimal SMS-only consumer and cylinder |
+| `GET /safety` | published safety guidance used by the app and AI |
 | `GET /health` | liveness |
 
 Brand colours (live bridge mapping, corrected 14 Nov 2026):
@@ -760,16 +787,19 @@ Coverage highlights:
 
 Latest known:
 
-- Full suite before latest UI changes: **116/116**.
-- Analyze after latest changes: **0 errors / 0 warnings**.
+- Full suite: run after the Phase B–D app changes; result recorded in
+  `build_logs/test_final.log`.
+- Analyze: **0 errors / 0 warnings** (46 pre-existing info lints).
 - Gateway tests: **4/4**.
-- Full suite must be re-run after UI changes and before a release claim.
+- AI evaluation: **46/46**.
+- End-to-end SMS order test: passed against Firestore with mock TextBee sends;
+  test order and notifications deleted afterwards.
 
 Not covered / manual:
 
 - No device integration/e2e automation (order → vendor → delivery → cylinder).
 - No Firestore rules tests (rules don’t exist yet).
-- AI live catalogue answers and a real phone-to-TextBee round trip are verified. SMS order creation is intentionally not wired; the assistant refuses it and points to the app.
+- AI live catalogue answers and a real phone-to-TextBee round trip are verified. SMS ordering is implemented behind `SMS_ORDERING_ENABLED`; a real-phone order test is the remaining manual check.
 - Shop layout has a history of zero-width card bugs; verify screenshots on a
   device before handing an APK over.
 - Visual QA for light/dark and small screens is manual.
@@ -797,7 +827,7 @@ Not covered / manual:
 - **D3/D4 localization incomplete** — vendor/admin bilingual labels remain.
 - **Vendor FCM token** may be web/stale; consumer Android push verified.
 - **AI physical round trip verified** — real inbound SMS from `+255745123046` was polled from TextBee and answered through DeepSeek.
-- **SMS ordering not user-facing** — the bridge order endpoint exists, but the AI does not create orders. The app is the only live ordering path; the assistant refuses SMS order requests.
+- **SMS ordering is pilot-only** — implemented, feature-flagged, and tested with mock sends + real Firestore. A real-phone order and vendor acceptance is the remaining manual check. No per-phone rate limit yet.
 - **OTP not wired into app** — flag false; user/session linking missing.
 - **DHCP IP** — APK embeds gateway URL; rebuild on change.
 - **Spark plan** — no Cloud Functions; Python dispatcher/local bridge required.
@@ -879,15 +909,19 @@ Not covered / manual:
 ### Immediate (after current UI build verification)
 
 1. Verify the four-category build, shop layout, gestures and order flow.
-2. **AI Phase A (done 14 Nov 2026)**: persona rewritten, sandbox ledger removed,
-   vendor profile terms exposed, brand colours corrected, 13kg rule added,
-   household size words added, 43/43 evaluation passing.
-3. **AI Phase B**: onboarding data, order-status lookup, safety hub, app link.
-4. **D3 vendor localization**
-5. **D4 remaining localization**
-6. **OTP wiring**
+2. **AI Phase A (done 14 Nov 2026)**: persona, live context, brand colours,
+   13kg and size words; 46/46 evaluation.
+3. **AI Phase B (done in source)**: onboarding profile, safety hub, order
+   status, vendor terms, app-link foundation.
+4. **AI Phase C (done)**: 90-day memory, keyword opt-in, monitoring basics.
+5. **AI Phase D (done in gateway)**: SMS ordering, SMS-only onboarding, vendor
+   SMS acceptance, number release.
+6. **Release build**: verify and install the new APK.
+7. **D3 vendor localization**
+8. **D4 remaining localization**
+9. **OTP wiring**
    - Enable flag, route screen, link verified phone to user/session.
-7. **Phase 6**
+10. **Phase 6**
    - Blaze, 6A custom-token identity bridge, 6B rules, 6C storage, 6D admin
      functions/audit, 6E pagination, 6F analytics rollups, 6G billing design.
 

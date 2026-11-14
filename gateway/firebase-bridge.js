@@ -148,7 +148,114 @@ function createFirebaseBridgeRouter(options = {}) {
       role: (data.role || '').toString(),
       aiAssistantEnabled: data.ai_assistant_enabled === true,
       channel: (data.notification_channel || 'both').toString(),
+      area: (data.area || data.ward || '').toString(),
+      address: (data.address || data.deliveryAddress || '').toString(),
+      ward: (data.ward || '').toString(),
+      district: (data.district || '').toString(),
+      profileCompleted: data.profileCompleted === true,
+      preferredBrand: (data.preferredBrand || '').toString(),
+      preferredSize: (data.preferredSize || '').toString(),
     };
+  }
+
+  async function buildSubscriberProfile(subscriber) {
+    if (!subscriber) return null;
+    const firestore = db();
+    let cylinders = [];
+    try {
+      const snap = await firestore
+        .collection('users')
+        .doc(subscriber.uid)
+        .collection('cylinders')
+        .limit(10)
+        .get();
+      cylinders = snap.docs.map((doc) => {
+        const d = doc.data() || {};
+        return {
+          brand: (d.brand || '').toString(),
+          size: (d.size || d.weight || d.cylinder_weight || '').toString(),
+          lastRefillDate: (d.lastRefillDate || d.purchase_date || '').toString(),
+          refillCycle: (d.refillCycle || '30 days').toString(),
+        };
+      });
+    } catch (error) {
+      console.warn('[bridge] cylinder profile warning:', error.message);
+    }
+    return {
+      name: subscriber.name || '',
+      area: subscriber.area || '',
+      address: subscriber.address || '',
+      ward: subscriber.ward || '',
+      district: subscriber.district || '',
+      profileCompleted: subscriber.profileCompleted,
+      preferredBrand: subscriber.preferredBrand || '',
+      preferredSize: subscriber.preferredSize || '',
+      cylinders,
+    };
+  }
+
+  async function findVendorByPhone(phone) {
+    const firestore = db();
+    const variants = phoneVariants(phone);
+    const [primary, secondary] = await Promise.all([
+      firestore.collection('vendors').where('phone', 'in', variants).limit(1).get(),
+      firestore
+        .collection('vendors')
+        .where('secondaryPhone', 'in', variants)
+        .limit(1)
+        .get()
+        .catch(() => ({ empty: true, docs: [] })),
+    ]);
+    const doc =
+      (!primary.empty && primary.docs[0]) ||
+      (!secondary.empty && secondary.docs[0]);
+    if (!doc) return null;
+    const data = doc.data() || {};
+    return {
+      id: doc.id,
+      name: (data.businessName || data.business_name || data.shop_name || 'Muuzaji Gesi').toString(),
+      phone: (data.phone || '').toString(),
+      secondaryPhone: (data.secondaryPhone || '').toString(),
+      area: (data.areaText || data.ward || data.district || '').toString(),
+    };
+  }
+
+  function orderCode(orderId) {
+    return String(orderId || '').replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
+  }
+
+  async function vendorContact(vendorId) {
+    const doc = await db().collection('vendors').doc(vendorId).get();
+    if (!doc.exists) return null;
+    const data = doc.data() || {};
+    return {
+      id: doc.id,
+      name: (data.businessName || data.business_name || data.shop_name || 'Muuzaji Gesi').toString(),
+      phone: (data.phone || '').toString(),
+      secondaryPhone: (data.secondaryPhone || '').toString(),
+    };
+  }
+
+  async function notifyUser(userId, title, body, data = {}) {
+    if (!userId) return;
+    const firestore = db();
+    const userDoc = await firestore.collection('users').doc(userId).get();
+    if (!userDoc.exists) return;
+    const user = userDoc.data() || {};
+    const channel = (user.notification_channel || 'both').toString();
+    const wantsPush = channel === 'push_only' || channel === 'both';
+    const fcmToken = (user.fcmToken || user.fcm_token || '').toString();
+    if (wantsPush && fcmToken) {
+      await firestore.collection('notifications').add({
+        userId,
+        fcmToken,
+        title,
+        body,
+        data,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        read: false,
+      });
+    }
   }
 
   async function findProduct(vendorId, brand, size, category) {
@@ -248,7 +355,11 @@ function createFirebaseBridgeRouter(options = {}) {
         });
       }
       const subscriber = await findSubscriber(phone);
-      return res.json(subscriberResponse(subscriber));
+      const response = subscriberResponse(subscriber);
+      if (subscriber && subscriber.aiAssistantEnabled) {
+        response.profile = await buildSubscriberProfile(subscriber);
+      }
+      return res.json(response);
     } catch (error) {
       return res.status(500).json({ error: 'Bridge error', message: error.message });
     }
@@ -560,6 +671,386 @@ function createFirebaseBridgeRouter(options = {}) {
         total,
         currency: 'TZS',
       });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  function orderTime(data) {
+    const value = data.created_at || data.createdAt || data.createdAtMs;
+    if (!value) return 0;
+    if (typeof value.toMillis === 'function') return value.toMillis();
+    if (value instanceof Date) return value.getTime();
+    const parsed = Date.parse(String(value));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  router.get('/orders/status', async (req, res) => {
+    try {
+      const phone = normalizePhone(req.query.phone);
+      if (!isValidTzPhone(phone)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'A valid Tanzanian phone is required',
+        });
+      }
+      const subscriber = await findSubscriber(phone);
+      if (!subscriber) return res.json({ ok: true, orders: [] });
+
+      const firestore = db();
+      const limit = Math.min(5, Math.max(1, Number(req.query.limit) || 2));
+      let docs = [];
+      try {
+        const snap = await firestore
+          .collection('orders')
+          .where('consumer_uid', '==', subscriber.uid)
+          .limit(20)
+          .get();
+        docs = snap.docs;
+      } catch (error) {
+        console.warn('[bridge] order status uid query:', error.message);
+      }
+      if (!docs.length) {
+        try {
+          const snap = await firestore
+            .collection('orders')
+            .where('contact_phone', 'in', phoneVariants(phone))
+            .limit(20)
+            .get();
+          docs = snap.docs;
+        } catch (error) {
+          console.warn('[bridge] order status phone query:', error.message);
+        }
+      }
+
+      const sorted = docs
+        .sort((a, b) => orderTime(b.data() || {}) - orderTime(a.data() || {}))
+        .slice(0, limit);
+
+      const orders = [];
+      for (const doc of sorted) {
+        const order = doc.data() || {};
+        const status = (order.status || 'placed').toString();
+        const confirmed = ['confirmed', 'on_the_way', 'delivered_pending', 'delivered'].includes(status);
+        const dispatched = ['on_the_way', 'delivered_pending', 'delivered'].includes(status);
+        let vendorPhone = '';
+        if (confirmed) {
+          const contact = await vendorContact(
+            (order.vendor_id || order.vendorId || '').toString(),
+          );
+          vendorPhone = contact ? (contact.phone || contact.secondaryPhone || '') : '';
+        }
+        const driverPhone = dispatched
+          ? (order.driver_phone || order.driverPhone || '').toString()
+          : '';
+        orders.push({
+          id: doc.id,
+          code: orderCode(doc.id),
+          status,
+          brand: (order.brand || order.brand_name || order.brandName || '').toString(),
+          size: (order.size || order.weight || order.cylinder_weight || '').toString(),
+          quantity: Number(order.quantity || 1),
+          total: Number(order.total ?? order.total_price ?? order.totalPrice ?? 0),
+          currency: 'TZS',
+          vendorId: (order.vendor_id || order.vendorId || '').toString(),
+          vendorName: (order.vendor_name || order.vendorName || '').toString(),
+          etaMinutes: Number(order.eta_minutes || order.etaMinutes || 0) || null,
+          vendorPhone,
+          driverPhone,
+          createdAt: order.created_at || order.createdAt || null,
+        });
+      }
+      return res.json({ ok: true, orders });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  router.get('/vendors/contact', async (req, res) => {
+    try {
+      const vendorId = (req.query.vendorId || '').toString().trim();
+      if (!vendorId) {
+        return res.status(400).json({ error: 'Bad Request', message: 'vendorId is required' });
+      }
+      const contact = await vendorContact(vendorId);
+      if (!contact) {
+        return res.status(404).json({ error: 'Vendor not found' });
+      }
+      return res.json({ ok: true, vendor: contact });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  router.get('/vendors/pending-order', async (req, res) => {
+    try {
+      const phone = normalizePhone(req.query.phone);
+      if (!isValidTzPhone(phone)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'A valid Tanzanian phone is required',
+        });
+      }
+      const vendor = await findVendorByPhone(phone);
+      if (!vendor) {
+        return res.status(404).json({ error: 'Vendor not found' });
+      }
+      const snap = await db()
+        .collection('orders')
+        .where('status', 'in', ['placed', 'seen'])
+        .limit(50)
+        .get();
+      const pending = snap.docs
+        .map((doc) => ({ id: doc.id, data: doc.data() || {} }))
+        .filter(
+          ({ data }) =>
+            (data.vendor_id || data.vendorId || '').toString() === vendor.id,
+        )
+        .sort((a, b) => orderTime(b.data) - orderTime(a.data));
+      const latest = pending[0] || null;
+      return res.json({
+        ok: true,
+        vendor,
+        order: latest
+          ? {
+              id: latest.id,
+              code: orderCode(latest.id),
+              status: (latest.data.status || 'placed').toString(),
+              brand: (latest.data.brand || latest.data.brand_name || '').toString(),
+              size: (latest.data.size || latest.data.weight || '').toString(),
+              quantity: Number(latest.data.quantity || 1),
+              total: Number(latest.data.total ?? latest.data.total_price ?? 0),
+              address: (latest.data.delivery_address || latest.data.deliveryAddress || '').toString(),
+              createdAt: latest.data.created_at || latest.data.createdAt || null,
+            }
+          : null,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  router.post('/orders/vendor-response', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const phone = normalizePhone(body.phone);
+      if (!isValidTzPhone(phone)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'A valid Tanzanian phone is required',
+        });
+      }
+      const vendor = await findVendorByPhone(phone);
+      if (!vendor) {
+        return res.status(403).json({ error: 'Not a vendor phone' });
+      }
+      const orderId = (body.orderId || '').toString().trim();
+      const action = (body.response || '').toString().toLowerCase();
+      if (!orderId || !['accept', 'reject'].includes(action)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'orderId and response (accept|reject) are required',
+        });
+      }
+
+      const firestore = db();
+      const orderRef = firestore.collection('orders').doc(orderId);
+      const orderDoc = await orderRef.get();
+      if (!orderDoc.exists) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      const order = orderDoc.data() || {};
+      const orderVendorId = (order.vendor_id || order.vendorId || '').toString();
+      if (orderVendorId !== vendor.id) {
+        return res.status(403).json({ error: 'Order does not belong to this vendor' });
+      }
+      const status = (order.status || 'placed').toString();
+      if (['cancelled', 'delivered', 'delivered_pending'].includes(status)) {
+        return res.status(409).json({ error: 'Order is already closed', status });
+      }
+
+      const consumerUid = (order.consumer_uid || order.consumerUid || '').toString();
+      const customerPhone = (
+        order.contact_phone ||
+        order.consumerPhone ||
+        order.receiver_phone ||
+        ''
+      ).toString();
+
+      if (action === 'accept') {
+        if (['planned', 'placed', 'seen'].includes(status)) {
+          await orderRef.set(
+            {
+              status: 'confirmed',
+              vendor_phone: vendor.phone || '',
+              vendorPhone: vendor.phone || '',
+              vendor_confirmed_at: admin.firestore.FieldValue.serverTimestamp(),
+              updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true },
+          );
+          await notifyUser(
+            consumerUid,
+            'Oda imethibitishwa',
+            `Oda yako ya ${order.brand || ''} imethibitishwa. Vendor: ${vendor.name}.`,
+            { orderId, type: 'order_confirmed' },
+          ).catch(() => {});
+        } else if (!['confirmed', 'on_the_way'].includes(status)) {
+          return res.status(409).json({ error: 'Order cannot be accepted', status });
+        }
+        return res.json({
+          ok: true,
+          status: 'confirmed',
+          orderId,
+          code: orderCode(orderId),
+          customerPhone,
+          vendorPhone: vendor.phone || vendor.secondaryPhone || '',
+        });
+      }
+
+      if (!['placed', 'seen'].includes(status)) {
+        return res.status(409).json({ error: 'Order cannot be rejected now', status });
+      }
+      await orderRef.set(
+        {
+          status: 'cancelled',
+          cancelled_at: admin.firestore.FieldValue.serverTimestamp(),
+          cancellation_reason: 'vendor_rejected',
+          updated_at: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+      await notifyUser(
+        consumerUid,
+        'Oda imekataliwa',
+        `Oda yako ya ${order.brand || ''} imekataliwa na vendor. Tutakusaidia kupata vendor mwingine.`,
+        { orderId, type: 'order_rejected' },
+      ).catch(() => {});
+      return res.json({
+        ok: true,
+        status: 'cancelled',
+        orderId,
+        code: orderCode(orderId),
+        vendorPhone: vendor.phone || vendor.secondaryPhone || '',
+      });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  router.post('/subscribers/sms', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const phone = normalizePhone(body.phone);
+      if (!isValidTzPhone(phone)) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'A valid Tanzanian phone is required',
+        });
+      }
+      const name = (body.name || '').toString().trim();
+      const address = (body.address || '').toString().trim();
+      if (!name || !address) {
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'name and address are required',
+        });
+      }
+
+      const firestore = db();
+      const existing = await findSubscriber(phone);
+      let uid = existing ? existing.uid : '';
+      let created = false;
+      const profile = {
+        phone,
+        name,
+        address,
+        area: (body.area || '').toString().trim(),
+        ward: (body.ward || '').toString().trim(),
+        district: (body.district || '').toString().trim(),
+        role: 'consumer',
+        ai_assistant_enabled: true,
+        notification_channel: 'both',
+        sms_ordering_consent: true,
+        profileCompleted: true,
+        source: 'sms',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      if (uid) {
+        await firestore.collection('users').doc(uid).set(profile, { merge: true });
+      } else {
+        const doc = await firestore.collection('users').add({
+          ...profile,
+          termsAcceptedAt: admin.firestore.FieldValue.serverTimestamp(),
+          termsAcceptedVia: 'sms',
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        uid = doc.id;
+        created = true;
+      }
+
+      const cylinderBrand = (body.cylinderBrand || '').toString().trim();
+      const cylinderSize = (body.cylinderSize || '').toString().trim();
+      if (cylinderBrand && cylinderSize) {
+        const cylindersRef = firestore.collection('users').doc(uid).collection('cylinders');
+        const existingCylinders = await cylindersRef.limit(20).get();
+        const duplicate = existingCylinders.docs.some((doc) => {
+          const d = doc.data() || {};
+          return (
+            (d.brand || '').toString().toLowerCase() === cylinderBrand.toLowerCase() &&
+            ((d.size || d.weight || '').toString().toLowerCase() === cylinderSize.toLowerCase())
+          );
+        });
+        if (!duplicate) {
+          const refillDate = body.lastRefillDate
+            ? new Date(body.lastRefillDate)
+            : new Date();
+          const iso = Number.isNaN(refillDate.getTime())
+            ? new Date().toISOString()
+            : refillDate.toISOString();
+          await cylindersRef.add({
+            brand: cylinderBrand,
+            size: cylinderSize,
+            weight: cylinderSize,
+            refillCycle: '30 days',
+            lastRefillDate: iso,
+            purchase_date: iso,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      return res.status(created ? 201 : 200).json({ ok: true, uid, created });
+    } catch (error) {
+      return res.status(500).json({ error: 'Bridge error', message: error.message });
+    }
+  });
+
+  router.get('/safety', async (req, res) => {
+    try {
+      const snap = await db()
+        .collection('safety_guidelines')
+        .where('published', '==', true)
+        .limit(10)
+        .get()
+        .catch(() => null);
+      const items = snap
+        ? snap.docs.map((doc) => {
+            const d = doc.data() || {};
+            return {
+              id: doc.id,
+              title: (d.title || '').toString(),
+              titleSw: (d.titleSw || d.title_sw || '').toString(),
+              body: (d.body || '').toString(),
+              bodySw: (d.bodySw || d.body_sw || '').toString(),
+              steps: Array.isArray(d.steps) ? d.steps : [],
+              stepsSw: Array.isArray(d.stepsSw || d.steps_sw) ? (d.stepsSw || d.steps_sw) : [],
+              order: Number(d.order || 0),
+            };
+          })
+        : [];
+      items.sort((a, b) => a.order - b.order);
+      return res.json({ ok: true, items });
     } catch (error) {
       return res.status(500).json({ error: 'Bridge error', message: error.message });
     }

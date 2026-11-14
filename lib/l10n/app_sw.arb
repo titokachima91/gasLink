@@ -682,5 +682,22 @@
   "otpDisabled": "Kuingia kwa SMS bado hakujaanza.",
   "otpSendFailed": "Imeshindikana kutuma msimbo. Jaribu tena.",
   "otpInvalid": "Msimbo si sahihi.",
-  "orderNow": "Oda Sasa"
+  "orderNow": "Oda Sasa",
+  "profileSetupTitle": "Kamilisha wasifu wako",
+  "profileSetupSubtitle": "Tunatumia hii kufikisha gesi na kufuatilia mitungi yako.",
+  "areaLabel": "Eneo / kata",
+  "areaHint": "mf. Sinza, Mori",
+  "streetLabel": "Mtaa / alama",
+  "streetHint": "mf. karibu na msikiti",
+  "cylinderDetailsTitle": "Mtungi wako",
+  "quantityLabel": "Idadi",
+  "orderNowQuestion": "Unahitaji gesi sasa?",
+  "orderNowHint": "Baada ya kuhifadhi, chagua gesi na uagize.",
+  "profileSetupSave": "Hifadhi na uendelee",
+  "profileSetupSaved": "Wasifu umehifadhiwa. Chagua gesi kuagiza.",
+  "profileDetails": "Maelezo ya delivery na mtungi",
+  "profileDetailsSubtitle": "Hutumika kwa delivery na kufuatilia mitungi.",
+  "safetyHub": "Usalama wa gesi",
+  "safetyHubSubtitle": "Hatua za usalama na mwongozo wa dharura.",
+  "safetyHubEmpty": "Mwongozo wa usalama utaonekana hapa."
 }

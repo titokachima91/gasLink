@@ -20,6 +20,8 @@ import '../about_screen.dart';
 import '../auth/landing_screen.dart';
 import '../legal/legal_screens.dart';
 import 'gas_plan_screen.dart';
+import 'consumer_profile_setup_screen.dart';
+import 'safety_hub_screen.dart';
 
 class ConsumerSettingsScreen extends ConsumerStatefulWidget {
   const ConsumerSettingsScreen({super.key});
@@ -171,6 +173,19 @@ class _ConsumerSettingsScreenState
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.location_on_outlined),
+                  title: Text(l10n.profileDetails),
+                  subtitle: Text(l10n.profileDetailsSubtitle),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConsumerProfileSetupScreen(),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.storefront_outlined),
                   title: Text(l10n.registerAsVendor),
                   subtitle: Text(l10n.comingSoon),
@@ -237,9 +252,9 @@ class _ConsumerSettingsScreenState
             icon: Icons.tune_outlined,
           ),
           const SizedBox(height: 10),
-          AppCard(
+          const AppCard(
             padding: EdgeInsets.zero,
-            child: const LanguagePickerTile(),
+            child: LanguagePickerTile(),
           ),
           const SizedBox(height: 20),
 
@@ -341,6 +356,20 @@ class _ConsumerSettingsScreenState
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.health_and_safety_outlined,
+                    color: context.colors.primary,
+                  ),
+                  title: Text(l10n.safetyHub),
+                  subtitle: Text(l10n.safetyHubSubtitle),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SafetyHubScreen()),
+                  ),
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading:
                       Icon(Icons.call_outlined, color: context.colors.primary),
