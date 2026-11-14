@@ -157,21 +157,18 @@ Reference: `gateway/MOUNTED.md`.
 - **Servers:** APK download server on `8090` is running for UI inspection.
   Gateway `8080` and FCM are intentionally **off**; UI browsing still reads
   Firestore, but SMS/push will not fire until they are started.
-- **Last successful APK:** 14 Nov 07:20, SHA
-  `5ece834fa77068b926733160d4ac30547c7a84548bd8f7b5026044c418ff890c`
-  (59,310,155 bytes), embeds `192.168.1.11:8080`.
+- **Last successful APK:** 14 Nov 08:12, SHA
+  `85a42c745e7697ff4eafcc0ed96da359b8541b53d9016747051a3c5ef2b7ff29`
+  (59,326,427 bytes), embeds `192.168.1.11:8080`.
   Download: `http://192.168.1.11:8090/gaslink-latest.apk`
-- **Build:** incremental after the earlier clean build. Log:
-  `build_logs/shop_width_build.log`.
-- **Last commits:** `506bbf9` force full-width shop/cylinder cards,
-  `7295ff0` brand-header constraint, `8122297` product/vendor card text sweep,
-  `c4ae9eb` shop fallback.
-- **Root cause of the Shop Details bug:** the product AppCards were nested in
-  a Column with the default `center` cross-axis, so each card shrink-wrapped
-  to a narrow intrinsic width. The top card was a direct ListView child and
-  looked fine. `_buildCylindersSection` now uses
-  `CrossAxisAlignment.stretch` and each product card is `width: double.infinity`.
-  The 01:16 APK predates this specific fix; the 07:20 APK includes it.
+- **Build:** incremental. Log: `build_logs/shop_restore_build.log`.
+- **Last commits:** `5c221e7` restore pre-restyle weight-chip shop cards,
+  `506bbf9` force full-width shop/cylinder cards, `7295ff0` brand-header
+  constraint, `8122297` product/vendor card text sweep, `c4ae9eb` shop fallback.
+- **Shop Details history:** the last known-good product list is `5c7ae57`,
+  before the `5e2c6d2` restyle introduced the squeezing multi-row layout.
+  The current screen restores that weight-chip/active-offer design with
+  full-width cards and a vertical summary.
 - **Working tree:** clean.
 - **Install:** uninstall the old GasLink app first, then install the new APK.
   The previous 00:41 download had a connection reset; a stale install is the
