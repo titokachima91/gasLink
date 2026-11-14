@@ -25,6 +25,7 @@ class ConsumerOrderDialog extends StatefulWidget {
   final String brandName;
   final String cylinderWeight;
   final double price;
+  final String orderType;
 
   ConsumerOrderDialog({
     super.key,
@@ -34,6 +35,7 @@ class ConsumerOrderDialog extends StatefulWidget {
     String? cylinderWeight,
     String? cylinderSize,
     required this.price,
+    this.orderType = 'refill',
   }) : cylinderWeight = cylinderWeight ?? cylinderSize ?? '15kg';
 
   @override
@@ -374,7 +376,7 @@ class _ConsumerOrderDialogState extends State<ConsumerOrderDialog> {
         productId: '',
         brand: widget.brandName,
         size: widget.cylinderWeight,
-        type: 'refill',
+        type: widget.orderType,
         orderIntent: _orderIntent,
         quantity: _quantity,
         unitPrice: widget.price,

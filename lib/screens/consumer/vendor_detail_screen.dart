@@ -133,22 +133,48 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
               final productDocs = productSnap.data?.docs ?? [];
 
-              // Separate inventory into Cylinders and Accessories
-              final cylinders = <Map<String, dynamic>>[];
+              // Four vendor categories, matching what vendors can offer.
+              final refill = <Map<String, dynamic>>[];
+              final fullSet = <Map<String, dynamic>>[];
               final accessories = <Map<String, dynamic>>[];
+              final services = <Map<String, dynamic>>[];
 
               for (final doc in productDocs) {
                 final data = doc.data();
-                final type = (data['type'] ?? data['category'] ?? '')
+                final type = (data['category'] ?? data['type'] ?? 'refill')
                     .toString()
-                    .toLowerCase();
+                    .toLowerCase()
+                    .trim();
 
-                if (type == 'accessory' || type == 'vifaa' || type == 'kifaa') {
+                if (type == 'full_set' ||
+                    type == 'fullset' ||
+                    type == 'full set') {
+                  fullSet.add(data);
+                } else if (type == 'accessory' ||
+                    type == 'accessories' ||
+                    type == 'vifaa' ||
+                    type == 'kifaa') {
                   accessories.add(data);
+                } else if (type == 'service' ||
+                    type == 'services' ||
+                    type == 'huduma') {
+                  services.add(data);
                 } else {
-                  cylinders.add(data);
+                  refill.add(data);
                 }
               }
+
+              final categoryLists = [refill, fullSet, accessories, services];
+              final categoryTypes = [
+                'refill',
+                'full_set',
+                'accessories',
+                'services',
+              ];
+              final selectedIndex =
+                  _selectedCategoryIndex.clamp(0, 3).toInt();
+              final selectedItems = categoryLists[selectedIndex];
+              final selectedType = categoryTypes[selectedIndex];
 
               return ListView(
                 padding: const EdgeInsets.all(16),
@@ -162,9 +188,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   const SizedBox(height: 16),
 
                   // 3. Product list: each row owns its order button.
-                  ...(_selectedCategoryIndex == 0
-                      ? _buildCylinderTiles(cylinders)
-                      : _buildAccessoryTiles(accessories)),
+                  ..._buildProductTiles(selectedItems, selectedType),
                 ],
               );
             },
@@ -392,116 +416,85 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     );
   }
 
-  /// Segmented Category Switcher Bar
+  /// Four category switcher: Refill, Full Set, Vifaa, Huduma.
   Widget _buildCategoryToggle() {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.outlineVariant,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedCategoryIndex = 0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: _selectedCategoryIndex == 0
-                      ? context.colors.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    '🔥 Mitungi ya Gesi',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: _selectedCategoryIndex == 0
-                          ? context.colors.onPrimary
-                          : context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+    const labels = ['Refill', 'Full Set', 'Vifaa', 'Huduma'];
+    const icons = [
+      Icons.sync,
+      Icons.inventory_2_outlined,
+      Icons.build_circle_outlined,
+      Icons.handyman_outlined,
+    ];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: List.generate(labels.length, (index) {
+        final selected = _selectedCategoryIndex == index;
+        return ChoiceChip(
+          avatar: Icon(
+            icons[index],
+            size: 16,
+            color: selected ? context.colors.onPrimary : context.colors.primary,
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedCategoryIndex = 1),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: _selectedCategoryIndex == 1
-                      ? context.colors.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    '🔧 Vifaa & Aksesari',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: _selectedCategoryIndex == 1
-                          ? context.colors.onPrimary
-                          : context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          label: Text(labels[index]),
+          selected: selected,
+          selectedColor: context.colors.primary,
+          labelStyle: TextStyle(
+            color: selected
+                ? context.colors.onPrimary
+                : context.colors.onSurface,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
-        ],
-      ),
+          onSelected: (_) =>
+              setState(() => _selectedCategoryIndex = index),
+        );
+      }),
     );
   }
 
   /// Always-visible checkout CTA so a consumer can order without hunting for
   /// the per-row button below the vendor header.
-  List<Widget> _buildCylinderTiles(List<Map<String, dynamic>> cylinders) {
-    if (cylinders.isEmpty) {
-      return [
-        _buildEmptyProducts(
-            'Muuzaji ${widget.businessName} hajaweka mitungi bado.'),
-      ];
+  List<Widget> _buildProductTiles(
+      List<Map<String, dynamic>> items, String category) {
+    if (items.isEmpty) {
+      final message = switch (category) {
+        'full_set' =>
+          'Muuzaji ${widget.businessName} hajaweka Full Set bado.',
+        'accessories' =>
+          'Muuzaji ${widget.businessName} hajaweka vifaa au aksesari bado.',
+        'services' =>
+          'Muuzaji ${widget.businessName} hajaweka huduma bado.',
+        _ => 'Muuzaji ${widget.businessName} hajaweka mitungi bado.',
+      };
+      return [_buildEmptyProducts(message)];
     }
-    return cylinders.map((item) {
+
+    return items.map((item) {
+      final isCylinder = category == 'refill' || category == 'full_set';
       final brand = (item['brand'] ?? 'Gesi').toString();
       final weight = (item['weight'] ?? item['size'] ?? '').toString();
+      final name = (item['name'] ?? item['title'] ?? brand).toString();
       final price = (item['price'] as num?)?.toDouble() ?? 0.0;
       final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
-      return _buildProductTile(
-        title: weight.isEmpty ? brand : '$brand · $weight',
-        price: price,
-        inStock: inStock,
-        icon: Icons.propane_tank_outlined,
-        onOrder: () =>
-            _openOrder(brand, weight.isEmpty ? '15kg' : weight, price),
-      );
-    }).toList();
-  }
+      final title = isCylinder
+          ? (weight.isEmpty ? brand : '$brand · $weight')
+          : name;
+      final orderName = isCylinder ? brand : name;
+      final orderWeight =
+          isCylinder ? (weight.isEmpty ? '15kg' : weight) : '1pc';
+      final icon = category == 'accessories'
+          ? Icons.build_outlined
+          : category == 'services'
+              ? Icons.handyman_outlined
+              : Icons.propane_tank_outlined;
 
-  List<Widget> _buildAccessoryTiles(List<Map<String, dynamic>> accessories) {
-    if (accessories.isEmpty) {
-      return [
-        _buildEmptyProducts(
-            'Muuzaji ${widget.businessName} hajaweka vifaa au aksesari bado.'),
-      ];
-    }
-    return accessories.map((item) {
-      final name =
-          (item['name'] ?? item['title'] ?? item['brand'] ?? 'Kifaa').toString();
-      final price = (item['price'] as num?)?.toDouble() ?? 0.0;
-      final inStock = (item['in_stock'] ?? item['inStock'] ?? true) as bool;
       return _buildProductTile(
-        title: name,
+        title: title,
         price: price,
         inStock: inStock,
-        icon: Icons.build_outlined,
-        onOrder: () => _openOrder(name, '1pc', price),
+        icon: icon,
+        onOrder: () =>
+            _openOrder(orderName, orderWeight, price, category),
       );
     }).toList();
   }
@@ -597,7 +590,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     );
   }
 
-  Future<void> _openOrder(String brand, String weight, double price) async {
+  Future<void> _openOrder(
+      String brand, String weight, double price, String orderType) async {
     if (!await SessionGate.requireConsumer(context)) return;
     if (!mounted) return;
     await showModalBottomSheet(
@@ -609,6 +603,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
         cylinderWeight: weight,
         vendorName: widget.businessName,
         price: price,
+        orderType: orderType,
       ),
     );
   }

@@ -212,9 +212,17 @@ class OrderService {
       final String status =
           (data['status'] ?? '').toString().toLowerCase().trim();
       final bool alreadyRegistered = data['cylinder_registered'] == true;
+      final String orderType =
+          (data['type'] ?? data['category'] ?? 'refill')
+              .toString()
+              .toLowerCase()
+              .trim();
+      final bool isCylinderOrder =
+          orderType == 'refill' || orderType == 'full_set';
 
       if ((status == 'delivered' || status == 'completed') &&
-          !alreadyRegistered) {
+          !alreadyRegistered &&
+          isCylinderOrder) {
         final consumerUid =
             (data['consumer_uid'] ?? data['consumerUid'] ?? '').toString();
         final brandName =

@@ -75,16 +75,7 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
   }
 
   List<Map<String, dynamic>> get _matchingOffers {
-    var results = _collectOffers(widget.category);
-
-    // The pilot catalogue is refill-only. Never dead-end "Full Set" when the
-    // exact category has not been stocked yet.
-    if (results.isEmpty) {
-      results = _collectOffers('refill');
-    }
-    if (results.isEmpty) {
-      results = _collectOffers(null);
-    }
+    final results = _collectOffers(widget.category);
 
     if (_sortBy == 'price_low') {
       results.sort(
@@ -366,9 +357,15 @@ class _ItemVendorsScreenState extends State<ItemVendorsScreen> {
       builder: (context) => ConsumerOrderDialog(
         vendorId: vendor.id,
         brandName: widget.itemName,
-        cylinderSize: weight.isEmpty ? '15kg' : weight,
+        cylinderSize: weight.isEmpty
+            ? (widget.category == 'refill' ||
+                    widget.category == 'full_set'
+                ? '15kg'
+                : '1pc')
+            : weight,
         vendorName: vendorName,
         price: price,
+        orderType: widget.category,
       ),
     );
   }
