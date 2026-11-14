@@ -1,8 +1,12 @@
 # GasLink — AI Handoff & Operating Rules
 
 > **Read this before changing code, restarting servers, or starting a build.**
-> Last updated: **13 Nov 2026, 22:35 EAT**
+> Last updated: **14 Nov 2026**
 > Branch: `harden-source-of-truth`
+>
+> Master docs: **[`PROJECT_BIBLE.md`](PROJECT_BIBLE.md)** (authoritative) and
+> **[`WHITEPAPER.md`](WHITEPAPER.md)** (partner/marketing).
+> Reading order: Bible → this file → white paper → `BUILD.md`.
 
 ---
 
@@ -150,44 +154,55 @@ Reference: `gateway/MOUNTED.md`.
 
 ---
 
-## Current state at 01:17 EAT, 14 Nov 2026
+## Current state at 14 Nov 2026
 
 - **Power:** AC connected.
 - **LAN IP:** `192.168.1.11`.
-- **Servers:** APK download server on `8090` is running for UI inspection.
-  Gateway `8080` and FCM are intentionally **off**; UI browsing still reads
-  Firestore, but SMS/push will not fire until they are started.
-- **Last successful APK:** 14 Nov 08:12, SHA
-  `85a42c745e7697ff4eafcc0ed96da359b8541b53d9016747051a3c5ef2b7ff29`
-  (59,326,427 bytes), embeds `192.168.1.11:8080`.
-  Download: `http://192.168.1.11:8090/gaslink-latest.apk`
-- **Build:** incremental. Log: `build_logs/shop_restore_build.log`.
-- **Last commits:** `5c221e7` restore pre-restyle weight-chip shop cards,
-  `506bbf9` force full-width shop/cylinder cards, `7295ff0` brand-header
-  constraint, `8122297` product/vendor card text sweep, `c4ae9eb` shop fallback.
-- **Shop Details history:** the last known-good product list is `5c7ae57`,
-  before the `5e2c6d2` restyle introduced the squeezing multi-row layout.
-  The current screen restores that weight-chip/active-offer design with
-  full-width cards and a vertical summary.
-- **Working tree:** clean.
-- **Install:** uninstall the old GasLink app first, then install the new APK.
-  The previous 00:41 download had a connection reset; a stale install is the
-  likely reason the old mangled layout kept appearing.
-- **Shop fix:** Shop Details product rows are full-width vertical rows
-  (name/weight, price, full-width `Oda Sasa`). Brand headers are constrained.
-  The same sweep covered vendor cards, brand shop, order summary, cylinder
-  facts, vendor search, inventory, and vendor order cards.
+- **Source HEAD:** `885f828` — four vendor categories + split vendor-card
+  actions.
+- **Servers:** gateway `8080` is running (dashboard 200); APK download server
+  `8090` is running; FCM dispatcher is off until notification monitoring is
+  needed.
+- **Build:** a four-category build is pending verification. Do not hand over an
+  APK until timestamp, embedded IP, SHA and download are verified.
+- **Last verified APK:** V4 14 Nov 08:46, SHA
+  `7d27a2c4127bc8b730d4b068c8092bab70bbaab75b61f214ff4a86b359bbfd65`.
+  It predates the four-category/gesture changes.
+- **Latest commits:** `885f828` four categories + gestures, `525e137` remove
+  bottom bar/marker and refine gestures, `03fa3d0` flat ListTile storefront,
+  `5c221e7` restore pre-restyle storefront, `506bbf9` full-width cards.
+- **Shop details:** flat `ListView` of full-width `Card + ListTile` product
+  rows; four tabs (Refill, Full Set, Vifaa, Huduma); bottom Order Now bar and
+  `SHOP v4` marker removed.
+- **Vendor card gestures:** shop header → storefront; `Oda Sasa` → checkout;
+  empty card background → no action.
+- **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
+  this update). Check `git status` before building.
+- **Install:** uninstall the old GasLink app first, then install the verified
+  APK. Stale installs have repeatedly shown the old layout.
 
 ### Known issues / non-blockers
 
-- The vendor FCM token is stale/web and logs
-  `Permission denied by the third party webpush service`. Consumer Android
-  tokens were tested and received pushes successfully. Do not chase the vendor
-  web push during the pitch.
-- DeepSeek/AI is not configured. Do not demo inbound AI.
-- Firebase rules are still open (no `firestore.rules`). Client writes were
-  tested and work. Do not change rules during the pitch.
+- Vendor-side localization (D3) and remaining surfaces (D4) are open.
+- The vendor FCM token can be stale/web and logs
+  `Permission denied by the third party webpush service`. Consumer Android push
+  was verified; do not chase web push during a mobile demo.
+- DeepSeek/AI is configured through the dashboard but has not yet been tested
+  end to end.
+- OTP is feature-flagged off; app user/session linking is not wired.
+- Firebase rules are still open (no `firestore.rules`); do not enable
+  auth-required rules before Phase 6A.
 - The APK is debug-signed. A real keystore is still pending.
+- Live Sao Gas catalogue currently has refill products only; Full Set, Vifaa
+  and Huduma tabs show empty states until products are seeded.
+
+### Next plan
+
+1. Verify the four-category build and shop UI on a device.
+2. AI testing through the dashboard simulator and inbound SMS.
+3. D3 vendor localization, then D4 remaining surfaces.
+4. Wire OTP login.
+5. Phase 6 security/scale after Blaze.
 
 ---
 

@@ -1,8 +1,10 @@
 # GasLink — Project Guide
 
-> **Last updated:** 2026-11-12
+> **Last updated:** 2026-11-14
 > **Branch:** `harden-source-of-truth`
-> **Primary reference:** `PROGRESS.md` is the authoritative master file for this project.
+> **Primary reference:** **[`PROJECT_BIBLE.md`](PROJECT_BIBLE.md)** is now the
+> authoritative master file. `PROGRESS.md` and `ROADMAP.md` are historical
+> snapshots; the Bible wins when they disagree.
 
 ---
 
@@ -10,7 +12,7 @@
 
 This is a **documentation-first project**: plan before code, record after code.
 
-1. Read `PROGRESS.md` to understand the current state.
+1. Read `PROJECT_BIBLE.md` to understand the current state.
 2. Create or update `plan.md` before starting a phase.
 3. Build the phase.
 4. Write `implementation.md` after the phase.

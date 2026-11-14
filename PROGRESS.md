@@ -1,3 +1,7 @@
+> ⚠️ **Historical snapshot.** The authoritative current-state document is
+> **[`PROJECT_BIBLE.md`](PROJECT_BIBLE.md)**. This file records the project up to
+> 12 Nov 2026 and does not include the 5F SMS/AI gateway or later UI fixes.
+
 # GasLink — Master Progress Report
 
 > **Last updated:** 2026-11-12

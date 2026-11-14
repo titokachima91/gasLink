@@ -1,5 +1,11 @@
 # GasLink — Project Roadmap
 
+> ⚠️ **Current planning lives in [`PROJECT_BIBLE.md`](PROJECT_BIBLE.md)** and
+> **[`HANDOFF.md`](HANDOFF.md)**. This roadmap is historical through 12 Nov 2026.
+> Current source includes Phase 5E D1/D2 and the Phase 5F SMS/AI gateway
+> foundation; D3/D4 localization and OTP wiring remain; Phase 6 is parked on
+> Spark/Blaze.
+>
 > **Last updated:** 2026-11-12
 > **Branch:** `harden-source-of-truth`
 > **Master status:** [`PROGRESS.md`](PROGRESS.md)
