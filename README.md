@@ -21,7 +21,9 @@ Read in this order:
    non-negotiable build rules and the immediate roadmap.
 3. **[`WHITEPAPER.md`](WHITEPAPER.md)** — partner/marketing narrative, pilot
    thesis, business model, risks and potential improvements.
-4. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
+4. **[`RUNBOOK.md`](RUNBOOK.md)** — copy-paste commands to start, stop, verify
+   and test the gateway, AI SMS pipeline, SMS ordering and multi-phone demos.
+5. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
    troubleshooting on this Mac.
 
 `PROGRESS.md`, `ROADMAP.md`, `guide.md` and `phases/*` are historical records.
