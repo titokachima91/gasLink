@@ -216,12 +216,12 @@ set -a; source .env; set +a
 curl -sS -X POST http://127.0.0.1:8080/v1/inbound-sms \
   -H "Content-Type: application/json" \
   -H "x-api-key: $API_KEY_GASLINK" \
-  -d '{"from":"+255714604777","message":"Nataka Oryx 6kg"}' | python3 -m json.tool
+  -d '{"from":"+2557XXXXXXXX","message":"Nataka Oryx 6kg"}' | python3 -m json.tool
 ```
 
-Use a real test phone number you control. For a registered AI subscriber, the
-assistant replies normally. For an unknown number, only order/business keywords
-are forwarded; personal SMS is ignored.
+Replace `+2557XXXXXXXX` with a phone you control: the reply is sent by real SMS.
+For a registered AI subscriber, the assistant replies normally. For an unknown
+number, only order/business keywords are forwarded; personal SMS is ignored.
 
 ### 6.4 Real phone test
 
