@@ -76,7 +76,7 @@ curl -sI "http://$MAC_IP:8090/gaslink-latest.apk" | head -5
 Expected:
 
 - gateway: `{"status":"OK",...}`
-- APK: `HTTP/1.0 200 OK` and `Content-Length: 59277472`
+- APK: `HTTP/1.0 200 OK` and `Content-Length: 59277489`
 
 ---
 

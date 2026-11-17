@@ -77,9 +77,11 @@ flutter build apk --release --dart-define-from-file=env.local.json
 
 ### Before every build: the LAN IP changes
 
-DHCP has already moved the Mac between `192.168.1.11` and `192.168.1.104`.
-The APK embeds the gateway URL, so the IP must be checked **before every
-build**:
+DHCP has already moved the Mac between `192.168.1.11`, `192.168.1.24` and
+`192.168.1.4`. The APK embeds the gateway URL **only when the SMS/OTP path is
+enabled**; the current release has `ENABLE_OTP_LOGIN=false` and the URL is
+tree-shaken out. The order flow uses Firestore and does not depend on the
+embedded URL. Still update the build config before every build:
 
 ```bash
 ipconfig getifaddr en0
@@ -103,9 +105,10 @@ strings app-release.apk | grep -o "192\.168\.[0-9]*\.[0-9]*:8080" | sort -u
 curl -sI http://<LAN-IP>:8090/gaslink-latest.apk
 ```
 
-The APK timestamp must be **after** the build start, the embedded URL must be
-the current host, and `Content-Length` must match the file size. Only then send
-the link and SHA.
+The APK timestamp must be **after** the build start and `Content-Length` must
+match the file size. If `strings` finds no URL, confirm whether the SMS/OTP
+path is enabled; the current build intentionally has it disabled. Only then
+send the link and SHA.
 
 ---
 
@@ -157,19 +160,19 @@ Reference: `gateway/MOUNTED.md`.
 ## Current state at 14 Nov 2026
 
 - **Power:** AC connected.
-- **LAN IP:** `192.168.1.24` (new Wi-Fi; DHCP).
-- **Source HEAD:** `885f828` — four vendor categories + split vendor-card
-  actions.
-- **Servers:** gateway `8080` is running (dashboard 200) with the AI live
-  catalogue wiring and the TextBee inbound poller; APK download server `8090`
-  is running; FCM dispatcher is **on** (one instance). Gateway log:
+- **LAN IP:** `192.168.1.4` (DHCP).
+- **Source HEAD:** `e92fc9c` — current release; docs through `6eba554`.
+- **Servers:** gateway `8080` is running (health OK, dashboard 200); APK
+  download server `8090` is running; FCM dispatcher is **on** (one instance).
+  Gateway log:
   `/Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox/gateway.log`.
-- **Build:** four-category build **verified**.
-- **Latest verified APK:** 14 Nov 09:58, SHA
-  `7b2c28fa073afda704730bfd352436ef6ed6f3c42b34c908fa6ea8b0210b658f`
-  (59,310,032 bytes), embeds `192.168.1.11:8080`; includes four categories,
-  split vendor-card gestures, flat ListTile storefront, and no `SHOP v4` marker.
-  Download: `http://192.168.1.11:8090/gaslink-latest.apk`.
+- **Latest verified APK:** **17 Nov 2026 14:36 EAT**, SHA-256
+  `a21c902e358067ffb8d28034ab10d6086142deacd2137ac5bd48adaf63cf3b30`,
+  SHA-1 `cf7178f16b0a729ea764c5db950f5b99f43502ea`, **59,277,489 bytes**.
+  `ENABLE_OTP_LOGIN=false`, so the SMS/OTP path is tree-shaken and the gateway
+  URL is not embedded; ordering uses Firestore. Download:
+  `http://192.168.1.4:8090/gaslink-latest.apk`. Build log:
+  `build_logs/release_latest.log`.
 - **Latest commits:** `885f828` four categories + gestures, `525e137` remove
   bottom bar/marker and refine gestures, `03fa3d0` flat ListTile storefront,
   `5c221e7` restore pre-restyle storefront, `506bbf9` full-width cards.
@@ -254,7 +257,7 @@ Reference: `gateway/MOUNTED.md`.
 
 1. Verify the four-category build and shop UI on a device.
 2. Finish Flutter tests, update docs, commit.
-3. Build and verify the release APK on `192.168.1.24`.
+3. Build and verify the release APK on `192.168.1.4`.
 4. Real-phone SMS order + vendor acceptance check.
 5. D3 vendor localization, then D4 remaining surfaces.
 6. Wire OTP login.
