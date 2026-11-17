@@ -21,14 +21,11 @@ Everything runs on the Mac; phones only need to be on the same Wi-Fi.
 | Gateway port | `8080` |
 | APK server port | `8090` |
 | Firestore project | `gaslink-app-4bfbb` |
-| Gateway phone / support | `0767304776` (`+255767304776`) |
-| Operator phone | `0714604777` (`+255714604777`) |
+| Gateway SMS line | `0776304776` (`+255776304776`) |
+| Admin/support line | `0767304776` (`+255767304776`) |
+| Operator phone / second SIM | `0714604777` (`+255714604777`) |
 | Vendor demo login | `+255777000777` / PIN `1234` |
 | Vendor id (Sao Gas) | `HR7lVXzVHWPeR94ebRF5` |
-
-**Gateway-number confirmation pending (17 Nov 2026):** the owner wrote
-`0776304776`; the build uses `0767304776`. Do not change the gateway line
-until confirmed. See `PHONE_NUMBERS.md`.
 
 **The Mac IP is DHCP and changes.** Always read it first:
 
@@ -229,7 +226,7 @@ number, only order/business keywords are forwarded; personal SMS is ignored.
 
 ### 6.4 Real phone test
 
-Text the gateway line **0767304776** from a phone that is not the gateway phone:
+Text the gateway line **0776304776** from a phone that is not the gateway phone:
 
 ```text
 Nataka Oryx 6kg
@@ -271,7 +268,7 @@ you need an immediate reset.
 
 ### 7.1 Customer flow
 
-Text **0767304776**:
+Text **0776304776**:
 
 ```text
 Nataka Oryx 6kg
@@ -398,18 +395,18 @@ Recommended matrix:
 
 | Phone | Role | What to do |
 |---|---|---|
-| Samsung SM-A075F | Gateway phone | Keep on Wi-Fi/power; runs TextBee. Do not use it as a customer. Only **0767304776** is confirmed; the Vodacom SIM number is unverified (see `PHONE_NUMBERS.md`). |
+| Samsung SM-A075F | Gateway phone | Keep on Wi-Fi/power; runs TextBee. Do not use it as a customer. Gateway SMS line **0776304776**; second SIM/operator **0714604777** (see `PHONE_NUMBERS.md`). |
 | Phone A | Consumer (app) | Install APK, register with Phone A's own number + 4-digit PIN, place an order. |
 | Phone B | Vendor (app) | Install APK, log in `+255777000777` / `1234`, accept the order. |
-| Phone C | Consumer (SMS) | Text `0767304776` with `Nataka Oryx 6kg` and follow prompts. |
+| Phone C | Consumer (SMS) | Text `0776304776` with `Nataka Oryx 6kg` and follow prompts. |
 | Phone D | Vendor (SMS, optional) | Only if its SIM matches the vendor phone, or use §7.7 temporarily. |
 
 **Do not register the gateway phone's own SIM as a consumer.** A message sent
-from the gateway phone to `0767304776` is a self-send; it does not enter the
+from the gateway phone to `0776304776` is a self-send; it does not enter the
 TextBee inbound queue. Use a separate phone for the customer test. To confirm
-receiving independently, text **0767304776** from another phone. The gateway's
-Vodacom SIM number is unverified — do not assume it is any customer number.
-Every number used in testing must be approved in `PHONE_NUMBERS.md`.
+receiving independently, text **0776304776** from another phone. The second
+SIM/operator is `0714604777`; do not use a customer number as a gateway test.
+Every fixed-role number used in testing must be approved in `PHONE_NUMBERS.md`.
 
 **Current testing rule (17 Nov 2026):** the owner runs all tests. Do not send
 test SMS or initiate calls; ask first. Unknown-number opt-in is paused
@@ -665,11 +662,11 @@ JS
 If the message is **not** in that list, it never reached the gateway phone:
 
 - Do not text from the gateway phone itself; a self-send is not an inbound SMS.
-- Only `0767304776` is a confirmed gateway number. Text it from another phone
-  to confirm the public SIM is receiving. The gateway's Vodacom SIM number is
-  unverified; do not use a customer number as a gateway test.
-- `0767304776` is the public line; if it never receives, check which SIM it is
-  in and whether TextBee is set to receive SMS on that SIM.
+- Only `0776304776` is a confirmed gateway number. Text it from another phone
+  to confirm the public SIM is receiving. The second SIM/operator is
+  `0714604777`; do not use a customer number as a gateway test.
+- `0776304776` is the gateway SMS line; if it never receives, check which SIM
+  it is in and whether TextBee is set to receive SMS on that SIM.
 - Check SMS bundle/credit on the sending and receiving SIMs.
 - On the gateway phone, set TextBee battery usage to **Unrestricted** and allow
   background activity. `powerInfo.isIgnoringBatteryOptimizations` was `false`

@@ -26,9 +26,9 @@ Read in this order:
 5. **[`PRIVACY_DATA_INVENTORY.md`](PRIVACY_DATA_INVENTORY.md)** — every
    permission, data field, processor and retention rule the build touches.
    Required reading before writing the privacy policy or sharing the APK.
-6. **[`PHONE_NUMBERS.md`](PHONE_NUMBERS.md)** — every phone number the system
-   may send to, receive from, call or flag, with the owner's approval rules.
-   No number is used or flagged without an approved rule here.
+6. **[`PHONE_NUMBERS.md`](PHONE_NUMBERS.md)** — phone-number rules plus the
+   fixed roles: gateway, admin/support, operator/second SIM, vendor, app users
+   and unknown numbers. Rules govern every number; no per-user list is needed.
 7. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
    troubleshooting on this Mac.
 

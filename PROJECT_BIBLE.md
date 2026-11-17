@@ -613,10 +613,11 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
 
 ### Phone-number governance
 
-- `PHONE_NUMBERS.md` is the authoritative registry of every number the system
-  may send to, receive from, call, or flag as a gateway SIM.
-- No number is added to `GASLINK_SELF_NUMBERS`, used for a test SMS, called, or
-  shared without the owner's explicit approval.
+- `PHONE_NUMBERS.md` is the authoritative rules document and fixed-role number
+  list for the system. Individual app-user numbers are governed by the rules,
+  not by a per-number list.
+- No fixed-role number is added to `GASLINK_SELF_NUMBERS`, used for a test SMS,
+  called, or shared without the owner's explicit approval.
 - The owner runs all tests. The agent must not send test SMS or initiate calls;
   ask the owner first if a send is necessary. Keep the self-number relay ON.
 - Unknown numbers not registered in the app are paused: no opt-in SMS, log
@@ -626,12 +627,9 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
 - Customer/vendor engagement after a number is released is app-flow, not
   SMS-gateway territory. The vendor publishes the number; the app gives it to
   the customer during ordering; the customer chooses how to engage.
-- The gateway number `0767304776` may change; the owner announces changes.
-- **Pending gateway-number confirmation (17 Nov 2026):** the owner wrote
-  `0776304776`; the build uses `0767304776`. Do not change the gateway line
-  until the owner confirms which is the public line and what the other is.
-- Gateway SIMs are infrastructure, not customers. The only confirmed gateway
-  number is `0767304776`; the Vodacom SIM's number is unverified.
+- The gateway SMS line is `0776304776`; it may change and the owner announces
+  changes. Admin/support is `0767304776`; operator/second SIM is `0714604777`.
+- Gateway SIMs are infrastructure, not customers.
 - `+255742946436` is a consumer account (George Mwaseba), not a gateway SIM.
   It was wrongly added to the self-number list on 17 Nov 2026 and removed the
   same day.
