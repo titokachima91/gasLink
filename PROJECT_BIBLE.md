@@ -617,6 +617,13 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
   may send to, receive from, call, or flag as a gateway SIM.
 - No number is added to `GASLINK_SELF_NUMBERS`, used for a test SMS, called, or
   shared without the owner's explicit approval.
+- The owner runs all tests. The agent must not send test SMS or initiate calls;
+  ask the owner first if a send is necessary. Keep the self-number relay ON.
+- Unknown numbers not registered in the app are paused: no opt-in SMS, log
+  only, until GasLink has a dedicated number. The code path stays intact.
+- App-registered numbers are engaged only when they initiate an inbound
+  message; the AI replies while the gateway is running.
+- The gateway number `0767304776` may change; the owner announces changes.
 - Gateway SIMs are infrastructure, not customers. The only confirmed gateway
   number is `0767304776`; the Vodacom SIM's number is unverified.
 - `+255742946436` is a consumer account (George Mwaseba), not a gateway SIM.

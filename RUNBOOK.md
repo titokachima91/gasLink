@@ -407,6 +407,11 @@ receiving independently, text **0767304776** from another phone. The gateway's
 Vodacom SIM number is unverified — do not assume it is any customer number.
 Every number used in testing must be approved in `PHONE_NUMBERS.md`.
 
+**Current testing rule (17 Nov 2026):** the owner runs all tests. Do not send
+test SMS or initiate calls; ask first. Unknown-number opt-in is paused
+(`optInUnauthorized: false`); only app-registered numbers are engaged, and only
+when they initiate. Keep `GASLINK_SELF_NUMBER_RELAY=true`.
+
 ### 8.1 App order test
 
 1. Phone A: Home -> Refill -> Oryx Gas -> Sao Gas Supply -> **Oda Sasa**.
