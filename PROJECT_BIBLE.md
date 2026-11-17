@@ -696,10 +696,10 @@ ships a local poller:
 - Enabled with `TEXTBEE_POLL_ENABLED=true` (10s interval by default).
 - It anchors a cursor at the newest existing SMS on first run, so old messages
   are never replayed.
-- New received messages are checked against the subscriber gate. Known
-  AI-enabled senders are forwarded. Unknown numbers are forwarded only when
-  the message matches a GasLink business keyword or order intent; personal SMS
-  is skipped silently (no log, no AI credit, no reply).
+- New received messages are checked against the subscriber gate. Registered
+  app users are forwarded. Unknown numbers are forwarded only when the message
+  matches a GasLink business keyword or order intent; the inbound route blocks
+  them (no AI call, no reply, no opt-in SMS). Personal SMS is skipped silently.
 - Cursor: `data/textbee-inbound-cursor.json`.
 
 If a public HTTPS tunnel is added later, point TextBee’s `MESSAGE_RECEIVED`
@@ -719,10 +719,13 @@ order intent → brand/size/quantity → profile (name + address)
 → vendor YES/NO → confirmed/cancelled → customer gets vendor number
 ```
 
-- Unknown callers can create a minimal SMS-only profile through
-  `POST /v1/bridge/subscribers/sms`; no app is required to order.
-- Vendors accept or reject by replying `YES`/`NO`; the bridge updates the order
-  and releases the customer phone only after acceptance.
+- Only numbers registered in the GasLink app can use SMS ordering. The
+  subscriber gate runs before the order flow; unregistered numbers get no AI
+  reply, no SMS order reply, no profile and no opt-in SMS.
+- Registered app users may use the SMS order flow even when AI chat is
+  disabled; the gate still requires an app account.
+- Registered vendors accept or reject by replying `YES`/`NO`; the bridge
+  updates the order and releases the customer phone only after acceptance.
 - Order status: `GET /v1/bridge/orders/status?phone=...`.
 - Feature flag: `SMS_ORDERING_ENABLED=true`.
 - Mock end-to-end test created a real Firestore order, accepted it as the

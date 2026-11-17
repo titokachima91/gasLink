@@ -12,7 +12,7 @@
 
 1. **The owner runs all tests.** The agent must not send test SMS or initiate calls. If a send is necessary, ask the owner first.
 2. **App-registered numbers:** if they initiate an inbound message, the AI takes the wheel while the gateway is running. No proactive SMS.
-3. **Unknown/new numbers not in the app:** paused. No opt-in SMS; log only. Revisit when GasLink has a dedicated number. The foundation and logic stay intact.
+3. **Unknown/new numbers not in the app:** paused. No AI reply, no SMS order reply, no opt-in SMS; log only. Revisit when GasLink has a dedicated number. The foundation and logic stay intact.
 4. **Customer/vendor engagement after the app releases a number:** app-flow. The vendor publishes the number; the app gives it to the customer during ordering; the customer chooses how to engage. The SMS gateway does not mediate, monitor, or send those messages.
 5. **App transactional order flow:** unchanged; hands off. The gateway sends only its designed order notifications.
 6. **Carrier/alphanumeric senders:** never reply; log only.
@@ -30,7 +30,7 @@
 | Admin/support line | `0767304776` (`+255767304776`) | App support/calls and admin login; not a gateway SIM; no proactive SMS; app rules apply. |
 | Operator / second SIM | `0714604777` (`+255714604777`) | Relay/internal; keep relay ON; no manual test SMS; owner runs tests. |
 | Vendor (Sao Gas) | `+255777000777`; published secondary `+255777000776` | App transactional order SMS only; vendor/customer engagement app-flow; no marketing or manual SMS. |
-| App-registered users | dynamic | Inbound-initiated AI only; no proactive SMS; rules above. |
+| App-registered users | dynamic | Inbound-initiated AI and SMS order flow only; no proactive SMS; rules above. |
 | Unknown/new numbers | dynamic | Paused; log only; no opt-in SMS. |
 | Carrier senders | `M-PESA`, `Vodacom`, `VodaTaarifa`, `TING`, `SONGESHA`, `LUKU` | Never reply; log only. |
 
