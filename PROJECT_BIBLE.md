@@ -623,6 +623,9 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
   only, until GasLink has a dedicated number. The code path stays intact.
 - App-registered numbers are engaged only when they initiate an inbound
   message; the AI replies while the gateway is running.
+- Customer/vendor engagement after a number is released is app-flow, not
+  SMS-gateway territory. The vendor publishes the number; the app gives it to
+  the customer during ordering; the customer chooses how to engage.
 - The gateway number `0767304776` may change; the owner announces changes.
 - Gateway SIMs are infrastructure, not customers. The only confirmed gateway
   number is `0767304776`; the Vodacom SIM's number is unverified.

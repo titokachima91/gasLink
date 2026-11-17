@@ -412,6 +412,10 @@ test SMS or initiate calls; ask first. Unknown-number opt-in is paused
 (`optInUnauthorized: false`); only app-registered numbers are engaged, and only
 when they initiate. Keep `GASLINK_SELF_NUMBER_RELAY=true`.
 
+Customer/vendor engagement after the app releases a number is app-flow: the
+vendor publishes it, the app gives it to the customer during ordering, and the
+customer chooses how to engage. The SMS gateway does not manage that channel.
+
 ### 8.1 App order test
 
 1. Phone A: Home -> Refill -> Oryx Gas -> Sao Gas Supply -> **Oda Sasa**.

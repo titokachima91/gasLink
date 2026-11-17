@@ -17,6 +17,7 @@
 5. **Unknown/new numbers not in the app are paused.** No opt-in SMS; log only. Revisit when GasLink has a dedicated number. Keep the foundation and logic intact.
 6. **The app's designed transactional order flow continues unchanged.** Hands off. No manual marketing or test sends.
 7. **Any number added, flagged, or contacted must be approved in this file first.** Do not silently add a number to `GASLINK_SELF_NUMBERS`, a test script, or a send path.
+8. **Customer/vendor engagement after the app releases a number is app-flow, not SMS-gateway territory.** The vendor publishes the number; the app gives it to the user during ordering; the user chooses how to engage. The gateway does not mediate, monitor, or send those messages.
 
 ## Current config state
 
@@ -61,8 +62,8 @@ Pausing the opt-in did **not** remove code. It is the dashboard/config toggle. R
 
 | # | Number | Who / what | Source | Proposed rule | Your rule |
 |---|---|---|---|---|---|
-| C1 | `+255777000777` | Sao Gas Supply pilot vendor phone; vendor app login and order SMS | Firestore `vendors` (Sao Gas Supply) and `users`; RUNBOOK §8 | TXN order notifications only. Vendor must opt in. App acceptance preferred. No marketing. | **App's transactional order SMS only; hands off. No marketing or manual SMS.** |
-| C2 | `+255777000776` | Sao Gas Supply secondary/WhatsApp number | Firestore `vendors.secondaryPhone` | Not used for automated SMS. Manual WhatsApp only, if the vendor agrees. | **Not understood; paused. Do not use. Re-ask: is this a WhatsApp number, and may a human message it?** |
+| C1 | `+255777000777` | Sao Gas Supply pilot vendor phone; vendor app login and order SMS | Firestore `vendors` (Sao Gas Supply) and `users`; RUNBOOK §8 | TXN order notifications only. Vendor must opt in. App acceptance preferred. No marketing. | **App's transactional order SMS only; hands off. The vendor number is published/released through the app flow after confirmation; the customer chooses how to engage. Not SMS-gateway territory. No marketing or manual SMS.** |
+| C2 | `+255777000776` | Sao Gas Supply secondary/WhatsApp number | Firestore `vendors.secondaryPhone` | Not used for automated SMS. Manual WhatsApp only, if the vendor agrees. | **Vendor-published secondary/WhatsApp number; app-flow only. The user chooses how to engage. Not an SMS-gateway number; no gateway sends. Resolved — not gateway territory.** |
 
 ---
 
@@ -114,7 +115,7 @@ These are not fixed contacts; they come from orders. The app's designed lifecycl
 |---|---|---|
 | Order contact / receiver phone | `orders.contact_phone`, `orders.receiver_phone` | Use only for that order's lifecycle. No marketing. No calls/SMS outside the order. Test/mock numbers (e.g. `0777…`, `0788…`) are historical fixtures; never contact them. |
 | Driver / rider phone | `orders.driverPhone`, `orders.riderPhone` | Release only after dispatch, per the order lifecycle. Never before. No marketing. The customer receives the number only at the approved step. |
-| Vendor phone | `orders.vendorPhone` / vendor profile | Release to the customer only after vendor confirmation, per the business rules. No marketing. |
+| Vendor phone | `orders.vendorPhone` / vendor profile | The app releases the vendor number to the customer after vendor confirmation; the customer chooses how to engage. Not SMS-gateway territory. No marketing or gateway mediation. |
 
 ---
 
@@ -128,11 +129,11 @@ Answered:
 - [x] **E2/E3:** Inbound-initiated AI only; unknown/not-in-app numbers paused.
 - [x] **Unknown inbound:** Opt-in SMS paused; log only; keep foundation and logic intact.
 - [x] **Test sends:** Owner runs all tests; agent asks before any send.
+- [x] **C2:** App-flow only; the vendor publishes the number and the customer chooses how to engage. Not SMS-gateway territory.
 
 Still open:
 
 - [ ] **A2:** What is the gateway Vodacom SIM's own number? Read it on the handset; do not guess.
-- [ ] **C2:** Is `+255777000776` a WhatsApp number? May a human message it, or should we ignore it?
 - [ ] **D2/D5:** Are these fixtures or real people? Confirm so the registry is exact.
 - [ ] **A1 support line:** Any hours/limits for customers calling/texting `0767304776`?
 - [ ] **Dedicated GasLink number:** Revisit unknown-number engagement when the owner gets a separate GasLink number.
@@ -144,6 +145,7 @@ Still open:
 - **17 Nov 2026 — consumer number wrongly flagged as a gateway SIM.** `+255742946436` (George Mwaseba) was added to `GASLINK_SELF_NUMBERS` at 08:39 EAT because a Vodacom bundle SMS was misread as proof that the SIM was in the gateway handset. The number belongs to George's own phone. It was removed the same day. No SMS was sent to him by the guard; the flag only suppressed replies. Docs corrected; this registry created.
 - **17 Nov 2026 — unknown-number opt-in paused.** `optInUnauthorized` set to `false` via the dashboard config. No code removed; re-enable only with owner approval when GasLink has a dedicated number.
 - **16 Nov 2026 — carrier senders treated as customers.** `Vodacom`, `M-PESA`, `TING`, etc. were parsed as phone numbers and received failed AI replies. Fixed by ignoring non-phone senders.
+- **17 Nov 2026 — customer/vendor engagement boundary clarified.** Vendor numbers are published by the vendor and released by the app during ordering; the customer chooses how to engage. The SMS gateway does not mediate calls/WhatsApp or send manual follow-ups.
 - **16 Nov 2026 — unknown number opt-in SMS.** `+255685882036` received an opt-in SMS. Now paused (see above).
 
 ---

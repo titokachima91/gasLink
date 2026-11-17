@@ -491,8 +491,8 @@ Data sent to DeepSeek per message is listed in §5.3. The gateway does **not** s
 - Unknown numbers are logged and not engaged during the current testing phase: the opt-in SMS is paused (`optInUnauthorized: false`) as of 17 Nov 2026. The code path remains intact for a future dedicated GasLink number.
 - The subscriber gate blocks AI calls for unregistered senders; only numbers registered in the app are engaged, and only when they initiate the message.
 - For registered senders, the gateway can create a Firestore order from SMS with name, address, brand, size, quantity, and payment method.
-- The vendor receives the customer's name, address, and order details by SMS.
-- The customer receives the vendor's phone after confirmation, and the driver's phone after dispatch.
+- The vendor receives the customer's name, address, and order details by SMS. Any further vendor-to-customer contact is the vendor's choice and outside the SMS gateway.
+- The customer receives the vendor's phone after confirmation, and the driver's phone after dispatch; the customer chooses how to engage. This is app-flow, not an SMS-gateway function.
 - Messages to gateway SIMs are suppressed to prevent a self-reply loop; the suppressed reply is logged to `self-number-inbox.jsonl` and relayed to the operator phone (`GASLINK_SELF_NUMBER_RELAY=true`).
 - Carrier/bank alert SMS (M-PESA, Vodacom, TING, etc.) are filtered out and not treated as orders.
 - SMS content is visible to the mobile carrier and to TextBee. It is not end-to-end encrypted.
