@@ -26,6 +26,10 @@ Everything runs on the Mac; phones only need to be on the same Wi-Fi.
 | Vendor demo login | `+255777000777` / PIN `1234` |
 | Vendor id (Sao Gas) | `HR7lVXzVHWPeR94ebRF5` |
 
+**Gateway-number confirmation pending (17 Nov 2026):** the owner wrote
+`0776304776`; the build uses `0767304776`. Do not change the gateway line
+until confirmed. See `PHONE_NUMBERS.md`.
+
 **The Mac IP is DHCP and changes.** Always read it first:
 
 ```zsh

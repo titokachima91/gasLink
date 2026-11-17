@@ -23,10 +23,11 @@
 
 | Setting | Value |
 |---|---|
-| `GASLINK_SELF_NUMBERS` | `+255767304776` only |
+| `GASLINK_SELF_NUMBERS` | `+255767304776` only (pending gateway-number confirmation) |
 | `GASLINK_SELF_NUMBER_RELAY` | `true` |
 | `optInUnauthorized` | `false` — unknown-number opt-in paused 17 Nov 2026 |
-| Gateway self-number list | Only the confirmed gateway line; George's number removed |
+| Gateway number | **Pending confirmation: build uses `0767304776`; owner wrote `0776304776` on 17 Nov** |
+| Gateway self-number list | Only `+255767304776`; George's number removed |
 | Test sends by agent | Prohibited without owner approval |
 
 Pausing the opt-in did **not** remove code. It is the dashboard/config toggle. Re-enable only with the owner's approval when a dedicated GasLink number exists.
@@ -43,8 +44,14 @@ Pausing the opt-in did **not** remove code. It is the dashboard/config toggle. R
 
 | # | Number | Who / what | Source | Proposed rule | Your rule |
 |---|---|---|---|---|---|
-| A1 | `+255767304776` / `0767304776` | Gateway public line (YAS SIM in Samsung SM-A075F); admin phone; public support number shown in the app | `.env` `GASLINK_SMS_NUMBER`, `FACADE_SMS_SENDER_PHONE`; `lib/services/auth_service.dart` `adminPhone`; `lib/core/constants.dart` `supportPhone`; support text in several screens | Gateway SIM. Self-number. Never a consumer. Inbound support replies allowed; outbound only transactional/OTP/replies. | **Current gateway line; may change anytime — owner will announce. Self-number. AI-assistance replies allowed. Agent must not send test SMS; ask first.** |
-| A2 | Vodacom SIM in the gateway handset | Second SIM in the Samsung SM-A075F; number **not verified** | TextBee `simInfo` shows a Vodacom SIM, but no number | Verify on the handset (**Settings → About phone → Status → SIM status**) before adding. Do not assume it is `0742946436` or any customer number. | **Pending: read the SIM's own number on the handset. Do not guess or use a consumer number.** |
+| A1 | `+255767304776` / `0767304776` | Gateway public line (YAS SIM in Samsung SM-A075F); admin phone; public support number shown in the app | `.env` `GASLINK_SMS_NUMBER`, `FACADE_SMS_SENDER_PHONE`; `lib/services/auth_service.dart` `adminPhone`; `lib/core/constants.dart` `supportPhone`; support text in several screens | Gateway SIM. Self-number. Never a consumer. Inbound support replies allowed; outbound only transactional/OTP/replies. | **Current gateway line; may change anytime — owner will announce. Self-number. AI-assistance replies allowed. No time limits; availability is subject to app rules, AI/SMS gateway configuration, and self-hosted server/quota. Agent must not send test SMS; ask first.** |
+| A2 | Vodacom SIM in the gateway handset | Second SIM in the Samsung SM-A075F; number **not verified** | TextBee `simInfo` shows a Vodacom SIM, but no number | Verify on the handset (**Settings → About phone → Status → SIM status**) before adding. Do not assume it is `0742946436` or any customer number. | **Pending: read the SIM's own number on the handset. Do not guess or use a consumer number. If `0776304776` is the second/Vodacom SIM, confirm it before adding.** |
+
+**Gateway number pending confirmation (17 Nov 2026):** the owner's latest message wrote
+`0776304776`, while the build, `.env`, app support text, and logs use
+`0767304776`. These differ by one digit. **No change has been made.** Confirm
+which is the public gateway line, and whether the other is the second SIM or a
+typo.
 
 **Important:** A1 and A2 are the only gateway SIMs. `0742946436` is **not** a gateway number; it is George's consumer number (see E1).
 
@@ -74,11 +81,10 @@ Some are fixtures and some are real. The status column records the evidence; con
 | # | Number | Who / what | Source | Status | Proposed rule | Your rule |
 |---|---|---|---|---|---|---|
 | D1 | `+255700000123` | "Test Mteja" mock consumer | Firestore `users`; mock order tests; `sms-log.json` | **Fixture** (mock order) | Fixture only. Never call. SMS only in mock tests. | **Fixture. Never contact.** |
-| D2 | `+255716546732` | Simulated test consumer | Firestore `users`; one test order; `sms-log.json` | **Likely fixture** (simulated only; no TextBee inbound) | Fixture only. No real SMS without approval. | **Likely fixture. Confirm if real; no real SMS until confirmed.** |
-| D3 | `+255767304776` | A duplicate "Test Mteja" user doc using the gateway number | Firestore `users` | **Not a customer** (gateway number) | Clean up the duplicate/seed account when safe. | **Gateway number, not a customer. Clean up duplicate seed when safe.** |
-| D4 | `+255777000778` | Seeded consumer test account and duplicate Firestore user | `lib/main.dart` `seedUser`; Firestore `users` | **Fixture** (seeded in code) | Fixture only. No real SMS. | **Fixture. Never contact.** |
-| D5 | `+255777000779` | Test consumer account | Firestore `users` | **Likely fixture** | Fixture only. No real SMS. | **Likely fixture. Confirm if real; no contact until confirmed.** |
-| D6 | `+255700000001` | Simulated blocked/unauthorized test number | `sms-log.json` simulate entries | **Fixture** (simulated) | Fixture only. Never contact. | **Fixture. Never contact.** |
+| D2 | `+255767304776` | A duplicate "Test Mteja" user doc using the gateway number | Firestore `users` | **Not a customer** (gateway number) | Clean up the duplicate/seed account when safe. | **Gateway number, not a customer. Clean up duplicate seed when safe.** |
+| D3 | `+255777000778` | Seeded consumer test account and duplicate Firestore user | `lib/main.dart` `seedUser`; Firestore `users` | **Fixture** (seeded in code) | Fixture only. No real SMS. | **Fixture. Never contact.** |
+| D4 | `+255777000779` | Test consumer account | Firestore `users` | **Likely fixture** | Fixture only. No real SMS. | **Likely fixture. Confirm if real; no contact until confirmed.** |
+| D5 | `+255700000001` | Simulated blocked/unauthorized test number | `sms-log.json` simulate entries | **Fixture** (simulated) | Fixture only. Never contact. | **Fixture. Never contact.** |
 
 ---
 
@@ -89,6 +95,7 @@ Some are fixtures and some are real. The status column records the evidence; con
 | E1 | `+255742946436` / `0742946436` | **George Mwaseba**, consumer; registered 16 Nov 2026; AI assistant enabled; uses his own phone | Firestore `users` doc `5sCsY1XFT71zxcSgjcS4` | Real consumer. **Not a gateway SIM.** No proactive SMS. Reply only to his own inbound. | **If he initiates AI assistance, AI responds while servers are on. No proactive SMS. Owner runs tests; agent asks before any send.** |
 | E2 | `+255745123046` | Real tester who texted gas questions on 14 Nov; consumer account with AI enabled | Firestore `users`; `sms-log.json` | Real person. TXN replies only. No proactive SMS or marketing. | **Inbound-initiated AI only. No proactive SMS. Owner runs tests.** |
 | E3 | `+255685882036` | Real inbound on 16 Nov; unregistered AI user; received one opt-in SMS | `sms-log.json` | Real person. Do not send again unless they opt in. | **Real but not in the app. New/unknown → paused. Log only; no SMS. If he registers in the app, engage on inbound.** |
+| E4 | `+255716546732` / `0716546732` | **Real user**, confirmed by the owner on 17 Nov 2026; consumer account with AI enabled; one order | Firestore `users`; one order; `sms-log.json` | Real user. Inbound-initiated AI only. No proactive SMS. | **Real user — treat as such. If they initiate AI assistance, AI responds while servers are on; no proactive SMS; owner runs tests.** |
 
 ---
 
@@ -130,12 +137,14 @@ Answered:
 - [x] **Unknown inbound:** Opt-in SMS paused; log only; keep foundation and logic intact.
 - [x] **Test sends:** Owner runs all tests; agent asks before any send.
 - [x] **C2:** App-flow only; the vendor publishes the number and the customer chooses how to engage. Not SMS-gateway territory.
+- [x] **A1 support hours:** No time limits; availability is subject to app rules, AI/SMS gateway configuration, and self-hosted server/quota.
+- [x] **D2 (old `+255716546732`):** Real user, confirmed by the owner; treat as real and inbound-initiated only.
 
 Still open:
 
+- [ ] **Gateway number:** Confirm whether the public gateway line is `0767304776` (current build) or `0776304776` (owner's 17 Nov message), and what the other number is.
 - [ ] **A2:** What is the gateway Vodacom SIM's own number? Read it on the handset; do not guess.
-- [ ] **D2/D5:** Are these fixtures or real people? Confirm so the registry is exact.
-- [ ] **A1 support line:** Any hours/limits for customers calling/texting `0767304776`?
+- [ ] **D4:** Is `+255777000779` a fixture or a real person? Confirm so the registry is exact.
 - [ ] **Dedicated GasLink number:** Revisit unknown-number engagement when the owner gets a separate GasLink number.
 
 ---
@@ -145,6 +154,9 @@ Still open:
 - **17 Nov 2026 — consumer number wrongly flagged as a gateway SIM.** `+255742946436` (George Mwaseba) was added to `GASLINK_SELF_NUMBERS` at 08:39 EAT because a Vodacom bundle SMS was misread as proof that the SIM was in the gateway handset. The number belongs to George's own phone. It was removed the same day. No SMS was sent to him by the guard; the flag only suppressed replies. Docs corrected; this registry created.
 - **17 Nov 2026 — unknown-number opt-in paused.** `optInUnauthorized` set to `false` via the dashboard config. No code removed; re-enable only with owner approval when GasLink has a dedicated number.
 - **16 Nov 2026 — carrier senders treated as customers.** `Vodacom`, `M-PESA`, `TING`, etc. were parsed as phone numbers and received failed AI replies. Fixed by ignoring non-phone senders.
+- **17 Nov 2026 — gateway-number clarification pending.** Owner wrote `0776304776`; the build, `.env`, app support text, and logs use `0767304776`. The numbers differ by one digit. No change made; the public line and the second SIM must be confirmed.
+- **17 Nov 2026 — `+255716546732` confirmed real user.** Reclassified from fixture to E4; inbound-initiated AI only, no proactive SMS.
+- **17 Nov 2026 — support line has no time limits.** Availability follows app rules, AI/SMS gateway configuration, and self-hosted server/quota.
 - **17 Nov 2026 — customer/vendor engagement boundary clarified.** Vendor numbers are published by the vendor and released by the app during ordering; the customer chooses how to engage. The SMS gateway does not mediate calls/WhatsApp or send manual follow-ups.
 - **16 Nov 2026 — unknown number opt-in SMS.** `+255685882036` received an opt-in SMS. Now paused (see above).
 
