@@ -22,6 +22,45 @@ However, three nuances matter for the privacy policy:
 2. **Firebase/Google SDKs can see device and app metadata.** The app does not call a device-info API, but Google Play services and Firebase requests can include device model, OS version, app version, language, IP address, and installation identifiers as part of normal service telemetry. Your policy should say service providers may process device and technical data.
 3. **Photos are user-selected, not automatic.** A vendor can pick one shop photo from the gallery. The app cannot browse the gallery on its own. If that photo contains EXIF GPS data, it may be uploaded unless the picker re-encodes it (see risk #17 in §11).
 
+### 0.1.1 Evidence: the model in TextBee is the gateway phone, not the sender
+
+This matters because the `SM-A075F` model appears in the TextBee message object and can easily be mistaken for the sender's phone. It is not.
+
+A live received-message object from TextBee has these top-level keys:
+
+```
+__v, _id, createdAt, device, direction, encrypted, message, receivedAt,
+sender, status, type, updatedAt, user
+```
+
+The `device` field is:
+
+```json
+{
+  "_id": "6af53d075f4bc89110d82065",
+  "enabled": true,
+  "brand": "samsung",
+  "model": "SM-A075F",
+  "name": "samsung SM-A075F",
+  "buildId": "CP2A.260605.016"
+}
+```
+
+That is the **receiving gateway handset** — the phone running the TextBee app and holding the GasLink SIMs. It is the same device shown in the TextBee device list. The message's `direction` is `received`, so `device` describes where the message arrived, not where it came from.
+
+The gateway code never reads `msg.device` or any model field. `services/textbee-inbound-poller.js` reads only:
+
+- `msg._id`
+- `msg.sender`
+- `msg.message`
+- `msg.receivedAt`
+
+SMS itself does not carry the sender's phone model, IMEI, OS, or serial number. The SMS PDU carries the sender's number (or an alphanumeric sender ID), the SMSC timestamp, and the message text. A phone model can only be known if the sender's own app or SDK reports it — for example, an app with a device-info API, or RCS/IMS metadata. The GasLink app has no device-info package and no `READ_PHONE_STATE` permission, so it does not report it either.
+
+**What happened with `0742946436`:** that number is `+255742946436`, which is listed in `GASLINK_SELF_NUMBERS`. The gateway treats any message from it as a gateway SIM and suppresses the reply. That is a **number rule**, not a model rule. Separately, `data/sms-log.json` contains no inbound message from `+255742946436`; the only mention is a Vodacom carrier SMS confirming an SMS bundle on that number. So the friend's message either never reached TextBee (for example, it was sent from the gateway handset itself, which TextBee does not capture as an inbound SMS) or it was suppressed by the number rule. In neither case did the system see or use a phone model.
+
+A message from a different phone got a response because it came from a **different number** that was not in the self-number list. The model was irrelevant.
+
 ### 0.2 The five findings that should block launch
 
 | # | Finding | Why it matters |
