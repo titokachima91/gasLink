@@ -23,7 +23,10 @@ Read in this order:
    thesis, business model, risks and potential improvements.
 4. **[`RUNBOOK.md`](RUNBOOK.md)** — copy-paste commands to start, stop, verify
    and test the gateway, AI SMS pipeline, SMS ordering and multi-phone demos.
-5. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
+5. **[`PRIVACY_DATA_INVENTORY.md`](PRIVACY_DATA_INVENTORY.md)** — every
+   permission, data field, processor and retention rule the build touches.
+   Required reading before writing the privacy policy or sharing the APK.
+6. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
    troubleshooting on this Mac.
 
 `PROGRESS.md`, `ROADMAP.md`, `guide.md` and `phases/*` are historical records.

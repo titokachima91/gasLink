@@ -595,6 +595,12 @@ lsof -ti tcp:8080 | xargs kill
 
 Then restart §1.
 
+**Fixed 17 Nov 2026:** `services/ai-service.js` used to `require('googleapis')`
+at the top even though the Gemini path calls the REST API with `axios`. That
+unused import cost ~25 s of cold-start time and made launchd look dead. The
+import is gone; startup is now a few seconds. If a future change re-adds a heavy
+top-level `require`, lazy-load it inside the function that needs it.
+
 ### `EADDRINUSE`
 
 ```zsh
@@ -706,7 +712,77 @@ echo "Dashboard: http://$MAC_IP:8080/dashboard"
 
 ---
 
-## 14. Rules that keep the pilot safe
+## 14. Privacy & security checks
+
+The full data-collection inventory is in
+[`PRIVACY_DATA_INVENTORY.md`](PRIVACY_DATA_INVENTORY.md). Read it before writing
+the privacy policy or sharing the APK.
+
+### 14.1 What the release APK can access
+
+```zsh
+cd /Users/apple/gaslink_app
+"$HOME/Library/Android/sdk/build-tools/36.0.0/aapt2" dump permissions \
+  build/app/outputs/flutter-apk/app-release.apk
+```
+
+Expected pilot permissions: `INTERNET`, `ACCESS_NETWORK_STATE`,
+`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `POST_NOTIFICATIONS`,
+`VIBRATE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, FCM/GSF internals.
+Location is currently unused by app code.
+
+### 14.2 Firestore is currently open (critical)
+
+Verified 17 Nov 2026: an unauthenticated REST read of `users` with the Firebase
+API key from `lib/firebase_options.dart` returned HTTP 200 and real documents
+including `phone` and `passcodeHash`. Treat the database as public until rules
+are deployed.
+
+```zsh
+# Reproduce the read-only check (prints status + field names, not values)
+cd /Users/apple/gaslink_app
+KEY="$(grep -m1 "apiKey:" lib/firebase_options.dart | sed "s/.*'\(.*\)'.*/\1/")"
+curl -sS -o /tmp/gaslink_fs_probe.json -w "HTTP %{http_code}\n" \
+  "https://firestore.googleapis.com/v1/projects/gaslink-app-4bfbb/databases/(default)/documents/users?pageSize=1&key=$KEY"
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/gaslink_fs_probe.json'))
+print('documents:', len(d.get('documents', [])))
+print('fields:', sorted({k for doc in d.get('documents', []) for k in (doc.get('fields') or {})}))
+PY
+rm -f /tmp/gaslink_fs_probe.json
+```
+
+A 403 is the desired result. A 200 means rules are missing/open.
+
+### 14.3 Storage and inbound webhook
+
+```zsh
+cd /Users/apple/gaslink_app
+cat storage.rules          # public read; anonymous write to any vendor path
+
+cd /Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox
+grep -E "^TEXTBEE_INBOUND_SECRET=" .env || echo "NOT SET -> /v1/inbound-sms is open"
+```
+
+### 14.4 APK signing and backup
+
+```zsh
+cd /Users/apple/gaslink_app
+grep -n "signingConfig" android/app/build.gradle          # debug signing in release
+grep -n "allowBackup" android/app/src/main/AndroidManifest.xml || \
+  echo "allowBackup not set -> defaults to true"
+```
+
+### 14.5 Do not publish yet
+
+Do not share the APK link outside the pilot until Firestore/Storage rules,
+admin auth, and the privacy policy are fixed. See
+`PRIVACY_DATA_INVENTORY.md` §11 for the full risk register.
+
+---
+
+## 15. Rules that keep the pilot safe
 
 - Do not change FIFO cylinders, order lifecycle, auth/session logic, or the
   Firestore schema without an explicit decision.
