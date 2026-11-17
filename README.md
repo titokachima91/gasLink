@@ -129,9 +129,9 @@ before handing it over. See `HANDOFF.md`.
 cd /Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox
 node server.js
 
-# APK download server (port 8090)
+# APK download server (port 8091)
 cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk
-python3 -m http.server 8090 --bind 0.0.0.0
+python3 -m http.server 8091 --bind 0.0.0.0
 
 # FCM ledger dispatcher (one instance only)
 cd /Users/apple/gaslink_app

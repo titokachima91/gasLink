@@ -19,7 +19,7 @@ Everything runs on the Mac; phones only need to be on the same Wi-Fi.
 | App build config | `/Users/apple/gaslink_app/env.local.json` |
 | Firebase service account | `/Users/apple/gaslink_app/serviceAccountKey.json` |
 | Gateway port | `8080` |
-| APK server port | `8090` |
+| APK server port | `8091` |
 | Firestore project | `gaslink-app-4bfbb` |
 | Gateway SMS line | `0776304776` (`+255776304776`) |
 | Admin/support line | `0767304776` (`+255767304776`) |
@@ -34,7 +34,7 @@ export MAC_IP="$(ipconfig getifaddr en0)"
 echo "$MAC_IP"
 ```
 
-Use `http://$MAC_IP:8080` and `http://$MAC_IP:8090` in every link below.
+Use `http://$MAC_IP:8080` and `http://$MAC_IP:8091` in every link below.
 If the IP changed, rebuild the APK only if you need app-side SMS/OTP
 (see §5). Normal app ordering uses Firestore and does not need the gateway URL.
 
@@ -58,7 +58,7 @@ echo "fcm pid $!"
 
 # 3) APK download server
 cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk
-nohup python3 -m http.server 8090 --bind 0.0.0.0 \
+nohup python3 -m http.server 8091 --bind 0.0.0.0 \
   >> /Users/apple/gaslink_app/build_logs/apk_server.log 2>&1 &
 echo "apk pid $!"
 ```
@@ -70,7 +70,7 @@ export MAC_IP="$(ipconfig getifaddr en0)"
 
 curl -sS "http://127.0.0.1:8080/health"; echo
 curl -sS "http://$MAC_IP:8080/health"; echo
-curl -sI "http://$MAC_IP:8090/gaslink-latest.apk" | head -5
+curl -sI "http://$MAC_IP:8091/gaslink-latest.apk" | head -5
 ```
 
 Expected:
@@ -90,7 +90,7 @@ lsof -ti tcp:8080 | xargs kill
 pkill -f "python3 -u server.py"
 
 # APK server
-lsof -ti tcp:8090 | xargs kill
+lsof -ti tcp:8091 | xargs kill
 ```
 
 Only run **one** FCM dispatcher and **one** gateway at a time.
@@ -108,14 +108,14 @@ Restart everything with §1.
 | Notification outbox worker | inside gateway | every 5 s |
 | 10-minute order finalizer | inside gateway | every 30 s |
 | FCM dispatcher | `python3 -u server.py` | Firestore listener |
-| APK server | `python3 -m http.server 8090` | `8090` |
+| APK server | `python3 -m http.server 8091` | `8091` |
 
 Check quickly:
 
 ```zsh
 lsof -nP -iTCP:8080 -sTCP:LISTEN
-lsof -nP -iTCP:8090 -sTCP:LISTEN
-ps aux | grep -E "[n]ode server.js|[s]erver.py|[h]ttp.server 8090"
+lsof -nP -iTCP:8091 -sTCP:LISTEN
+ps aux | grep -E "[n]ode server.js|[s]erver.py|[h]ttp.server 8091"
 ```
 
 ---
@@ -125,8 +125,8 @@ ps aux | grep -E "[n]ode server.js|[s]erver.py|[h]ttp.server 8090"
 ```zsh
 export MAC_IP="$(ipconfig getifaddr en0)"
 
-echo "APK:       http://$MAC_IP:8090/gaslink-latest.apk"
-echo "Files:     http://$MAC_IP:8090/"
+echo "APK:       http://$MAC_IP:8091/gaslink-latest.apk"
+echo "Files:     http://$MAC_IP:8091/"
 echo "Dashboard: http://$MAC_IP:8080/dashboard"
 echo "Health:    http://$MAC_IP:8080/health"
 ```
@@ -134,7 +134,7 @@ echo "Health:    http://$MAC_IP:8080/health"
 Phones must be on the same Wi-Fi. If the APK link fails:
 
 1. Confirm the Mac and phone are on the same network.
-2. Confirm the APK server is on `0.0.0.0:8090`.
+2. Confirm the APK server is on `0.0.0.0:8091`.
 3. Check macOS firewall / VPN.
 4. Re-read `MAC_IP`; DHCP may have changed it.
 
@@ -174,7 +174,7 @@ shasum -a 1  build/app/outputs/flutter-apk/app-release.apk \
 
 # The APK server serves the same directory, so gaslink-latest.apk updates
 # automatically through the symlink.
-curl -sI "http://$(ipconfig getifaddr en0):8090/gaslink-latest.apk" \
+curl -sI "http://$(ipconfig getifaddr en0):8091/gaslink-latest.apk" \
   | grep -iE "HTTP/|Content-Length|Last-Modified"
 ```
 
@@ -616,7 +616,7 @@ top-level `require`, lazy-load it inside the function that needs it.
 
 ```zsh
 lsof -ti tcp:8080 | xargs kill
-lsof -ti tcp:8090 | xargs kill
+lsof -ti tcp:8091 | xargs kill
 ```
 
 ### APK server returns 404
@@ -634,7 +634,7 @@ ls -la gaslink-latest.apk app-release.apk
 - `MAC_IP` correct?
 - macOS firewall allowing Python?
 - VPN on either device?
-- Try the directory listing: `http://$MAC_IP:8090/`.
+- Try the directory listing: `http://$MAC_IP:8091/`.
 
 ### No inbound SMS at all
 
@@ -705,7 +705,7 @@ export MAC_IP="$(ipconfig getifaddr en0)"
 
 # 1. Services
 curl -sS "http://127.0.0.1:8080/health"; echo
-curl -sI "http://$MAC_IP:8090/gaslink-latest.apk" | head -3
+curl -sI "http://$MAC_IP:8091/gaslink-latest.apk" | head -3
 
 # 2. Gateway workers
 tail -20 /Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox/gateway.log
@@ -718,7 +718,7 @@ node scripts/send-operator-sms.js "GasLink daily check: gateway online"
 node -r dotenv/config scripts/test-sms-order.js
 
 # 5. Phone test
-echo "APK:       http://$MAC_IP:8090/gaslink-latest.apk"
+echo "APK:       http://$MAC_IP:8091/gaslink-latest.apk"
 echo "Dashboard: http://$MAC_IP:8080/dashboard"
 ```
 

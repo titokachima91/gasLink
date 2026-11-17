@@ -102,7 +102,7 @@ cd build/app/outputs/flutter-apk
 stat -f "%Sm %z bytes" app-release.apk
 shasum -a 256 app-release.apk
 strings app-release.apk | grep -o "192\.168\.[0-9]*\.[0-9]*:8080" | sort -u
-curl -sI http://<LAN-IP>:8090/gaslink-latest.apk
+curl -sI http://<LAN-IP>:8091/gaslink-latest.apk
 ```
 
 The APK timestamp must be **after** the build start and `Content-Length` must
@@ -117,7 +117,7 @@ send the link and SHA.
 | Service | Port | How |
 |---|---|---|
 | Gateway + bridge + OTP + SMS | **8080** | `cd /Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox && node server.js` |
-| APK download | **8090** | `cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk && python3 -m http.server 8090 --bind 0.0.0.0` |
+| APK download | **8091** | `cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk && python3 -m http.server 8091 --bind 0.0.0.0` |
 | FCM dispatcher | — | `cd /Users/apple/gaslink_app && python3 -u server.py` (exactly **one** instance) |
 
 - Old gateway on `3000` is intentionally stopped.
@@ -163,7 +163,7 @@ Reference: `gateway/MOUNTED.md`.
 - **LAN IP:** `192.168.1.4` (DHCP).
 - **Source HEAD:** `e92fc9c` — current release; docs through `6eba554`.
 - **Servers:** gateway `8080` is running (health OK, dashboard 200); APK
-  download server `8090` is running; FCM dispatcher is **on** (one instance).
+  download server `8091` is running; FCM dispatcher is **on** (one instance).
   Gateway log:
   `/Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox/gateway.log`.
 - **Latest verified APK:** **17 Nov 2026 14:36 EAT**, SHA-256
@@ -171,7 +171,7 @@ Reference: `gateway/MOUNTED.md`.
   SHA-1 `cf7178f16b0a729ea764c5db950f5b99f43502ea`, **59,277,489 bytes**.
   `ENABLE_OTP_LOGIN=false`, so the SMS/OTP path is tree-shaken and the gateway
   URL is not embedded; ordering uses Firestore. Download:
-  `http://192.168.1.4:8090/gaslink-latest.apk`. Build log:
+  `http://192.168.1.4:8091/gaslink-latest.apk`. Build log:
   `build_logs/release_latest.log`.
 - **Latest commits:** `885f828` four categories + gestures, `525e137` remove
   bottom bar/marker and refine gestures, `03fa3d0` flat ListTile storefront,

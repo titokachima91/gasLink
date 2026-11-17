@@ -210,7 +210,7 @@ Do **not** use `jdk.net.hosts.file`.
   stat -f "%Sm %z bytes" build/app/outputs/flutter-apk/app-release.apk
   shasum -a 256 build/app/outputs/flutter-apk/app-release.apk
   strings build/app/outputs/flutter-apk/app-release.apk | grep -o "192.168.[0-9]*.[0-9]*:8080"
-  curl -sI http://<LAN-IP>:8090/gaslink-latest.apk
+  curl -sI http://<LAN-IP>:8091/gaslink-latest.apk
   ```
   The timestamp must be after the build started; Content-Length must match.
 
@@ -223,7 +223,7 @@ Do **not** use `jdk.net.hosts.file`.
 | Service | Port | Start command |
 |---|---|---|
 | Node gateway + SMS/OTP/AI/bridge | **8080** | `cd /Users/apple/.cline/data/workspaces/chat/kachi-fintech-sandbox && node server.js` |
-| APK download server | **8090** | `cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk && python3 -m http.server 8090 --bind 0.0.0.0` |
+| APK download server | **8091** | `cd /Users/apple/gaslink_app/build/app/outputs/flutter-apk && python3 -m http.server 8091 --bind 0.0.0.0` |
 | Python FCM dispatcher | no HTTP | `cd /Users/apple/gaslink_app && python3 -u server.py` (exactly one instance) |
 | Old gateway | 3000 | **Stopped intentionally** |
 
