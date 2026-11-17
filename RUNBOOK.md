@@ -1,6 +1,6 @@
 # GasLink Operations Runbook
 
-**Last updated:** 16 Nov 2026
+**Last updated:** 17 Nov 2026
 **Purpose:** start, stop, verify and test the complete GasLink stack from this Mac.
 Everything runs on the Mac; phones only need to be on the same Wi-Fi.
 
@@ -22,7 +22,7 @@ Everything runs on the Mac; phones only need to be on the same Wi-Fi.
 | APK server port | `8090` |
 | Firestore project | `gaslink-app-4bfbb` |
 | Gateway phone / support | `0767304776` (`+255767304776`) |
-| Operator phone | `0714604777` (`+255714604477`) |
+| Operator phone | `0714604777` (`+255714604777`) |
 | Vendor demo login | `+255777000777` / PIN `1234` |
 | Vendor id (Sao Gas) | `HR7lVXzVHWPeR94ebRF5` |
 
@@ -394,7 +394,7 @@ Recommended matrix:
 
 | Phone | Role | What to do |
 |---|---|---|
-| Samsung SM-A075F | Gateway phone | Keep on Wi-Fi/power; runs TextBee. Do not use it as a customer. Its Vodacom SIM is **0742946436**. |
+| Samsung SM-A075F | Gateway phone | Keep on Wi-Fi/power; runs TextBee. Do not use it as a customer. Only **0767304776** is confirmed; the Vodacom SIM number is unverified (see `PHONE_NUMBERS.md`). |
 | Phone A | Consumer (app) | Install APK, register with Phone A's own number + 4-digit PIN, place an order. |
 | Phone B | Vendor (app) | Install APK, log in `+255777000777` / `1234`, accept the order. |
 | Phone C | Consumer (SMS) | Text `0767304776` with `Nataka Oryx 6kg` and follow prompts. |
@@ -402,9 +402,10 @@ Recommended matrix:
 
 **Do not register the gateway phone's own SIM as a consumer.** A message sent
 from the gateway phone to `0767304776` is a self-send; it does not enter the
-TextBee inbound queue. Use a separate phone for the customer test. If you need
-to confirm receiving independently, text the gateway's Vodacom SIM
-**0742946436** from another phone.
+TextBee inbound queue. Use a separate phone for the customer test. To confirm
+receiving independently, text **0767304776** from another phone. The gateway's
+Vodacom SIM number is unverified — do not assume it is any customer number.
+Every number used in testing must be approved in `PHONE_NUMBERS.md`.
 
 ### 8.1 App order test
 
@@ -651,8 +652,9 @@ JS
 If the message is **not** in that list, it never reached the gateway phone:
 
 - Do not text from the gateway phone itself; a self-send is not an inbound SMS.
-- The gateway phone's Vodacom SIM is `0742946436`. Text that number from
-  another phone to confirm the SIM is receiving.
+- Only `0767304776` is a confirmed gateway number. Text it from another phone
+  to confirm the public SIM is receiving. The gateway's Vodacom SIM number is
+  unverified; do not use a customer number as a gateway test.
 - `0767304776` is the public line; if it never receives, check which SIM it is
   in and whether TextBee is set to receive SMS on that SIM.
 - Check SMS bundle/credit on the sending and receiving SIMs.

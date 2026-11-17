@@ -26,7 +26,10 @@ Read in this order:
 5. **[`PRIVACY_DATA_INVENTORY.md`](PRIVACY_DATA_INVENTORY.md)** — every
    permission, data field, processor and retention rule the build touches.
    Required reading before writing the privacy policy or sharing the APK.
-6. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
+6. **[`PHONE_NUMBERS.md`](PHONE_NUMBERS.md)** — every phone number the system
+   may send to, receive from, call or flag, with the owner's approval rules.
+   No number is used or flagged without an approved rule here.
+7. **[`BUILD.md`](BUILD.md)** — exact release build command, toolchain pins and
    troubleshooting on this Mac.
 
 `PROGRESS.md`, `ROADMAP.md`, `guide.md` and `phases/*` are historical records.

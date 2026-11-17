@@ -611,6 +611,18 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
 - `POST /v1/inbound-sms` — AI pipeline + subscriber gate
 - Real outbound SMS tested successfully via TextBee.
 
+### Phone-number governance
+
+- `PHONE_NUMBERS.md` is the authoritative registry of every number the system
+  may send to, receive from, call, or flag as a gateway SIM.
+- No number is added to `GASLINK_SELF_NUMBERS`, used for a test SMS, called, or
+  shared without the owner's explicit approval.
+- Gateway SIMs are infrastructure, not customers. The only confirmed gateway
+  number is `0767304776`; the Vodacom SIM's number is unverified.
+- `+255742946436` is a consumer account (George Mwaseba), not a gateway SIM.
+  It was wrongly added to the self-number list on 17 Nov 2026 and removed the
+  same day.
+
 ### DeepSeek / AI
 
 Dashboard: `http://<LAN-IP>:8080/dashboard` → SMS & AI.
