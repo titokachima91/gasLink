@@ -442,7 +442,7 @@ customer chooses how to engage. The SMS gateway does not manage that channel.
 | Vendor push not received | Stale/wrong FCM token | Log out and back in on the vendor phone; SMS fallback still works. |
 | Vendor SMS `YES` ignored | Sender is not the vendor phone | Use the vendor app or §7.7. |
 | No AI reply | Sender is not an AI subscriber and message is not a business keyword | Use the app number or an order keyword. |
-| TextBee `429` | 50 messages/day used (inbound + outbound count) | Wait until 00:00 UTC / 03:00 EAT, or use a second device/account. |
+| TextBee `429` | Billing-period allowance used (inbound + outbound count) | Wait for the reset shown in the error (currently 12 Dec, 04:08 UTC) or upgrade the TextBee plan. |
 | Order stuck at `placed` | Vendor has not opened/accepted | Vendor dashboard -> Accept. |
 | Order stuck at `delivered_pending` | Buyer has not confirmed | Wait 10 minutes for the finalizer, or buyer confirms. |
 | `SMS_GATEWAY_API_KEY is not configured` | APK built without `env.local.json` | Rebuild with §5. |
@@ -544,10 +544,13 @@ JS
 
 ### 10.2 Quota
 
-The free TextBee plan allows **50 messages/day**, and **received SMS counts
-too**. When exhausted, sends return `429` and resume at **00:00 UTC / 03:00
-EAT**. The outbox worker detects this and defers SMS retries to the next UTC
-midnight instead of burning attempts.
+The free TextBee plan allows **300 messages per billing period**, and
+**received SMS counts too**. When exhausted, sends return `429`:
+`Your account has used its 300 messages for this billing period ... resets on
+12 December at 04:08 UTC`. This is an account-level period cap, not a daily
+reset. The outbox worker detects the quota error and defers SMS retries
+instead of burning attempts. Upgrading the TextBee plan or switching provider
+is the only way to send before the reset.
 
 ### 10.3 Inbound poller
 

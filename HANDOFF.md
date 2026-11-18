@@ -226,10 +226,13 @@ Reference: `gateway/MOUNTED.md`.
 - **Operator channel:** `GASLINK_OPERATOR_PHONE=+255714604777`. Texts from the
   operator line are logged to `data/operator-inbox.jsonl` and skipped by the
   customer AI. `scripts/send-operator-sms.js` sends progress to the operator.
-- **TextBee quota:** the account hit its 50-message daily cap on 14 Nov 2026
-  (`429 ... used all 50 messages`). Sending resumes at midnight UTC. The
-  outbox worker detects the quota error and defers SMS entries to the next UTC
-  midnight instead of burning retries. One Textbelt fallback SMS was delivered.
+- **TextBee quota:** the account exhausted its **300-message billing-period**
+  allowance on 18 Nov 2026 (`429 ... used its 300 messages for this billing
+  period`). Sending resumes **12 December 2026, 04:08 UTC** unless the plan is
+  upgraded. Inbound polling still works; outbound AI replies fail with `429`.
+  The outbox worker detects the quota error and defers SMS entries instead of
+  burning retries. Earlier 14 Nov 2026: a 50-message daily cap produced the
+  same `429`; one Textbelt fallback SMS was delivered then.
 - **Working tree:** docs added (`PROJECT_BIBLE.md`, `WHITEPAPER.md`, README and
   this update). Gateway changes are outside this repo. Check `git status`
   before building.
