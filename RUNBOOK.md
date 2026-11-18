@@ -442,7 +442,7 @@ customer chooses how to engage. The SMS gateway does not manage that channel.
 | Vendor push not received | Stale/wrong FCM token | Log out and back in on the vendor phone; SMS fallback still works. |
 | Vendor SMS `YES` ignored | Sender is not the vendor phone | Use the vendor app or §7.7. |
 | No AI reply | Sender is not an AI subscriber and message is not a business keyword | Use the app number or an order keyword. |
-| TextBee `429` | Billing-period allowance used (inbound + outbound count) | Wait for the reset shown in the error (currently 12 Dec, 04:08 UTC) or upgrade the TextBee plan. |
+| TextBee `429` | Free-plan allowance used: 50/day or 300/month; inbound + outbound both count | Upgrade the plan (Pro: 5,000/month, unlimited daily) or wait for the reset shown in the error (currently 12 Dec, 04:08 UTC). |
 | Order stuck at `placed` | Vendor has not opened/accepted | Vendor dashboard -> Accept. |
 | Order stuck at `delivered_pending` | Buyer has not confirmed | Wait 10 minutes for the finalizer, or buyer confirms. |
 | `SMS_GATEWAY_API_KEY is not configured` | APK built without `env.local.json` | Rebuild with §5. |
@@ -544,12 +544,14 @@ JS
 
 ### 10.2 Quota
 
-The free TextBee plan allows **300 messages per billing period**, and
-**received SMS counts too**. When exhausted, sends return `429`:
-`Your account has used its 300 messages for this billing period ... resets on
-12 December at 04:08 UTC`. This is an account-level period cap, not a daily
-reset. The outbox worker detects the quota error and defers SMS retries
-instead of burning attempts. Upgrading the TextBee plan or switching provider
+The free TextBee plan allows **50 messages/day and 300 messages/month**, and
+**received SMS counts too**. On 18 Nov 2026 the account had used **293
+received + 32 sent = 325** for the period that began 12 Nov, so the monthly
+cap blocked sending; the reset is **12 December, 04:08 UTC**. Most usage was
+inbound personal/carrier SMS to the gateway SIM (M-PESA 66, SONGESHA 28,
+AzamPesa 35, BUSTISHA 18, etc.). The outbox worker detects the quota error and
+defers SMS retries instead of burning attempts. Upgrading the TextBee plan
+(Pro: 5,000/month, unlimited daily) or moving the gateway to a dedicated SIM
 is the only way to send before the reset.
 
 ### 10.3 Inbound poller
