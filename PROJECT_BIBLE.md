@@ -620,16 +620,19 @@ gateway workers deliver push/SMS with retry. The buyer no longer receives an
   called, or shared without the owner's explicit approval.
 - The owner runs all tests. The agent must not send test SMS or initiate calls;
   ask the owner first if a send is necessary. Keep the self-number relay ON.
-- Unknown numbers not registered in the app are paused: no opt-in SMS, log
-  only, until GasLink has a dedicated number. The code path stays intact.
+- Unknown numbers not registered in the app are paused: no AI reply, no SMS
+  order reply, no opt-in SMS; log only, until GasLink has a dedicated number.
+  The code path stays intact.
 - App-registered numbers are engaged only when they initiate an inbound
   message; the AI replies while the gateway is running.
 - Customer/vendor engagement after a number is released is app-flow, not
   SMS-gateway territory. The vendor publishes the number; the app gives it to
   the customer during ordering; the customer chooses how to engage.
-- The gateway SMS line is `0776304776`; it may change and the owner announces
-  changes. Admin/support is `0767304776`; operator/second SIM is `0714604777`.
-- Gateway SIMs are infrastructure, not customers.
+- `0767304776` is the TextBee phone, gateway, admin and support number. It has
+  multiple roles but one rule: it is the self-number because it is the number
+  in the TextBee phone. `0714604777` is the operator/second SIM. No other
+  number is a self-number, and there is no intentional consumer block list.
+- The TextBee phone is infrastructure, not a customer.
 - `+255742946436` is a consumer account (George Mwaseba), not a gateway SIM.
   It was wrongly added to the self-number list on 17 Nov 2026 and removed the
   same day.

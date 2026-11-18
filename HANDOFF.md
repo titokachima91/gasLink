@@ -78,7 +78,7 @@ flutter build apk --release --dart-define-from-file=env.local.json
 ### Before every build: the LAN IP changes
 
 DHCP has already moved the Mac between `192.168.1.11`, `192.168.1.24` and
-`192.168.1.4`. The APK embeds the gateway URL **only when the SMS/OTP path is
+`192.168.1.13`. The APK embeds the gateway URL **only when the SMS/OTP path is
 enabled**; the current release has `ENABLE_OTP_LOGIN=false` and the URL is
 tree-shaken out. The order flow uses Firestore and does not depend on the
 embedded URL. Still update the build config before every build:
@@ -160,7 +160,7 @@ Reference: `gateway/MOUNTED.md`.
 ## Current state at 14 Nov 2026
 
 - **Power:** AC connected.
-- **LAN IP:** `192.168.1.4` (DHCP).
+- **LAN IP:** `192.168.1.13` (DHCP).
 - **Source HEAD:** `e92fc9c` — current release; docs through `6eba554`.
 - **Servers:** gateway `8080` is running (health OK, dashboard 200); APK
   download server `8091` is running; FCM dispatcher is **on** (one instance).
@@ -171,7 +171,7 @@ Reference: `gateway/MOUNTED.md`.
   SHA-1 `cf7178f16b0a729ea764c5db950f5b99f43502ea`, **59,277,489 bytes**.
   `ENABLE_OTP_LOGIN=false`, so the SMS/OTP path is tree-shaken and the gateway
   URL is not embedded; ordering uses Firestore. Download:
-  `http://192.168.1.4:8091/gaslink-latest.apk`. Build log:
+  `http://192.168.1.13:8091/gaslink-latest.apk`. Build log:
   `build_logs/release_latest.log`.
 - **Latest commits:** `885f828` four categories + gestures, `525e137` remove
   bottom bar/marker and refine gestures, `03fa3d0` flat ListTile storefront,
@@ -257,7 +257,7 @@ Reference: `gateway/MOUNTED.md`.
 
 1. Verify the four-category build and shop UI on a device.
 2. Finish Flutter tests, update docs, commit.
-3. Build and verify the release APK on `192.168.1.4`.
+3. Build and verify the release APK on `192.168.1.13`.
 4. Real-phone SMS order + vendor acceptance check.
 5. D3 vendor localization, then D4 remaining surfaces.
 6. Wire OTP login.
